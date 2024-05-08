@@ -35,10 +35,6 @@ public abstract partial class Spellcasting : Node2D
         if(castables[index].Item2) return;
         if(castables[index].Item1.Mana > Mana) return;
         Task t = new Task(() => { CastingPipeline(index); } );
-        
-        
-
-
     }
 
 

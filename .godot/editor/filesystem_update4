@@ -4,3 +4,4 @@ res://Scenes/Entities/Familiars/familiar_book.tscn
 res://Scenes/Levels/scene_01.tscn
 res://BaseMoviment.cs
 res://Scripts/Player/PlayerControls.cs
+res://Scripts/Spellcasting/Spellcasting.Cs

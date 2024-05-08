@@ -1,8 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
-public enum ECastParamType : int {
+ 
+public class CastParam {
+  public enum ECastParamType : int {
   BOOL,
   INT,
   FLOAT,
@@ -11,8 +12,6 @@ public enum ECastParamType : int {
   VECTOR3,
   COLOR
 };
- 
-public class CastParam {
   public string name;
   public ECastParamType paramType;
 }
