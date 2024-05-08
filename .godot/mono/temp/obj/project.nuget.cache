@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "xRwN42VGPAWdVRQArbSUmg47HVguQjQBAvZWeh5Pwo7i3o//I5DzEsSLvcj4WvkYmW1JlxzB9S8AmiOkHFGp/g==",
+  "success": true,
+  "projectFilePath": "/home/matias/Projects/Inscriber/Inscriber.csproj",
+  "expectedPackageFiles": [
+    "/home/matias/.nuget/packages/godot.sourcegenerators/4.2.2/godot.sourcegenerators.4.2.2.nupkg.sha512",
+    "/home/matias/.nuget/packages/godotsharp/4.2.2/godotsharp.4.2.2.nupkg.sha512",
+    "/home/matias/.nuget/packages/godotsharpeditor/4.2.2/godotsharpeditor.4.2.2.nupkg.sha512",
+    "/home/matias/.nuget/packages/microsoft.netcore.app.ref/6.0.29/microsoft.netcore.app.ref.6.0.29.nupkg.sha512",
+    "/home/matias/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.29/microsoft.aspnetcore.app.ref.6.0.29.nupkg.sha512"
+  ],
+  "logs": []
+}

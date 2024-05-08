@@ -1,0 +1,104 @@
+[gd_scene load_steps=15 format=3 uid="uid://ql8q64r2f025"]
+
+[ext_resource type="Script" path="res://Scripts/Familiars/FamiliarFollower.cs" id="1_bm8ea"]
+[ext_resource type="Texture2D" uid="uid://8o5argyxc3hp" path="res://Sprites/floating_book-Sheet.png" id="2_d782i"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uavdq"]
+atlas = ExtResource("2_d782i")
+region = Rect2(0, 100, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xqkli"]
+atlas = ExtResource("2_d782i")
+region = Rect2(100, 80, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_savoc"]
+atlas = ExtResource("2_d782i")
+region = Rect2(80, 80, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xp31p"]
+atlas = ExtResource("2_d782i")
+region = Rect2(60, 80, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_11d0o"]
+atlas = ExtResource("2_d782i")
+region = Rect2(40, 80, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n5bxd"]
+atlas = ExtResource("2_d782i")
+region = Rect2(20, 80, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4axjf"]
+atlas = ExtResource("2_d782i")
+region = Rect2(0, 80, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t7n04"]
+atlas = ExtResource("2_d782i")
+region = Rect2(100, 60, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bnxex"]
+atlas = ExtResource("2_d782i")
+region = Rect2(80, 60, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lf50y"]
+atlas = ExtResource("2_d782i")
+region = Rect2(60, 60, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_txsnc"]
+atlas = ExtResource("2_d782i")
+region = Rect2(40, 60, 20, 20)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wbjhl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uavdq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xqkli")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_savoc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xp31p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_11d0o")
+}],
+"loop": true,
+"name": &"down",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n5bxd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4axjf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t7n04")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bnxex")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lf50y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_txsnc")
+}],
+"loop": true,
+"name": &"down-left",
+"speed": 12.0
+}]
+
+[node name="Familiar Book" type="Node2D"]
+script = ExtResource("1_bm8ea")
+speed = 50.0
+floatSpeed = 10.0
+distanceToTarget = 5.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_wbjhl")
+animation = &"down-left"
