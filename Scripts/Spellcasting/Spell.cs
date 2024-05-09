@@ -1,103 +1,86 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Security;
+using Godot;
 
-public class Spell : ICastable
+[GlobalClass]
+public partial class Spell : Resource, ICastable
 {
     public class SpellNode
     {
-    
-        ICastable castable;
+        public ICastable castable;
         public bool marked;
-        public List<SpellNode> dependencies = new List<SpellNode>();
+        public List<SpellNode> prevs = new List<SpellNode>();
+        public List<SpellNode> nexts = new List<SpellNode>();
         public Task<CastingResources> castStatus;
         public CastingResources CastRequirements { get {return castable.CastRequirements; } }
         public CastingResources CastReturns { get { return castable.CastReturns; } }
-
         public async Task<CastingResources> Cast(CastingResources data)
         {
             return await castable.Cast(data);
         }
         public async Task<CastingResources> Cast()
         {
-            foreach(SpellNode dep in dependencies)
+            foreach(SpellNode dep in prevs)
             {
                 await dep.castStatus;
             }
-            return await castable.Cast(CastingResources.Merge(dependencies.Select<SpellNode, CastingResources>(i => i.castStatus?.Result).ToArray()));
+            return await castable.Cast(CastingResources.Merge(prevs.Select<SpellNode, CastingResources>(i => i.castStatus?.Result).ToArray()));
         }
     }
-    public List<SpellNode> nodes = new List<SpellNode>();
-    public List<int[]> arcs = new List<int[]>();
     private CastingResources castReqs;
+    private CastingResources castRets;
+    public List<SpellNode> nodes = new List<SpellNode>();
     public CastingResources CastRequirements 
     {   get
         {
-            CastingResources castReqs = new CastingResources();
-            if(nodes.Count == 0) return castReqs;
-
-            bool mark = !nodes[0].marked;
-            Queue<int> queue = new Queue<int>();
-            queue.Enqueue(0);
-            nodes[0].marked = mark;
-
-            while (queue.Count > 0)
-            {   
-                int currNode = queue.Dequeue();
-                foreach(int i in arcs[currNode])
-                {
-                    if(nodes[i].marked != mark)
-                    {
-                        queue.Enqueue(i);
-                        nodes[i].marked = mark;
-                    }
-                }
-                castReqs.Merge(nodes[currNode].CastRequirements);
-            }
+            castReqs = new CastingResources();
+            castReqs = BFSNodes<CastingResources>(ref castReqs, 
+            (SpellNode currNode) => { 
+                    castRets.Merge(currNode.CastRequirements); 
+                    return castReqs;
+                });
             return castReqs;
         }
     }
-    private CastingResources castRets;
     public CastingResources CastReturns 
     {   
         get{
-            CastingResources castRets = new CastingResources();
-            if(nodes.Count == 0) return castRets;
-
-            bool mark = !nodes[0].marked;
-            Queue<int> queue = new Queue<int>();
-            queue.Enqueue(0);
-            nodes[0].marked = mark;
-
-            while (queue.Count > 0)
-            {   
-                int currNode = queue.Dequeue();
-                foreach(int i in arcs[currNode])
-                {
-                    if(nodes[i].marked != mark)
-                    {
-                        queue.Enqueue(i);
-                        nodes[i].marked = mark;
-                    }
-                }
-                castRets.Merge(nodes[currNode].CastReturns);
-            }
+            castRets = new CastingResources();
+            castRets = BFSNodes<CastingResources>(ref castRets, 
+            (SpellNode currNode) => { 
+                    castRets.Merge(currNode.CastReturns); 
+                    return castReqs;
+                });
             return castRets;
         }
     }
+    public float Cooldown { 
+        get{
+            float cooldown = 0;
+            //TODO
+            // cooldown = BFSNodes<float>(ref cooldown, 
+            // (SpellNode currNode) => {
+            //     float cd = 0f;
+            //     foreach(SpellNode n in currNode.prevs)
+            //     { 
+            //         cd = cd < n.castable.Cooldown? n.castable.Cooldown: cd; 
+            //     }
+            //     cooldown += n.castable.Cooldown; 
+            //     return cooldown;
+            // });
+            return cooldown;
+        } 
+    set; }
+    public int Mana { get; set; }
+    public float CastingTime { get; set; }
+    public Spell(){}
 
-    CastingResources ICastable.CastRequirements => throw new NotImplementedException();
+    public Spell(List<SpellNode> n)
+    {
 
-    CastingResources ICastable.CastReturns => throw new NotImplementedException();
-
-    float ICastable.Cooldown { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    int ICastable.Mana { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    float ICastable.CastingTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-    private SpellNode end;
+    }
     public async Task<CastingResources> Cast(CastingResources data)
     {
         //Early Returns
@@ -108,24 +91,21 @@ public class Spell : ICastable
             node.castStatus = node.Cast();
         }
         
-        Queue<int> queue = new Queue<int>();
-        queue.Enqueue(0);
-        int currNode = 0;
+        Queue<SpellNode> queue = new Queue<SpellNode>();
+        queue.Enqueue(nodes[0]);
+        SpellNode currNode = nodes[0];
         while (queue.Count > 0)
-        {   
-            
-            foreach(int idx in arcs[currNode])
+        {
+            currNode = queue.Dequeue();   
+            foreach(SpellNode nextNode in currNode.nexts)
             {
-                SpellNode node = nodes[idx];
-                if(!node.marked)
+                if(!nextNode.marked)
                 {
-                    queue.Enqueue(idx);
-                    nodes[idx].marked = true;
-                    nodes[idx].castStatus.Start();
+                    queue.Enqueue(nextNode);
+                    nextNode.marked = true;
+                    nextNode.castStatus.Start();
                 }
-                
-            }
-            currNode = queue.Dequeue();
+            }   
         }
 
         foreach(SpellNode node in nodes)
@@ -135,5 +115,32 @@ public class Spell : ICastable
         }
         
         return CastingResources.Merge(nodes.Select<SpellNode, CastingResources>(i => i.castStatus?.Result).ToArray());
+    }
+    private TResult BFSNodes<TResult>(ref TResult results, Func<SpellNode, TResult> Process)
+    {
+        if(nodes.Count == 0) return results;
+
+        Queue<SpellNode> queue = new Queue<SpellNode>();
+        queue.Enqueue(nodes[0]);
+        nodes[0].marked = true;
+
+        while (queue.Count > 0)
+        {   
+            SpellNode currNode = queue.Dequeue();
+            foreach(SpellNode nextNode in currNode.nexts)
+            {
+                if(!nextNode.marked)
+                {
+                    queue.Enqueue(nextNode);
+                    nextNode.marked = true;
+                }
+            }
+            Process(currNode);
+        }
+        foreach(SpellNode node in nodes)
+        {
+            node.marked = false;
+        }
+        return results;
     }
 }

@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://bx0ncbt17l7ip"]
+[gd_scene load_steps=6 format=3 uid="uid://bx0ncbt17l7ip"]
 
 [ext_resource type="Script" path="res://Scripts/Player/PlayerControls.cs" id="1_50om6"]
 [ext_resource type="Texture2D" uid="uid://j5isqctde2nc" path="res://Sprites/player.png" id="2_v3xvd"]
+[ext_resource type="Script" path="res://Scripts/Player/PlayerSpellcasting.cs" id="3_xwkh3"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_3kqub"]
 animations = [{
@@ -29,3 +30,4 @@ position = Vector2(0, -15)
 shape = SubResource("CapsuleShape2D_cuh6v")
 
 [node name="Node2D" type="Node2D" parent="."]
+script = ExtResource("3_xwkh3")

@@ -1,7 +1,9 @@
-res://Scenes/Player.tscn
-res://Scripts/Familiars/FamiliarFollower.cs
-res://Scenes/Entities/Familiars/familiar_book.tscn
 res://Scenes/Levels/scene_01.tscn
+res://Scripts/Familiars/FamiliarFollower.cs
+res://Scenes/Player.tscn
+res://Scenes/Entities/Familiars/familiar_book.tscn
 res://BaseMoviment.cs
 res://Scripts/Player/PlayerControls.cs
+res://Scripts/Player/PlayerSpellcasting.cs
 res://Scripts/Spellcasting/Spellcasting.Cs
+res://Scripts/Spellcasting/Spell.cs
