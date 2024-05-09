@@ -72,7 +72,8 @@ public partial class Spell : Resource, ICastable
             // });
             return cooldown;
         } 
-    set; }
+    set{// TODO
+    } }
     public int Mana { get; set; }
     public float CastingTime { get; set; }
     public Spell(){}
