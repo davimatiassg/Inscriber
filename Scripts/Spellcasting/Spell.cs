@@ -11,6 +11,7 @@ public partial class Spell : Resource, ICastable
     {
         public ICastable castable;
         public bool marked;
+        public int weight;
         public List<SpellNode> prevs = new List<SpellNode>();
         public List<SpellNode> nexts = new List<SpellNode>();
         public Task<CastingResources> castStatus;
@@ -56,28 +57,32 @@ public partial class Spell : Resource, ICastable
             return castRets;
         }
     }
-    public float Cooldown { 
+    public uint Cooldown { 
         get{
-            float cooldown = 0;
-            //TODO
-            // cooldown = BFSNodes<float>(ref cooldown, 
-            // (SpellNode currNode) => {
-            //     float cd = 0f;
-            //     foreach(SpellNode n in currNode.prevs)
-            //     { 
-            //         cd = cd < n.castable.Cooldown? n.castable.Cooldown: cd; 
-            //     }
-            //     cooldown += n.castable.Cooldown; 
-            //     return cooldown;
-            // });
-            return cooldown;
+            int cooldown = 0;
+            
+            SizeOfLongestPath(ref cooldown, 
+            (SpellNode currNode) => { return (int) currNode.castable.Cooldown; } );
+            return (uint) cooldown;
         } 
-    set{// TODO
-    } }
-    public int Mana { get; set; }
-    public float CastingTime { get; set; }
+    }
+    public int Mana { 
+        get{
+            int mana = 0;
+            foreach(SpellNode node in nodes){mana+= node.castable.Mana; }
+            return mana;
+        }  
+    }
+    public uint CastingTime { 
+        get{
+            int castingtime = 0;
+            
+            SizeOfLongestPath(ref castingtime, 
+            (SpellNode currNode) => { return (int) currNode.castable.CastingTime; } );
+            return (uint) castingtime;
+        }  
+    }
     public Spell(){}
-
     public Spell(List<SpellNode> n)
     {
 
@@ -143,5 +148,53 @@ public partial class Spell : Resource, ICastable
             node.marked = false;
         }
         return results;
+    }
+    private List<SpellNode> TopSort()
+    {
+        void TopologicalSortUtil(SpellNode node, Stack<SpellNode> stack)
+        {
+            node.marked = true;
+            foreach(SpellNode n in node.nexts)
+            {
+                if (!n.marked) TopologicalSortUtil(n, stack);
+            }
+            stack.Push(node);
+        }
+
+        List<SpellNode> list = new List<SpellNode>();
+        // Stack to store the result
+        Stack<SpellNode> stack = new Stack<SpellNode>();
+        foreach (SpellNode node in nodes) {
+            if (!node.marked) TopologicalSortUtil(node, stack);
+        }
+        foreach(SpellNode sp in stack)
+        {
+            sp.marked = false;
+        }
+
+        while(stack.Count > 0){ 
+            
+            list.Add(stack.Pop()); 
+        }
+        return list;
+    }
+    private List<SpellNode> SizeOfLongestPath(ref int result, Func<SpellNode, int> Process) 
+    {
+        List<SpellNode> list = (List<SpellNode>)TopSort();
+        
+        foreach(SpellNode currNode in TopSort()){
+            currNode.weight = Process(currNode);
+            foreach (SpellNode nextNode in currNode.nexts) {
+            if (nextNode.weight < currNode.weight + Process(nextNode)) 
+                nextNode.weight = currNode.weight + Process(nextNode); 
+            }
+        }
+        foreach(SpellNode node in nodes)
+        {
+            if(node.weight > result) { result = node.weight; }
+            node.weight = 0;
+        }
+        
+        return list;
     }
 }
