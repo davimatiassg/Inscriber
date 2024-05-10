@@ -7,6 +7,7 @@ using Godot;
 [GlobalClass]
 public partial class Spell : Resource, ICastable
 {
+    public bool Valid = true;
     public class SpellNode
     {
         public ICastable castable;

@@ -14,6 +14,7 @@ public class CastParam {
 };
   public string name;
   public ECastParamType paramType;
+  public CastParam(string n, ECastParamType p) { this.name = n; this.paramType = p; }
 }
 
 public class CastParamComparer : Comparer<CastParam> {
