@@ -37,5 +37,4 @@ public abstract partial class Spellcasting : Node2D
         Task t = new Task(() => { CastingPipeline(index); } );
     }
 
-
 }

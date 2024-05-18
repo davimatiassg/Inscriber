@@ -8,15 +8,15 @@ public partial class RuneCreate : Rune, ICastable
     public override CastingResources CastRequirements
     { get{
         CastingResources res = new CastingResources();
-        res.Add(new CastParam("POSITION", CastParam.ECastParamType.VECTOR2), IntPtr.Zero);
-        res.Add(new CastParam("ROTATION", CastParam.ECastParamType.FLOAT), IntPtr.Zero);
-        res.Add(new CastParam("OBJECT", CastParam.ECastParamType.GAMEOBJECT), IntPtr.Zero);
+        res.Add("CASTER", CastParam.ECastParamType.VECTOR2);
+        res.Add("POSITION", CastParam.ECastParamType.VECTOR2);
+        res.Add("PACKED_OBJECT", CastParam.ECastParamType.STRING);
         return res;
     } }
     public override CastingResources CastReturns
     { get{
         CastingResources res = new CastingResources();
-        res.Add(new CastParam("OBJECT", CastParam.ECastParamType.GAMEOBJECT), IntPtr.Zero);
+        res.Add("OBJECT", CastParam.ECastParamType.NODE2D);
         return res;
     } }
     public override uint CastingTime
@@ -29,7 +29,33 @@ public partial class RuneCreate : Rune, ICastable
     {
         await Task.Delay((int)this.CastingTime);
         res.Merge(GatherResources());
+
+        Node2D spawn;
+        unsafe {
+            CastParam param = new CastParam("OBJECT", CastParam.ECastParamType.NODE2D);
+            if(res.ContainsKey(param)){
+                spawn = *(Node2D*)res[param].ToPointer();
+            }
+            else{ 
+                param.Refactor("PACKED_OBJECT", CastParam.ECastParamType.STRING);
+                spawn = (Node2D)ResourceLoader.Load<PackedScene>(*(String*)res[param].ToPointer()).Instantiate();
+            }
+            MainScene.Node.AddChild(spawn);
+            spawn.Position = *(Vector2*)res[param].ToPointer();
+
+            if(res.ContainsKey(param.Refactor("ROTATION", CastParam.ECastParamType.VECTOR2))){
+                spawn.Rotation = *(float*)res[param].ToPointer();
+            }
+
+            if(res.ContainsKey(param.Refactor("ANGULAR_", CastParam.ECastParamType.VECTOR2))){
+                spawn.Rotation = *(float*)res[param].ToPointer();
+            }
+
+            res.Add<Node2D>("OBJECT", CastParam.ECastParamType.NODE2D, ref spawn);            
+        }
+
+
         
-        return;
+        return res;
     }
 }

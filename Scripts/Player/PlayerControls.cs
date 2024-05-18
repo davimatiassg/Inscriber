@@ -5,14 +5,16 @@ public partial class PlayerControls : CharacterBody2D
 {
 	[Export] public float Speed = 250.0f;
 
+	private PlayerSpellcasting spellcasting;
+
 	// Get the gravity from the project settings to be synced with RigidBody nodes.
 	public float gravity = ProjectSettings.GetSetting("physics/2d/default_gravity").AsSingle();
 
     public override void _Ready()
     {
         base._Ready();
-		GD.Print(this.GetPath());
 		MotionMode = MotionModeEnum.Floating;
+		
     }
 
     public override void _PhysicsProcess(double delta)
@@ -37,4 +39,7 @@ public partial class PlayerControls : CharacterBody2D
 		Velocity = velocity;
 		MoveAndSlide();
 	}
+
+
+	public void 
 }
