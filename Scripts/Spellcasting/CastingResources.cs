@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class CastParam {
-  public enum ECastParamType : int { BOOL, INT, FLOAT, VECTOR2, VECTOR3, COLOR, STRING, NODE2D, BEHAVIOR, TARGET, SPELL };
+  public enum ECastParamType : int { BOOL, INT, FLOAT, VECTOR2, VECTOR3, COLOR, STRING, NODE2D, PHYSICAL_BEHAVIOR, TARGET, SPELL };
   public string name;
   public ECastParamType paramType;
   public CastParam(string n, ECastParamType p) { this.name = n; this.paramType = p; }
