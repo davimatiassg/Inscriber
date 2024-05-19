@@ -1,3 +1,15 @@
-res://Scenes/Levels/scene_01.tscn
+res://Scenes/Entities/Familiars/familiar_book.tscn
+res://Scripts/Behaviors/PhysicalBehavior.cs
+res://Scripts/Player/PlayerControls.cs
 res://Scripts/Player/PlayerSpellcasting.cs
-res://Scripts/Familiars/FamiliarFollower.cs
+res://Scripts/MainScene.cs
+res://Scripts/Spellcasting/Runes/Rune.cs
+res://Scripts/Behaviors/Familiars/FamiliarFollower.cs
+res://Scripts/Spellcasting/Runes/RuneCreate.cs
+res://Scripts/Spellcasting/Spell.cs
+res://Scripts/Spellcasting/Spellcasting.Cs
+res://Scripts/Behaviors/Familiars/FamiliarBehavior.cs
+res://Scenes/Entities/Familiars/familiar_book.cs
+res://Scenes/Player.tscn
+res://Scripts/Behaviors/SpellcastingBehavior.cs
+res://Scenes/Levels/scene_01.tscn

@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 [GlobalClass]
-public partial class FamiliarFollower : Node2D
+public partial class FamiliarBehavior : PhysicalBehavior
 {
 	
 	private delegate void MoveAction(float delta);

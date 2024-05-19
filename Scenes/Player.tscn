@@ -18,8 +18,9 @@ animations = [{
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cuh6v"]
 radius = 6.0
 
-[node name="Scenes\\Player" type="CharacterBody2D"]
+[node name="Scenes\\Player" type="CharacterBody2D" node_paths=PackedStringArray("spellcastingNode")]
 script = ExtResource("1_50om6")
+spellcastingNode = NodePath("Spellcasting")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(-2, -24)
@@ -29,5 +30,5 @@ sprite_frames = SubResource("SpriteFrames_3kqub")
 position = Vector2(0, -15)
 shape = SubResource("CapsuleShape2D_cuh6v")
 
-[node name="Node2D" type="Node2D" parent="."]
+[node name="Spellcasting" type="Node2D" parent="."]
 script = ExtResource("3_xwkh3")

@@ -9,5 +9,4 @@
 up_direction = Vector2(0, 1)
 
 [node name="Familiar Book" parent="." node_paths=PackedStringArray("target") instance=ExtResource("2_cs4k3")]
-distanceToTarget = 50.0
 target = NodePath("../Player")

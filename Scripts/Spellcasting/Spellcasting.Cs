@@ -5,17 +5,31 @@ using System.Threading.Tasks;
 
 public abstract partial class Spellcasting : Node2D
 {
+    public Node2D Caster;
     public enum ECastState {Ready, Casting, Cooldown};
 	[Export] private int mana;
     [Export] private int manaMax;
     [Export] public ECastState state;
-    public List<(ICastable, bool)> castables;
+    [Export] private int selectedCastableIndex;  
+    public List<(ICastable, bool)> castables = new List<(ICastable, bool)>();
     public int Mana { get { return mana; } set { mana = value; } }
     public int ManaMax { get { return manaMax; } set { manaMax = value; } }
+    public int SelectedCastableIndex
+    {
+        get { 
+            return selectedCastableIndex > 0 ? selectedCastableIndex : 0; 
+        }
+        set {
+            int count = castables.Count;
+            if(count == 0 || value < 0) { selectedCastableIndex = int.MinValue; return; }
+            while (value > count) {value -= count;}
+            selectedCastableIndex = value;
+        }
+         
+    }
 
     public abstract CastingResources GenerateResources();
-
-    public async void CastingPipeline(int index)
+    private async Task CastingPipeline(int index)
     {
         CastingResources res = GenerateResources();
         Task casting = castables[index].Item1.Cast(res);
@@ -34,7 +48,8 @@ public abstract partial class Spellcasting : Node2D
         (ICastable, bool) castSlot = castables[index];
         if(castables[index].Item2) return;
         if(castables[index].Item1.Mana > Mana) return;
-        Task t = new Task(() => { CastingPipeline(index); } );
+        CastingPipeline(index).Start();
     }
+    public void PrepareCast() { if(selectedCastableIndex >= 0) PrepareCast(selectedCastableIndex); }
 
 }
