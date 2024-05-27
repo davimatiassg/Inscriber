@@ -2,9 +2,13 @@ using Godot;
 using System;
 using System.Threading.Tasks;
 
-//ERuneRarity { Dull = 0, Common, Uncommon, Rare, Mithic, Unique}
-public partial class RuneCreate : Rune, ICastable
+[GlobalClass]
+public partial class RuneCreate : Rune
 {
+    public override string Name { 
+        get { return rarity.ToString() + " Create"; } 
+        set => throw new System.InvalidOperationException("You can not rename a create rune!"); 
+        }
     public override CastingResources CastRequirements
     { get{
         CastingResources res = new CastingResources();
@@ -25,6 +29,10 @@ public partial class RuneCreate : Rune, ICastable
     {get{ return 500 - (uint)rarity*(uint)rarity*15; }}
     public override int Mana
     {get{ return 50 - (int)rarity*5; }}
+    public override Texture2D Portrait { 
+        get { return (Texture2D)ResourceLoader.Load<Texture2D>("res://Sprites/Runes/Wave.png"); }
+    }
+
     public override async Task<CastingResources> Cast(CastingResources res)
     {
         await Task.Delay((int)this.CastingTime);
