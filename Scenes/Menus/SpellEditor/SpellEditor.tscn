@@ -1,14 +1,20 @@
-[gd_scene load_steps=2 format=3 uid="uid://dcoo6fuvaat06"]
+[gd_scene load_steps=5 format=3 uid="uid://dcoo6fuvaat06"]
 
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellManager.cs" id="1_sfj3h"]
 [ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs" id="1_td7ao"]
+[ext_resource type="Texture2D" uid="uid://di74hdlv8w237" path="res://Sprites/cursor.png" id="3_l004p"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellCursor.cs" id="4_x0mjh"]
 
-[node name="SpellEditor" type="Control"]
+[node name="SpellEditor" type="Control" node_paths=PackedStringArray("selector", "cursor")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_sfj3h")
+selector = NodePath("RuneSelector")
+cursor = NodePath("Cursor")
 
 [node name="RuneSelector" type="VBoxContainer" parent="."]
 custom_minimum_size = Vector2(135, 135)
@@ -19,21 +25,33 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -202.0
+offset_left = -67.5
 offset_top = -67.5
-offset_right = -67.0
+offset_right = 67.5004
 offset_bottom = 67.5
 grow_horizontal = 0
 grow_vertical = 2
-pivot_offset = Vector2(67.5, 67.5)
 size_flags_horizontal = 8
 size_flags_vertical = 4
 size_flags_stretch_ratio = 0.0
 auto_translate = false
 localize_numeral_system = false
+mouse_default_cursor_shape = 13
 alignment = 2
 script = ExtResource("1_td7ao")
-slotSize = 3
-selectIdentation = 50
-transitionSpeedMilli = 1500
-metadata/_edit_use_anchors_ = true
+slotSize = 30
+selectIdentation = 150
+transitionSpeed = 1000
+
+[node name="Cursor" type="TextureRect" parent="."]
+z_index = -4
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+pivot_offset = Vector2(32, 32)
+texture = ExtResource("3_l004p")
+script = ExtResource("4_x0mjh")
+
+[connection signal="PickPlotable" from="RuneSelector" to="." method="OnPickPlotable"]
+[connection signal="DropPlotable" from="Cursor" to="." method="OnDropPlotable"]
+[connection signal="PlacePlotable" from="Cursor" to="." method="OnPlacePlotable"]

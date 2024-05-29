@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/RuneSlot.cs" id="2_vrhvo"]
 
 [node name="RuneSlot" type="TextureRect"]
+texture_filter = 1
 custom_minimum_size = Vector2(135, 135)
 texture = ExtResource("1_jjm6n")
 script = ExtResource("2_vrhvo")

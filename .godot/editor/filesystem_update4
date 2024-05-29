@@ -1,9 +1,3 @@
-res://Scenes/Levels/scene_01.tscn
-res://Scripts/Player/PlayerSpellcasting.cs
-res://Scenes/Player.tscn
-res://Scenes/Entities/Familiars/familiar_book.tscn
-res://Scenes/Menus/SpellEditor/SpellEditor.tscn
-res://Scenes/Menus/SpellEditor/RuneSlot.tscn
 res://Scripts/Behaviors/Familiars/FamiliarBehavior.cs
 res://Scripts/Spellcasting/Runes/RuneCreate.cs
 res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs
@@ -14,6 +8,13 @@ res://Scripts/Player/PlayerControls.cs
 res://Scripts/MainScene.cs
 res://Scripts/Spellcasting/Spellcasting.Cs
 res://Scripts/Spellcasting/SpellEditing/RuneSlot.cs
+res://Scripts/Player/PlayerSpellcasting.cs
 res://Scripts/Spellcasting/Runes/Rune.cs
 res://Scripts/Spellcasting/Spell.cs
 res://Scripts/Behaviors/PhysicalBehavior.cs
+res://Scenes/Menus/SpellEditor/SpellEditor.tscn
+res://Scenes/Levels/scene_01.tscn
+res://Scenes/Player.tscn
+res://Scenes/Entities/Familiars/familiar_book.tscn
+res://Scenes/Menus/SpellEditor/RuneSlot.tscn
+res://Scripts/Spellcasting/SpellEditing/SpellCursor.cs

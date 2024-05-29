@@ -17,13 +17,20 @@ public partial class PlayerControls : SpellcastingBehavior
 
 	public override void _Process(double delta)
 	{
-		int spell_idx = spellcastingNode.SelectedCastableIndex;
+		
 		// Handle spell selection and casting.
-		if(Input.IsActionJustPressed("game_select_spell_up")) { spell_idx += 1; }
-		if(Input.IsActionJustPressed("game_select_spell_down")) { spell_idx -= 1; }
-		for(int i = 0; i < 10; i++){ if(Input.IsActionJustPressed($"game_select_spell_{i}")) { spell_idx += i; return; } }
-		spellcastingNode.SelectedCastableIndex = spell_idx;
+		
+		
 	}
+    public override void _Input(InputEvent @event)
+    {
+        base._Input(@event);
+		int spell_idx = spellcastingNode.SelectedCastableIndex;
+		if(@event.IsActionPressed("game_select_spell_up")) { spell_idx += 1; }
+		if(@event.IsActionPressed("game_select_spell_down")) { spell_idx -= 1; }
+		for(int i = 0; i < 10; i++){ if(Input.IsActionJustPressed($"game_select_spell_{i}")) { spell_idx = i; return; } }
+		spellcastingNode.SelectedCastableIndex = spell_idx;
+    }
     public override void _PhysicsProcess(double delta)
 	{
 		Vector2 velocity = Velocity;
