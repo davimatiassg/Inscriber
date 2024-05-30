@@ -1,4 +1,8 @@
+Line2D
+Container
+TextureButton
 TextureRect
+HBoxContainer
 Control
 VBoxContainer
 CenterContainer
@@ -8,7 +12,3 @@ ScrollContainer
 PanelContainer
 ItemList
 VFlowContainer
-GraphElement
-GraphEdit
-Node
-CanvasGroup

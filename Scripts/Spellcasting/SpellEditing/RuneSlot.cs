@@ -1,13 +1,18 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 namespace SpellEditing
 {
+using SpellNode = Spell.Node;
 public partial class RuneSlot : TextureRect
 {
+	public Action getMoved;
+	public List<SpellLine> spellLines = new List<SpellLine>();
 	public Action<double> transition;
 	public Vector2 finalPosition;
 	public float gradValue;
+	public SpellNode node;
 	private IPlotable plotable;
 	public IPlotable Plotable 
 	{
@@ -18,6 +23,10 @@ public partial class RuneSlot : TextureRect
 			{
 				this.Modulate = Rune.ColorByRarity(((Rune)plotable).rarity);
 				this.Texture = plotable.Portrait;
+			}
+			if(plotable is ICastable)
+			{
+				node = SpellManager.CreateCastable((ICastable)plotable);
 			}
 		}
 	}

@@ -1,34 +1,53 @@
-[gd_scene load_steps=5 format=3 uid="uid://dcoo6fuvaat06"]
+[gd_scene load_steps=8 format=3 uid="uid://dcoo6fuvaat06"]
 
-[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellManager.cs" id="1_sfj3h"]
 [ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs" id="1_td7ao"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellEditor.cs" id="1_uwhh8"]
+[ext_resource type="Texture2D" uid="uid://dpd8k45qya4dp" path="res://Sprites/background_tane.png" id="2_wbbh3"]
 [ext_resource type="Texture2D" uid="uid://di74hdlv8w237" path="res://Sprites/cursor.png" id="3_l004p"]
 [ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellCursor.cs" id="4_x0mjh"]
+[ext_resource type="Texture2D" uid="uid://dk03huitix0t6" path="res://Sprites/background_blue.png" id="6_26hfy"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellLine.cs" id="7_25big"]
 
-[node name="SpellEditor" type="Control" node_paths=PackedStringArray("selector", "cursor")]
+[node name="SpellEditor" type="Control" node_paths=PackedStringArray("selector", "cursor", "arrowMaster", "plotableMaster")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_sfj3h")
+script = ExtResource("1_uwhh8")
 selector = NodePath("RuneSelector")
 cursor = NodePath("Cursor")
+arrowMaster = NodePath("Arrows")
+plotableMaster = NodePath("Plotables")
+
+[node name="Line2D" type="Line2D" parent="."]
+z_index = 4
+points = PackedVector2Array(252, 134, 0, 0)
+script = ExtResource("7_25big")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+visible = false
+z_index = -10
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_wbbh3")
+stretch_mode = 1
 
 [node name="RuneSelector" type="VBoxContainer" parent="."]
 custom_minimum_size = Vector2(135, 135)
 layout_direction = 2
 layout_mode = 1
-anchors_preset = 6
+anchors_preset = 11
 anchor_left = 1.0
-anchor_top = 0.5
 anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -67.5
-offset_top = -67.5
-offset_right = 67.5004
-offset_bottom = 67.5
+anchor_bottom = 1.0
+offset_left = -62.0
+offset_right = 73.0
 grow_horizontal = 0
 grow_vertical = 2
 size_flags_horizontal = 8
@@ -46,12 +65,41 @@ transitionSpeed = 1000
 [node name="Cursor" type="TextureRect" parent="."]
 z_index = -4
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_top = 4.0
+offset_right = 64.0
+offset_bottom = 68.0
 pivot_offset = Vector2(32, 32)
 texture = ExtResource("3_l004p")
 script = ExtResource("4_x0mjh")
 
-[connection signal="PickPlotable" from="RuneSelector" to="." method="OnPickPlotable"]
-[connection signal="DropPlotable" from="Cursor" to="." method="OnDropPlotable"]
-[connection signal="PlacePlotable" from="Cursor" to="." method="OnPlacePlotable"]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_direction = 2
+layout_mode = 0
+offset_right = 141.0
+offset_bottom = 34.0
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+texture = ExtResource("6_26hfy")
+stretch_mode = 1
+
+[node name="TextureButton" type="TextureButton" parent="HBoxContainer/TextureRect"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Arrows" type="Container" parent="."]
+z_index = 5
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Plotables" type="Container" parent="."]
+z_index = 6
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0

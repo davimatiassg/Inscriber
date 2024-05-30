@@ -6,8 +6,6 @@ namespace SpellEditing
 {
 public partial class RuneSelector : VBoxContainer
 {
-    [Signal]
-    public delegate void PickPlotableEventHandler(RuneSlot plotable); 
     [Export] int slotSize = 135;
     [Export] int selectIdentation = 2;
     [Export] int transitionSpeed = 20;
@@ -18,6 +16,15 @@ public partial class RuneSelector : VBoxContainer
 
     private bool initialized = false;
     private int selected;
+
+    public RuneSlot SelectedSlot {
+        get {
+            var value = selected;
+            while(value < 0) { value += slots.Count; }
+            while(value >= slots.Count) { value -= slots.Count; }
+            return slots[value];
+        }
+    }
     public int Selected
     {
         get { return selected; }
@@ -42,7 +49,7 @@ public partial class RuneSelector : VBoxContainer
             }
             transition = (double delta) =>
             {
-                float interpolation = Mathf.Min((float)delta*transitionSpeed/Mathf.Abs(slots[selected].finalPosition.Y-slots[selected].GlobalPosition.Y), 1);
+                float interpolation = Mathf.Min((float)delta*transitionSpeed/Mathf.Abs(SelectedSlot.finalPosition.Y-SelectedSlot.GlobalPosition.Y), 1);
                 foreach(RuneSlot slot in slots)
                 {
                     if(slot.processTransition(interpolation))
@@ -115,35 +122,39 @@ public partial class RuneSelector : VBoxContainer
         else if(slots.Count == 1)
         {   
             slots.Add(slot);
-            slot.GlobalPosition = slots[0].GlobalPosition + Vector2.Down*slots[0].Size.Y;
+            slot.GlobalPosition = slots[0].GlobalPosition + Vector2.Up*slots[0].Size.Y;
             Selected = 1;
             return;
         }
         else
         {
-            slot.GlobalPosition = slots[Selected].GlobalPosition;
             float distance = Mathf.Abs(slots[0].GlobalPosition.Y - slots[1].GlobalPosition.Y);
-            for(int i = selected; i < slots.Count-1; i++)
+            slot.GlobalPosition = slots[Selected].GlobalPosition + Vector2.Down*distance;
+            for(int i = selected+1; i < slots.Count-1; i++)
             {
+                //GD.PrintRich("[b]Slot da pos [color=" + slots[i+1].Modulate.ToHtml() + "]" + slots[i+1].GlobalPosition + "[/color] aplicado ao da pos [color=" + slots[i].Modulate.ToHtml() + "]" + slots[i].GlobalPosition + "[/color][/b]");
                 slots[i].GlobalPosition = slots[i+1].GlobalPosition;
             }
-            slots[slots.Count-1].GlobalPosition += Vector2.Down*distance;
-            slots.Insert(selected, slot);
-            Selected--;
+            if(selected != slots.Count-1) { slots[slots.Count-1].GlobalPosition += Vector2.Down*distance; }
+            slots.Insert(selected+1, slot);
+            Selected++;
         }
     }
     
     public void RemovePlotable(RuneSlot slot)
     {
-        RemoveChild(slot);
+        
         int idx = slots.IndexOf(slot);
         if(idx < 0) { return; }
         for(int i = slots.Count-1; i >= idx+1 ; i--)
         {
+            
             slots[i].GlobalPosition = slots[i-1].GlobalPosition;
         }
         slots.RemoveAt(idx);
+        RemoveChild(slot);
         Selected--;
+        Selected++;
     }
 
     Task inputDelay = Task.CompletedTask;
@@ -152,8 +163,6 @@ public partial class RuneSelector : VBoxContainer
         if(!inputDelay.IsCompleted) { return; }
         if(@event.IsActionPressed("ui_up", true)) { Selected--; checkDelay(@event); }
         if(@event.IsActionPressed("ui_down", true)) { Selected++; checkDelay(@event); }
-        if(@event.IsActionPressed("ui_left", false)) { EmitSignal(SignalName.PickPlotable, slots[Selected]); }
-        if(@event.IsActionPressed("ui_right", false)){} //{ AddPlotable(p); }
     }
     
     public void checkDelay(InputEvent @event)
