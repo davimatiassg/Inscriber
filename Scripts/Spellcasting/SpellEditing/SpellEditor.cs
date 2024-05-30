@@ -53,9 +53,13 @@ public partial class SpellEditor : Control
         RuneSlot slot = CheckCursorIntersection();
         if(slot == null) { return null; }
         SpellLine line = new SpellLine();
+
+        arrowMaster.AddChild(line);
+        
         line.ConnectBot(slot);
         line.ConnectCursor(cursor);
-        arrowMaster.AddChild(line);
+        
+        slot.getMoved?.Invoke();
         return line;
     }
 
