@@ -9,8 +9,5 @@ public interface IPlotable
     public string Name { get; protected set; }
 }
 
-
-
-
 }
 

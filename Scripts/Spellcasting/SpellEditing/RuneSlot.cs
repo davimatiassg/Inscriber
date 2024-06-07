@@ -26,7 +26,7 @@ public partial class RuneSlot : TextureRect
 			}
 			if(plotable is ICastable)
 			{
-				node = SpellManager.CreateCastable((ICastable)plotable);
+				node = SpellManager.CreateNodeFromCastable((ICastable)plotable);
 			}
 		}
 	}

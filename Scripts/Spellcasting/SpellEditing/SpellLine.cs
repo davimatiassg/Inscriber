@@ -18,6 +18,14 @@ public partial class SpellLine : Line2D
     private void MoveBot(Control obj) { SetPointPosition(0, obj.GetGlobalRect().GetCenter()); }
     private void MoveTip(Control obj) { SetPointPosition(1, obj.GetGlobalRect().GetCenter()); }
 
+    public override void _Ready()
+    {
+        base._Ready();
+        this.WidthCurve = new Curve();
+        this.WidthCurve.AddPoint(Vector2.Down);
+        this.WidthCurve.AddPoint(Vector2.Right);
+    }
+
     public SpellLine()
     {
         Points = new Vector2[2];
@@ -29,7 +37,6 @@ public partial class SpellLine : Line2D
         _moveTip = () => MoveTip(tip);
         tip.getMoved += _moveTip;
         _moveTip();
-        GD.Print("Tip: " + Points[1] + " // Object Connected" + tip.Name + " With pos: " +  tip.GetGlobalRect().GetCenter());
         tip.spellLines.Add(this);
     }
     public void ConnectBot(RuneSlot bot)
@@ -38,7 +45,6 @@ public partial class SpellLine : Line2D
         _moveBot = () => MoveBot(bot);
         bot.getMoved += _moveBot;
         _moveBot();
-        GD.Print("Bot: " + Points[0] + " // Object Connected" + bot.Name + " With pos: " +  bot.GetGlobalRect().GetCenter());
         bot.spellLines.Add(this);
     }
 

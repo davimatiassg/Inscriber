@@ -10,9 +10,9 @@
 /home/matias/Projects/Inscriber/.godot/mono/temp/bin/Debug/Inscriber.pdb
 /home/matias/Projects/Inscriber/.godot/mono/temp/bin/Debug/GodotSharp.dll
 /home/matias/Projects/Inscriber/.godot/mono/temp/bin/Debug/GodotSharpEditor.dll
-/home/matias/Projects/Inscriber/.godot/mono/temp/obj/Debug/Inscriber.csproj.Up2Date
 /home/matias/Projects/Inscriber/.godot/mono/temp/obj/Debug/Inscriber.dll
 /home/matias/Projects/Inscriber/.godot/mono/temp/obj/Debug/refint/Inscriber.dll
 /home/matias/Projects/Inscriber/.godot/mono/temp/obj/Debug/Inscriber.pdb
 /home/matias/Projects/Inscriber/.godot/mono/temp/obj/Debug/Inscriber.genruntimeconfig.cache
 /home/matias/Projects/Inscriber/.godot/mono/temp/obj/Debug/ref/Inscriber.dll
+/home/matias/Projects/Inscriber/.godot/mono/temp/obj/Debug/Inscriber.csproj.CopyComplete

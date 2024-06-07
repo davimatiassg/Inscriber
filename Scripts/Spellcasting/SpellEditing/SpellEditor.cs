@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SpellEditing
 {
@@ -63,21 +64,24 @@ public partial class SpellEditor : Control
         return line;
     }
 
-    private SpellLine EmptyCursorUnTrail()
+    private void EmptyCursorUnTrail()
     {
         RuneSlot slot = CheckCursorIntersection();
         if(slot == null) 
         { 
             tracingLine.Disconnect(); 
             arrowMaster.RemoveChild(tracingLine);
-            return null; 
         }
-        GD.Print("UIE");
-        tracingLine.DisconnectCursor();
-        tracingLine.ConnectTip(slot);
-        manager.TryEntangleNodes(tracingLine.bot.node, tracingLine.tip.node);
+        
+        if(manager.AddToSpellGraph(tracingLine.bot.node, tracingLine.tip.node))
+        {
+            tracingLine.DisconnectCursor();
+            tracingLine.ConnectTip(slot);
+            return;
+        }
 
-        return tracingLine;
+        tracingLine.Disconnect(); 
+        arrowMaster.RemoveChild(tracingLine);
     }
 
     private void CarriedCursorDrop()
@@ -112,7 +116,7 @@ public partial class SpellEditor : Control
     }
     private void PlacePlotable(RuneSlot slot)
     {
-        if(slot.node == null){ DropPlotable(slot); GD.Print("NOT CASTABLE!"); return; }
+        if(slot.node == null){ DropPlotable(slot); }
         SpellManager.AddNode(slot.node);
         cursor.Slot = null;
     }
