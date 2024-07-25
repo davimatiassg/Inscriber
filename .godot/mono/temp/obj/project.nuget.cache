@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "CEPMYA4VGOHvVxGakX/SxBSMfk9KAsfCmpgcMjy2s7JcAXvbK1b4tGzfUCwSpr6vb3dHG+WlNVkZF4JS/Z2ZOw==",
+  "dgSpecHash": "gKR5tlG6fghZlGZ+bh6TN6XvN5LbHBaJkHTPl4fFcabyN0U9up3Cg9ulBiDjmx+BCt3DCO+k1KW9UI29yjnfZQ==",
   "success": true,
   "projectFilePath": "/home/matias/Projects/Inscriber/Inscriber.csproj",
   "expectedPackageFiles": [
     "/home/matias/.nuget/packages/godot.sourcegenerators/4.2.2/godot.sourcegenerators.4.2.2.nupkg.sha512",
     "/home/matias/.nuget/packages/godotsharp/4.2.2/godotsharp.4.2.2.nupkg.sha512",
     "/home/matias/.nuget/packages/godotsharpeditor/4.2.2/godotsharpeditor.4.2.2.nupkg.sha512",
-    "/home/matias/.nuget/packages/microsoft.netcore.app.ref/6.0.30/microsoft.netcore.app.ref.6.0.30.nupkg.sha512",
-    "/home/matias/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.30/microsoft.aspnetcore.app.ref.6.0.30.nupkg.sha512"
+    "/home/matias/.nuget/packages/microsoft.netcore.app.ref/6.0.32/microsoft.netcore.app.ref.6.0.32.nupkg.sha512",
+    "/home/matias/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.32/microsoft.aspnetcore.app.ref.6.0.32.nupkg.sha512"
   ],
   "logs": []
 }

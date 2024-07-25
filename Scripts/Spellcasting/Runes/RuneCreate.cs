@@ -29,6 +29,7 @@ public partial class RuneCreate : Rune
     {get{ return 500 - (uint)rarity*(uint)rarity*15; }}
     public override int Mana
     {get{ return 50 - (int)rarity*5; }}
+    public override string Category { get => "Create Rune"; }
     public override Texture2D Portrait { 
         get { return (Texture2D)ResourceLoader.Load<Texture2D>("res://Sprites/Runes/Wave.png"); }
     }

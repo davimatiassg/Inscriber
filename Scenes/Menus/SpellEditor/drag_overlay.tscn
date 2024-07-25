@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://bbe1sd5nwqli5"]
+
+[ext_resource type="Texture2D" uid="uid://cip1d6opyvm8" path="res://Sprites/Menus/SpellEditor/Grab-overlay.png" id="1_pn1nx"]
+
+[node name="dragOverlay" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="Panel2" type="TextureRect" parent="."]
+show_behind_parent = true
+top_level = true
+light_mask = 0
+z_index = -5
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_pn1nx")

@@ -1,0 +1,117 @@
+[gd_scene load_steps=6 format=3 uid="uid://dcoo6fuvaat06"]
+
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellEditor.cs" id="1_p5ods"]
+[ext_resource type="PackedScene" uid="uid://cstn05ab0b735" path="res://Scenes/Menus/SpellEditor/RuneSelector.tscn" id="3_ep0c1"]
+[ext_resource type="Texture2D" uid="uid://bylv51vhw45ca" path="res://icon.svg" id="4_lupu8"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellSlot.cs" id="5_rqdta"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellEditorCamera.cs" id="6_no214"]
+
+[node name="SpellEditor" type="Control" node_paths=PackedStringArray("runeSelector", "plotableMaster", "arrowMaster")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_p5ods")
+runeSelector = NodePath("RuneSelector")
+plotableMaster = NodePath("Plotables")
+arrowMaster = NodePath("Arrows")
+
+[node name="RuneSelector" parent="." instance=ExtResource("3_ep0c1")]
+visible = false
+layout_mode = 1
+
+[node name="Arrows" type="Control" parent="."]
+z_index = 5
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Plotables" type="Control" parent="."]
+z_index = 6
+anchors_preset = 0
+offset_right = 640.0
+offset_bottom = 360.0
+
+[node name="Icon" type="TextureRect" parent="Plotables"]
+layout_mode = 0
+offset_left = 113.634
+offset_top = 174.023
+offset_right = 737.634
+offset_bottom = 887.023
+rotation = -0.00783151
+scale = Vector2(0.0929488, 0.0929488)
+pivot_offset = Vector2(-32.675, -5.31)
+texture = ExtResource("4_lupu8")
+script = ExtResource("5_rqdta")
+
+[node name="Icon2" type="TextureRect" parent="Plotables"]
+layout_mode = 0
+offset_left = 152.634
+offset_top = 85.0228
+offset_right = 776.634
+offset_bottom = 798.023
+scale = Vector2(0.0540865, 0.0540865)
+pivot_offset = Vector2(-32.675, -5.31)
+texture = ExtResource("4_lupu8")
+script = ExtResource("5_rqdta")
+
+[node name="Icon3" type="TextureRect" parent="Plotables"]
+layout_mode = 0
+offset_left = 234.634
+offset_top = 262.023
+offset_right = 858.634
+offset_bottom = 975.023
+scale = Vector2(0.0540865, 0.0540865)
+pivot_offset = Vector2(-32.675, -5.31)
+texture = ExtResource("4_lupu8")
+script = ExtResource("5_rqdta")
+
+[node name="Icon4" type="TextureRect" parent="Plotables"]
+layout_mode = 0
+offset_left = 590.634
+offset_top = 140.023
+offset_right = 1214.63
+offset_bottom = 853.023
+scale = Vector2(0.0540865, 0.0540865)
+pivot_offset = Vector2(-32.675, -5.31)
+texture = ExtResource("4_lupu8")
+script = ExtResource("5_rqdta")
+
+[node name="Icon5" type="TextureRect" parent="Plotables"]
+layout_mode = 0
+offset_left = 433.634
+offset_top = 197.023
+offset_right = 1057.63
+offset_bottom = 910.023
+scale = Vector2(0.0537795, 0.0557998)
+pivot_offset = Vector2(-32.675, -5.31)
+texture = ExtResource("4_lupu8")
+script = ExtResource("5_rqdta")
+
+[node name="Icon6" type="TextureRect" parent="Plotables"]
+layout_mode = 0
+offset_left = 505.634
+offset_top = 74.0228
+offset_right = 1129.63
+offset_bottom = 787.023
+scale = Vector2(0.0540865, 0.0540865)
+pivot_offset = Vector2(-32.675, -5.31)
+texture = ExtResource("4_lupu8")
+script = ExtResource("5_rqdta")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(320, 180)
+limit_left = -320
+limit_top = -320
+limit_right = 960
+limit_bottom = 680
+position_smoothing_enabled = true
+position_smoothing_speed = 15.0
+script = ExtResource("6_no214")

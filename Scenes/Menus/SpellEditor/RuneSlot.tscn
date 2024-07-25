@@ -1,9 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://l6qkejsfbqrm"]
 
 [ext_resource type="Texture2D" uid="uid://cmu5snalrqepb" path="res://Sprites/Runes/Arrow.png" id="1_jjm6n"]
-[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/RuneSlot.cs" id="2_vrhvo"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellSlot.cs" id="2_vrhvo"]
 
-[node name="RuneSlot" type="TextureRect"]
+[node name="SpellSlot" type="TextureRect"]
 texture_filter = 1
 custom_minimum_size = Vector2(135, 135)
 texture = ExtResource("1_jjm6n")

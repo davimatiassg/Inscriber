@@ -2,6 +2,7 @@ using Godot;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SpellEditing;
 
 public abstract partial class Rune : Resource, ICastable, SpellEditing.IPlotable
 {
@@ -23,6 +24,9 @@ public abstract partial class Rune : Resource, ICastable, SpellEditing.IPlotable
     { get; }
     public abstract uint CastingTime
     { get; }
+    public virtual Color Color { get => ColorByRarity(rarity); }
+    public virtual string Category { get => "Unknown Rune";  }
+
     public CastingResources GatherResources()
     {
         return CastingResources.Merge(sigils.Select<Sigil, CastingResources>(i => i.AsCastingResource).ToArray());
@@ -42,7 +46,7 @@ public abstract partial class Rune : Resource, ICastable, SpellEditing.IPlotable
             case ERuneRarity.Primal:
                 return new Color( 0.1f, 0.878f, 0.1f, 1f );         //Green
             case ERuneRarity.Mithic:
-                return new Color( 0.6f, 0.1f, 0.7f, 1f );         //Purple
+                return new Color( 0.6f, 0.1f, 0.7f, 1f );           //Purple
             case ERuneRarity.Rare:
                 return new Color( 0.039f, 0.628f, 0.628f, 1f );     //Cyan
             case ERuneRarity.Uncommon:

@@ -1,173 +1,248 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 namespace SpellEditing
 {
-public partial class RuneSelector : VBoxContainer
+struct ImageBundle2D 
 {
-    [Export] int slotSize = 135;
-    [Export] int selectIdentation = 2;
-    [Export] int transitionSpeed = 20;
-    public List<IPlotable> plotables = new List<IPlotable>();
-    public List<RuneSlot> slots = new List<RuneSlot>();
-    private Action<double> transition;
-    private float initialY;
-
-    private bool initialized = false;
-    private int selected;
-
-    public RuneSlot SelectedSlot {
-        get {
-            var value = selected;
-            while(value < 0) { value += slots.Count; }
-            while(value >= slots.Count) { value -= slots.Count; }
-            return slots[value];
-        }
-    }
-    public int Selected
-    {
-        get { return selected; }
-        set {
-            if(!initialized) { return; }
-            if(slots.Count == 0) { return; }
-            while(value < 0) { value += slots.Count; }
-            while(value >= slots.Count) { value -= slots.Count; }
-            if(value == selected) { return; }
-            selected = value;
-            initialY = (GetViewport().GetVisibleRect().Position.Y + Mathf.Abs(GetViewport().GetVisibleRect().Size.Y) - slotSize)/2.5f;
-            float differenceY = initialY - slots[value%slots.Count].GlobalPosition.Y;  
-            foreach(RuneSlot slot in slots)
-            {
-                float finalY = slot.GlobalPosition.Y + differenceY;
-                float deviationY = (initialY-finalY)/150;
-                float selectGradValue = deviationY==0?1:Mathf.Abs(Mathf.Atan(deviationY)/deviationY);
-                float finalX = GlobalPosition.X-(selectIdentation*selectGradValue);
-                slot.finalPosition = new Vector2(finalX, finalY);
-                slot.gradValue = selectGradValue;
-                    
-            }
-            transition = (double delta) =>
-            {
-                float interpolation = Mathf.Min((float)delta*transitionSpeed/Mathf.Abs(SelectedSlot.finalPosition.Y-SelectedSlot.GlobalPosition.Y), 1);
-                foreach(RuneSlot slot in slots)
-                {
-                    if(slot.processTransition(interpolation))
-                    {foreach(RuneSlot s in slots) {s.processTransition(1); } transition = null;  break;}
-                }
-                
-            };
-        }
-    }
-
-    public async override void _Ready()
-    {
-        // STUB
-        plotables.Add( new RuneCreate() );
-        plotables.Add( new RuneCreate() );
-        plotables.Add( new RuneCreate() );
-        plotables.Add( new RuneCreate() ); 
-        plotables.Add( new RuneCreate() );
-        plotables.Add( new RuneCreate() );
-        plotables.Add( new RuneCreate() );
-        plotables.Add( new RuneCreate() );
-        plotables.Add( new RuneCreate() );
-
-        
-        ((Rune)plotables[0]).rarity = Rune.ERuneRarity.Dull;
-        ((Rune)plotables[1]).rarity = Rune.ERuneRarity.Common;
-        ((Rune)plotables[2]).rarity = Rune.ERuneRarity.Uncommon;
-        ((Rune)plotables[3]).rarity = Rune.ERuneRarity.Rare;
-        ((Rune)plotables[4]).rarity = Rune.ERuneRarity.Mithic;
-        ((Rune)plotables[5]).rarity = Rune.ERuneRarity.Arcane;
-        ((Rune)plotables[6]).rarity = Rune.ERuneRarity.Primal;
-        ((Rune)plotables[7]).rarity = Rune.ERuneRarity.Profane;
-        ((Rune)plotables[8]).rarity = Rune.ERuneRarity.Divine;
-    
-        // END STUB
-        foreach(IPlotable p in plotables)
-        {   
-            RuneSlot runePortrait = (RuneSlot)(TextureRect)ResourceLoader.Load<PackedScene>("res://Scenes/Menus/SpellEditor/RuneSlot.tscn").Instantiate();
-            runePortrait.Plotable = p;
-            this.AddChild(runePortrait);
-            slots.Add(runePortrait);
-            runePortrait.Connect("gui_input", Callable.From(
-                (InputEvent @event) => {
-                    if(@event is InputEventMouseButton mouseEvent && mouseEvent.IsReleased()) { Selected = slots.IndexOf(runePortrait); }
-                })
-            );
-        }
-        
-        initialized = true;
-        await Task.Delay(20);
-        if(slots.Count > 0) { Selected = slots.Count/2; }
-    }
-    
-    
-
-    public async override void _Process(double delta)
-    {
-        transition?.Invoke(delta);
-
-        
-    }
-    public void AddPlotable(RuneSlot slot)
-    {
-        AddChild(slot);
-        if(slots.Count == 0) { 
-            slots.Add(slot); 
-            Selected = 0; 
-            return;
-        }
-        else if(slots.Count == 1)
-        {   
-            slots.Add(slot);
-            slot.GlobalPosition = slots[0].GlobalPosition + Vector2.Up*slots[0].Size.Y;
-            Selected = 1;
-            return;
-        }
-        else
-        {
-            float distance = Mathf.Abs(slots[0].GlobalPosition.Y - slots[1].GlobalPosition.Y);
-            slot.GlobalPosition = slots[Selected].GlobalPosition + Vector2.Down*distance;
-            for(int i = selected+1; i < slots.Count-1; i++)
-            {
-                //GD.PrintRich("[b]Slot da pos [color=" + slots[i+1].Modulate.ToHtml() + "]" + slots[i+1].GlobalPosition + "[/color] aplicado ao da pos [color=" + slots[i].Modulate.ToHtml() + "]" + slots[i].GlobalPosition + "[/color][/b]");
-                slots[i].GlobalPosition = slots[i+1].GlobalPosition;
-            }
-            if(selected != slots.Count-1) { slots[slots.Count-1].GlobalPosition += Vector2.Down*distance; }
-            slots.Insert(selected+1, slot);
-            Selected++;
-        }
-    }
-    
-    public void RemovePlotable(RuneSlot slot)
-    {
-        
-        int idx = slots.IndexOf(slot);
-        if(idx < 0) { return; }
-        for(int i = slots.Count-1; i >= idx+1 ; i--)
-        {
-            
-            slots[i].GlobalPosition = slots[i-1].GlobalPosition;
-        }
-        slots.RemoveAt(idx);
-        RemoveChild(slot);
-        Selected--;
-        Selected++;
-    }
-
-    Task inputDelay = Task.CompletedTask;
-    public override void _Input(InputEvent @event)
-    {
-        if(!inputDelay.IsCompleted) { return; }
-        if(@event.IsActionPressed("ui_up", true)) { Selected--; checkDelay(@event); }
-        if(@event.IsActionPressed("ui_down", true)) { Selected++; checkDelay(@event); }
-    }
-    
-    public void checkDelay(InputEvent @event)
-    { if(@event.IsEcho()){ inputDelay = Task.Delay(100); inputDelay.Start(); } }
-    
+    public Vector2 position;
+    public Rect2 rect;
+    public Vector2 scale;
+    public Texture2D texture;
 }
 
+public partial class RuneTextureRect : TextureRect
+{
+    public RuneSelector controller;
+
+    public Vector2 finalPosition;
+    public Vector2 finalScale;
+    public Color finalColor;
+
+    public void SlerpTowardsFinals(float weight)
+    {
+        Position = Position.Lerp(finalPosition, weight);
+        Scale = Scale.Slerp(finalScale, weight);
+        Modulate = finalColor + (Modulate - finalColor ) * weight;
+    }
+}
+public partial class RuneSelector : Control
+{
+    
+    public const float SLOT_SIZE = 108;
+    const double SLIDE_TIME = 0.35;
+    public static RuneSelector Instance;
+
+
+    public List<List<IPlotable>> plotables = new List<List<IPlotable>>();
+    private int selIndex;
+    private int rarityIndex;
+    private List<RuneTextureRect> visibleSlots = new List<RuneTextureRect>();
+
+    [Export] private Container box;
+    [Export] private RichTextLabel nameLabel;
+
+    
+
+    public int Selected 
+    {
+        get => selIndex;
+        set
+        {
+            if(value >= visibleSlots.Count) { do value -= visibleSlots.Count; while (value >= visibleSlots.Count); }
+            else if(value < 0) {  do value += visibleSlots.Count; while (value < 0); }
+            selIndex = value;
+            StartTransition();
+            UpdateTextBox();
+        }
+    }
+
+    public int SelectedRarity 
+    {
+        get => rarityIndex;
+        set
+        {
+            if(value >= plotables[Selected].Count) { do value -= plotables[Selected].Count; while (value >= plotables[Selected].Count); }
+            else if(value < 0) {  do value += plotables[Selected].Count; while (value < 0); }
+            rarityIndex = value;
+            StartTransition();
+            UpdateTextBox();
+        }
+    }
+
+
+    public override void _Ready()
+    {
+        base._Ready();
+        // STUB
+        for(int i = 0; i < 18; i++)
+        {
+            GD.Print(AddPlotable(new RuneCreate{ rarity = (Rune.ERuneRarity)(i%9)}));
+
+        }
+        // END STUB
+
+
+        if(plotables.Count == 0) {
+            nameLabel.Text = "[center][color=white][tornado radius=1.0 freq=20.0 connected=0]No Runes Here ;-;[/tornado][/color][center]";
+            return;
+        }
+
+        Selected = 0;
+    }
+
+    public override void _Process(double delta)
+    {
+        base._Process(delta);
+        selectTransition?.Invoke(delta);
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    private Action<double> selectTransition;
+    private void StartTransition()
+    {
+        float xHalf = GetViewportRect().Size.X/2;
+        float xSep = 15;
+        float yDelta = box.Size.Y;
+        float yPos = GetViewportRect().Size.Y/2 - SLOT_SIZE/3;
+        for(int i = 0; i < visibleSlots.Count; i++) xSep += 15f;
+        for(int i = 0; i < visibleSlots.Count; i++)
+        {
+            float sortingFactor = CalculateSorting(i);
+            visibleSlots[i].ZIndex = box.ZIndex + visibleSlots.Count - (int)(sortingFactor*visibleSlots.Count);
+            visibleSlots[i].finalColor = plotables[i][rarityIndex].Color*(1-Mathf.Abs(sortingFactor));
+            visibleSlots[i].finalScale = Vector2.One*ScalingFactor(sortingFactor);
+            visibleSlots[i].finalPosition = new Vector2(
+                XPositionFactor(sortingFactor)*xSep + xHalf - visibleSlots[i].finalScale.X*SLOT_SIZE + SLOT_SIZE/2, 
+                (-YPositionFactor(sortingFactor)*yDelta*1.8f) + yPos*1.8f
+            ) ;
+            
+        }
+        selectTransition = Transitionate;
+    }
+    private void Transitionate(double delta) => Transitionate(0, delta);
+    private void Transitionate(double time, double delta)
+    {
+        if(time >= SLIDE_TIME) { selectTransition = null; return; }
+        var nextTime = delta + time;
+
+        foreach(RuneTextureRect slot in visibleSlots)
+        {
+            slot.SlerpTowardsFinals((float)((float)nextTime/SLIDE_TIME));
+        }
+         
+        selectTransition = (double delta) => Transitionate(nextTime, delta);
+    }
+
+    private float CalculateSorting(int idx)
+    {
+        float factor = ((float)(idx - Selected))/(float)visibleSlots.Count;
+        if(factor > 0.5) { factor -= 1f; }
+        else if( factor < -0.5) {factor += 1f; }
+        return factor;
+    }
+
+    const float SCALE_FACTOR = 1.5f; 
+    private float ScalingFactor(float weight)
+    {
+        weight = Mathf.Clamp(Mathf.Abs(weight), 0, 1f);
+        float s = Mathf.Sin(SCALE_FACTOR*weight) + SCALE_FACTOR;
+        return s/(2*Mathf.Abs(SCALE_FACTOR*weight)+1) - 0.5f;
+    }
+
+    const float Y_FACTOR = Mathf.Pi;
+    private float YPositionFactor(float weight) 
+    {
+        weight = Mathf.Clamp(Mathf.Abs(weight), 0, 1f);
+        float k = Mathf.Pow(Mathf.Cos(Y_FACTOR*weight), 3) + 1 - Mathf.Sin(Mathf.Pow(weight/Y_FACTOR, 3*Y_FACTOR));
+        return k/2;
+    }
+    private float XPositionFactor(float weight) => Mathf.Sin(Mathf.Pi*weight*2);
+    
+    public void UpdateTextBox()
+    {
+        nameLabel.Clear();
+        
+        nameLabel.ParseBbcode("[center][tornado radius=1.0 freq=40.0 connected=1]");
+        nameLabel.PushColor(plotables[Selected][rarityIndex].Color);
+        nameLabel.AddText(plotables[Selected][rarityIndex].Name);
+        nameLabel.PopAll();
+    }
+
+
+
+
+
+
+    public IPlotable ConfirmSelection() => plotables[Selected][rarityIndex];
+    public Rect2 GetSelectedRect() => visibleSlots[Selected].GetGlobalRect();
+    public void SelectLeft(InputEvent @event) { if(!inputDelay.IsCompleted) { Selected--; checkDelay(@event.IsEcho()); }}
+    public void SelectRight(InputEvent @event) { if(inputDelay.IsCompleted) {  Selected++; checkDelay(@event.IsEcho()); }}
+    public void SelectRarityUp() => SelectedRarity ++;
+    public void SelectBackwards(InputEvent @event) { if(inputDelay.IsCompleted) { Selected -= plotables.Count/2; checkDelay(@event.IsEcho()); }}
+
+    Task inputDelay = Task.CompletedTask;
+    const float TRANS_ACEL = 1f;
+    const float TRANS_TOP_SPEED = 1;
+    float transSpeed = 100;
+    
+    public void checkDelay(bool isEcho)
+    { if(isEcho){ 
+        inputDelay = Task.Delay((int)(transSpeed*SLIDE_TIME));
+        transSpeed = transSpeed > TRANS_TOP_SPEED? transSpeed - TRANS_ACEL : TRANS_TOP_SPEED;
+        inputDelay.Start(); 
+    } else { transSpeed = 200; }}
+
+
+    public void ToggleDisplaying(bool state)
+    {
+        GD.Print("state: " + state);
+        Visible = state;
+        if(state) { SpellEditor.Instance.AddChild(this); }
+        else { SpellEditor.Instance.RemoveChild(this); }
+    }
+    
+
+    public bool AddPlotable(IPlotable plotable)
+    {
+        foreach(List<IPlotable> plist in plotables)
+        {
+            foreach(IPlotable p in plist) if(p.Name == plotable.Name) return false;
+            else if(plotable.Category == plist[0].Category)
+            {
+                plist.Add(plotable);
+                return true;
+            }
+        }
+        plotables.Add(new List<IPlotable>{plotable} );
+        AddVisibleSlot(plotable);
+        return true;
+
+    }
+
+    private void AddVisibleSlot(IPlotable plotable) 
+    {
+        RuneTextureRect newSlot = new RuneTextureRect
+        {
+            CustomMinimumSize = Vector2.One * SLOT_SIZE,
+            StretchMode = TextureRect.StretchModeEnum.Scale,
+            Texture = plotable.Portrait,
+            Modulate = plotable.Color,
+            PivotOffset = Vector2.Left*SLOT_SIZE/2
+        };
+        visibleSlots.Add(newSlot);
+        box.AddChild(newSlot);
+    }
+
+    
+
+
+
+}
 }

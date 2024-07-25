@@ -1,4 +1,7 @@
 res://Scenes/Menus/SpellEditor
+res://Scripts/Spellcasting/SpellEditing
+res://
+/home/matias/Projects/Inscriber/Build
 res://Scenes/Menus
 res://Scripts/Behaviors/Familiars
 res://Scripts/Player
@@ -7,4 +10,3 @@ res://Sprites
 res://Scenes
 res://Scripts
 res://Animations/
-res://

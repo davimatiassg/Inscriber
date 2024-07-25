@@ -1,0 +1,120 @@
+[gd_scene load_steps=9 format=3 uid="uid://cstn05ab0b735"]
+
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs" id="1_ipvsq"]
+
+[sub_resource type="Gradient" id="Gradient_y02va"]
+offsets = PackedFloat32Array(0.00909091, 0.386364, 0.636364, 1)
+colors = PackedColorArray(0, 0.827451, 0.992157, 0.12549, 0.0901961, 0.176471, 0.164706, 0, 0.0980392, 0.12549, 0.0980392, 0, 0.843137, 0.364706, 0, 0.317647)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_qcccp"]
+gradient = SubResource("Gradient_y02va")
+width = 512
+height = 512
+fill_to = Vector2(1, 1)
+
+[sub_resource type="Gradient" id="Gradient_n0qdp"]
+offsets = PackedFloat32Array(0, 0.268182, 0.740909, 1)
+colors = PackedColorArray(0.376471, 0.462745, 1, 0.215686, 0.0705882, 0.054902, 0.0235294, 0, 0, 0, 0, 0, 0.776471, 0.580392, 0, 0.235294)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fldf4"]
+gradient = SubResource("Gradient_n0qdp")
+width = 512
+height = 512
+fill_from = Vector2(0, 0.482906)
+fill_to = Vector2(1, 0.482906)
+
+[sub_resource type="Gradient" id="Gradient_taall"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0, 0.572727, 1)
+colors = PackedColorArray(0, 0.439868, 0.374844, 0.513726, 0.0352941, 0, 0.0196078, 0, 0.598733, 0, 0.299607, 0.368627)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_67wy3"]
+gradient = SubResource("Gradient_taall")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(1, 0)
+fill_to = Vector2(0, 1)
+
+[sub_resource type="RichTextEffect" id="RichTextEffect_ij6b6"]
+
+[node name="RuneSelector" type="Control" node_paths=PackedStringArray("box", "nameLabel")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ipvsq")
+box = NodePath("RuneScroll")
+nameLabel = NodePath("RichTextLabel")
+
+[node name="Background" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="bottom3" type="TextureRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_qcccp")
+expand_mode = 1
+
+[node name="bottom2" type="TextureRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_fldf4")
+expand_mode = 1
+
+[node name="bottom" type="TextureRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_67wy3")
+expand_mode = 1
+
+[node name="RuneScroll" type="Container" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 139.0
+offset_bottom = -53.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(320, 0)
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -125.0
+offset_right = 320.0
+offset_bottom = -23.0
+grow_horizontal = 2
+grow_vertical = 2
+bbcode_enabled = true
+scroll_active = false
+shortcut_keys_enabled = false
+custom_effects = [SubResource("RichTextEffect_ij6b6")]
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
+text_direction = 3

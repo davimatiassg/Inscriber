@@ -36,7 +36,7 @@ public partial class PlayerControls : SpellcastingBehavior
 		Vector2 velocity = Velocity;
 
 		// Get the input direction and handle the movement/deceleration.
-		Vector2 direction = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
+		Vector2 direction = Input.GetVector("game_left", "game_right", "game_up", "game_down");
 		if (direction != Vector2.Zero)
 		{
 			if(direction.LengthSquared() > 1) { direction = direction.Normalized(); }

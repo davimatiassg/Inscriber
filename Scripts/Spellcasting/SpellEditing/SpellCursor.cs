@@ -5,10 +5,13 @@ namespace SpellEditing
 {
 public partial class SpellCursor : TextureRect
 {
+    
     public Action getMoved;
-    private RuneSlot slot;
+    public Action cursorMoveAction;
+    private SpellSlot slot;
 
-    public RuneSlot Slot
+   
+    public SpellSlot Slot
     {
         get{ return slot; }
         set 
@@ -28,12 +31,22 @@ public partial class SpellCursor : TextureRect
     }
 	public override void _Input(InputEvent @event)
 	{
-        if(@event is InputEventMouseMotion)
-        {
-            Position = GetGlobalMousePosition() - Size/2;
-            if(slot != null) { slot.getMoved?.Invoke(); }
-            getMoved?.Invoke();
+        if(@event is InputEventMouse)  { cursorMoveAction = () => { Position = GetGlobalMousePosition() - Size/2; }; }
+        else {
+            cursorMoveAction = () => {
+                GD.Print("k");
+                Vector2 direction = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down").Normalized();
+                if(GetViewport().GetVisibleRect().HasPoint(GlobalPosition + direction*25))
+                {
+                    Position += direction*25;
+                }
+                
+            };
         }
+
+        cursorMoveAction?.Invoke();
+        if(slot != null) { slot.getMoved?.Invoke(); }
+        getMoved?.Invoke();
 		
 	}
     
