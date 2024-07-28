@@ -30,7 +30,7 @@ public partial class RuneSelector : Control
 
     public List<List<IPlotable>> plotables = new List<List<IPlotable>>();
     private int selIndex;
-    private int rarityIndex;
+    private List<int> rarityIndex = new List<int>();
     private List<RuneTextureRect> visibleSlots = new List<RuneTextureRect>();
 
     [Export] private Container box;
@@ -43,7 +43,10 @@ public partial class RuneSelector : Control
         get => selIndex;
         set
         {
-            if(value >= visibleSlots.Count) { do value -= visibleSlots.Count; while (value >= visibleSlots.Count); }
+            
+            if(value >= visibleSlots.Count) { 
+                do value -= visibleSlots.Count; while (value >= visibleSlots.Count); 
+            }
             else if(value < 0) {  do value += visibleSlots.Count; while (value < 0); }
             selIndex = value;
             StartTransition();
@@ -53,24 +56,32 @@ public partial class RuneSelector : Control
 
     public int SelectedRarity 
     {
-        get => rarityIndex;
+        get { 
+            rarityIndex[Selected] %= plotables[Selected].Count;
+            return rarityIndex[Selected];
+        }
         set
         {
             if(value >= plotables[Selected].Count) { do value -= plotables[Selected].Count; while (value >= plotables[Selected].Count); }
             else if(value < 0) {  do value += plotables[Selected].Count; while (value < 0); }
-            rarityIndex = value;
+            rarityIndex[Selected] = value;
             StartTransition();
             UpdateTextBox();
         }
     }
-        public override void _Ready()
+    
+
+
+    public override void _Ready()
     {
         base._Ready();
         // STUB
-        for(int i = 0; i < 18; i++)
+        for(int i = 0; i < 9; i++)
         {
             AddPlotable(new RuneCreate{ rarity = (Rune.ERuneRarity)(i%9)} );
+            
         }
+        for(int i = 0; i < 90; i++){ AddPlotable(new RandomTestRune()); }
         // END STUB
 
 
@@ -101,7 +112,7 @@ public partial class RuneSelector : Control
         {
             float sortingFactor = CalculateSorting(i);
             visibleSlots[i].ZIndex = box.ZIndex + visibleSlots.Count - (int)(sortingFactor*visibleSlots.Count);
-            visibleSlots[i].finalColor = plotables[i][rarityIndex].Color*(1-Mathf.Abs(sortingFactor));
+            visibleSlots[i].finalColor = plotables[i][rarityIndex[i]].Color*(1-Mathf.Abs(sortingFactor));
             visibleSlots[i].finalScale = Vector2.One*ScalingFactor(sortingFactor);
             visibleSlots[i].finalPosition = new Vector2(
                 XPositionFactor(sortingFactor)*xSep + xHalf - visibleSlots[i].finalScale.X*SLOT_SIZE + SLOT_SIZE/2, 
@@ -155,17 +166,17 @@ public partial class RuneSelector : Control
         nameLabel.Clear();
         
         nameLabel.ParseBbcode("[center][tornado radius=1.0 freq=40.0 connected=1]");
-        nameLabel.PushColor(plotables[Selected][rarityIndex].Color);
-        nameLabel.AddText(plotables[Selected][rarityIndex].Name);
+        nameLabel.PushColor(plotables[Selected][SelectedRarity].Color);
+        nameLabel.AddText(plotables[Selected][SelectedRarity].Name);
         nameLabel.PopAll();
     }
 
 
-    public IPlotable ConfirmSelection() => plotables[Selected][rarityIndex];
+    public IPlotable ConfirmSelection() => plotables[Selected][SelectedRarity];
     public Rect2 GetSelectedRect() => visibleSlots[Selected].GetGlobalRect();
-    public void SelectLeft(InputEvent @event) { if(!inputDelay.IsCompleted) { Selected--; checkDelay(@event.IsEcho()); }}
-    public void SelectRight(InputEvent @event) { if(inputDelay.IsCompleted) {  Selected++; checkDelay(@event.IsEcho()); }}
-    public void SelectRarityUp() => SelectedRarity ++;
+    public void SelectLeft(InputEvent @event) { if(inputDelay.IsCompleted && @event.IsPressed()) { Selected--; checkDelay(@event.IsEcho()); }}
+    public void SelectRight(InputEvent @event) { if(inputDelay.IsCompleted && @event.IsPressed()) {  Selected++; checkDelay(@event.IsEcho()); }}
+    public void SelectRarityUp() => SelectedRarity++;
     public void SelectBackwards(InputEvent @event) { if(inputDelay.IsCompleted) { Selected -= plotables.Count/2; checkDelay(@event.IsEcho()); }}
 
     Task inputDelay = Task.CompletedTask;
@@ -177,7 +188,7 @@ public partial class RuneSelector : Control
     { if(isEcho){ 
         inputDelay = Task.Delay((int)(transSpeed*SLIDE_TIME));
         transSpeed = transSpeed > TRANS_TOP_SPEED? transSpeed - TRANS_ACEL : TRANS_TOP_SPEED;
-        inputDelay.Start(); 
+        inputDelay = Task.CompletedTask;
     } else { transSpeed = 200; }}
 
     public bool AddPlotable(IPlotable plotable)
@@ -192,6 +203,7 @@ public partial class RuneSelector : Control
             }
         }
         plotables.Add(new List<IPlotable>{plotable} );
+        rarityIndex.Add(0);
         AddVisibleSlot(plotable);
         return true;
 

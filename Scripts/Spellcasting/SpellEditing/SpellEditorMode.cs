@@ -412,23 +412,25 @@ public class DragMode : FreeMode
 
     public override void _Process(double delta)
     {
-        base._Process(delta);
+        base._Process(delta); 
         selectedSlot.Position = SpellEditorCamera.Instance.GetScreenCenterPosition() - selectedSlot.GetGlobalRect().GetCenter() + selectedSlot.Position;
     }
     public override void EnterModeFrom(SpellEditorMode prevMode)
     {
         if(prevMode is FreeMode freePrev) { 
             this.selectedSlot = freePrev.selectedSlot; 
-            
+        }
+        else if(prevMode is ConnectMode connectMode) { 
+            this.selectedSlot = connectMode.selectedSlot; 
         }
         base.EnterModeFrom(prevMode);
+        if(selectedSlot == null) { ExitModeTo(prevMode); return; }
 
     }
     public override void ExitModeTo(SpellEditorMode nextMode)
     {
         base.ExitModeTo(nextMode);
-        selectedSlot = null;
-        
+        selectedSlot = null;  
     }
 
 }

@@ -2,7 +2,7 @@ using Godot;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SpellEditing;
+using System;
 
 public abstract partial class Rune : Resource, ICastable, SpellEditing.IPlotable
 {
@@ -57,4 +57,31 @@ public abstract partial class Rune : Resource, ICastable, SpellEditing.IPlotable
                 return new Color( 0.1f, 0.1f, 0.1f, 1f );           //Black
         }
     }
+}
+
+public partial class RandomTestRune : Rune
+{
+
+    public RandomTestRune()
+    {
+        randomFactor = new Random().Next(0, 90);
+        var names = new List<String>(DirAccess.Open("res://Sprites/Runes/").GetFiles());
+        var nnames = new List<String>();
+        foreach(string name in names) { if(!name.Contains(".import")) {nnames.Add(name);}}
+        imgpath = nnames[randomFactor%nnames.Count()];
+        rarity = (ERuneRarity)(randomFactor%9);
+    }
+    private string imgpath;
+    private int randomFactor;
+    public override CastingResources CastRequirements => throw new NotImplementedException();
+    public override CastingResources CastReturns => throw new NotImplementedException();
+    public override uint Cooldown => throw new NotImplementedException();
+    public override int Mana => throw new NotImplementedException();
+    public override uint CastingTime => throw new NotImplementedException();
+    public override string Category { get => "??? - " + randomFactor; }
+    public override string Name { get => Category; set => base.Name = value; }
+    public override Texture2D Portrait { 
+        get { return (Texture2D)ResourceLoader.Load<Texture2D>("res://Sprites/Runes/" + imgpath); }
+    }
+    public override Task<CastingResources> Cast(CastingResources res) => throw new NotImplementedException();
 }
