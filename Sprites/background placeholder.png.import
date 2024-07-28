@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jmohbyeera1y"
-path="res://.godot/imported/zeta.png-975254bc933d8d966f291e92302d713d.ctex"
+uid="uid://dg37qmibr4afd"
+path="res://.godot/imported/background placeholder.png-256cf6676fc3f7b68b1d3ad901d0c2cc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Sprites/Runes/zeta.png"
-dest_files=["res://.godot/imported/zeta.png-975254bc933d8d966f291e92302d713d.ctex"]
+source_file="res://Sprites/background placeholder.png"
+dest_files=["res://.godot/imported/background placeholder.png-256cf6676fc3f7b68b1d3ad901d0c2cc.ctex"]
 
 [params]
 

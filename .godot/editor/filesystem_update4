@@ -1,6 +1,5 @@
 res://Scenes/Menus/SpellEditor/SpellEditorBoard.tscn
 res://Scenes/Menus/SpellEditor/RuneSelector.tscn
-res://Scenes/Menus/SpellEditor/drag_overlay.tscn
 res://Scenes/Menus/SpellEditor/SpellEditor.tscn
 res://Scenes/Menus/SpellEditor/connect_overlay.tscn
 res://Scripts/Behaviors/Familiars/FamiliarBehavior.cs

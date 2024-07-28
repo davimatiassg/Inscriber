@@ -10,22 +10,12 @@ namespace SpellEditing
 public partial class SpellManager
 {
     private static List<SpellNode> tableNodes = new List<SpellNode>();
-    private static Spell currentSpell;
+    private static Spell currentSpell = new Spell();
     public Spell CurrentSpell { 
         get { return currentSpell; } 
         set { currentSpell = value; } 
     }
-    public SpellManager(Spell spell)
-    {
-        currentSpell = spell;
-    }
 
-    public SpellManager()
-    {
-        //STUB
-        currentSpell = new Spell();  
-        //END STUB    
-    }
     public static SpellNode CreateNodeFromCastable(ICastable c)
     {
 

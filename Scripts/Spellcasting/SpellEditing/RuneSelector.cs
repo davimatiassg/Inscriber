@@ -5,14 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 namespace SpellEditing
 {
-struct ImageBundle2D 
-{
-    public Vector2 position;
-    public Rect2 rect;
-    public Vector2 scale;
-    public Texture2D texture;
-}
-
 public partial class RuneTextureRect : TextureRect
 {
     public RuneSelector controller;
@@ -71,16 +63,13 @@ public partial class RuneSelector : Control
             UpdateTextBox();
         }
     }
-
-
-    public override void _Ready()
+        public override void _Ready()
     {
         base._Ready();
         // STUB
         for(int i = 0; i < 18; i++)
         {
-            GD.Print(AddPlotable(new RuneCreate{ rarity = (Rune.ERuneRarity)(i%9)}));
-
+            AddPlotable(new RuneCreate{ rarity = (Rune.ERuneRarity)(i%9)} );
         }
         // END STUB
 
@@ -93,16 +82,12 @@ public partial class RuneSelector : Control
         Selected = 0;
     }
 
-    public override void _Process(double delta)
+    public override void _Process(double delta) 
     {
         base._Process(delta);
         selectTransition?.Invoke(delta);
     }
 
-
-    /// <summary>
-    /// 
-    /// </summary>
 
     private Action<double> selectTransition;
     private void StartTransition()
@@ -176,10 +161,6 @@ public partial class RuneSelector : Control
     }
 
 
-
-
-
-
     public IPlotable ConfirmSelection() => plotables[Selected][rarityIndex];
     public Rect2 GetSelectedRect() => visibleSlots[Selected].GetGlobalRect();
     public void SelectLeft(InputEvent @event) { if(!inputDelay.IsCompleted) { Selected--; checkDelay(@event.IsEcho()); }}
@@ -198,16 +179,6 @@ public partial class RuneSelector : Control
         transSpeed = transSpeed > TRANS_TOP_SPEED? transSpeed - TRANS_ACEL : TRANS_TOP_SPEED;
         inputDelay.Start(); 
     } else { transSpeed = 200; }}
-
-
-    public void ToggleDisplaying(bool state)
-    {
-        GD.Print("state: " + state);
-        Visible = state;
-        if(state) { SpellEditor.Instance.AddChild(this); }
-        else { SpellEditor.Instance.RemoveChild(this); }
-    }
-    
 
     public bool AddPlotable(IPlotable plotable)
     {

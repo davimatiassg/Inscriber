@@ -49,7 +49,15 @@ public partial class SpellEditor : Control
     public static RuneSelectorMode runeSelectorMode;
     
 
-    public static SpellEditorMode editorMode;
+    public static SpellEditorMode _editorMode;
+
+    public static SpellEditorMode editorMode 
+    {
+        get { return _editorMode; }
+        set { _editorMode = value;
+            GD.PrintErr("Set editor mode: " + value.GetType()); 
+            }
+    }
 
 
     
@@ -66,7 +74,7 @@ public partial class SpellEditor : Control
             dragMode = new DragMode { overlay = dragOverlay };
             connectMode = new ConnectMode { overlay = connectOverlay };
             selectionMode = new SelectionMode { overlay = selectOverlay };
-            runeSelectorMode = new RuneSelectorMode{ selector = runeSelector };
+            runeSelectorMode = new RuneSelectorMode{ overlay = runeSelector, selector = runeSelector };
 
             editorMode = freeMode;
         }

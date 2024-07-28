@@ -1,5 +1,5 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1721866750
+::res://::1722123618
 export_presets.cfg::TextFile::-1::1718828531::0::1::::<><>::
 icon.svg::CompressedTexture2D::4094991115362396836::1716824050::1716824052::1::::<><>::
 readme.md::TextFile::-1::1713824598::0::1::::<><>::
@@ -14,13 +14,13 @@ familiar_book.tscn::PackedScene::1147763560798839504::1721524498::0::1::::<><>::
 ::res://Scenes/Levels/::1721524498
 scene_01.tscn::PackedScene::937168825771252012::1721524498::0::1::::<><>::uid://bx0ncbt17l7ip::::res://Scenes/Player.tscn<>uid://ql8q64r2f025::::res://Scenes/Entities/Familiars/familiar_book.tscn
 ::res://Scenes/Menus/::1716663739
-::res://Scenes/Menus/SpellEditor/::1721868514
-connect_overlay.tscn::PackedScene::666700357555954022::1721868514::0::1::::<><>::uid://ykbcl8ymcjni::::res://Sprites/Menus/SpellEditor/Connect-overlay.png
-drag_overlay.tscn::PackedScene::2466478028984473434::1721868514::0::1::::<><>::uid://cip1d6opyvm8::::res://Sprites/Menus/SpellEditor/Grab-overlay.png
-RuneSelector.tscn::PackedScene::6076299271730932622::1721868514::0::1::::<><>::res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs
+::res://Scenes/Menus/SpellEditor/::1722123532
+connect_overlay.tscn::PackedScene::666700357555954022::1722123532::0::1::::<><>::uid://ykbcl8ymcjni::::res://Sprites/Menus/SpellEditor/Connect-overlay.png
+drag_overlay.tscn::PackedScene::2466478028984473434::1721933731::0::1::::<><>::uid://cip1d6opyvm8::::res://Sprites/Menus/SpellEditor/Grab-overlay.png
+RuneSelector.tscn::PackedScene::6076299271730932622::1722123532::0::1::::<><>::res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs
 RuneSlot.tscn::PackedScene::837062545038739686::1718636581::0::1::::<><>::uid://cmu5snalrqepb::::res://Sprites/Runes/Arrow.png<>res://Scripts/Spellcasting/SpellEditing/SpellSlot.cs
-SpellEditor.tscn::PackedScene::8514938830424744635::1721868514::0::1::::<><>::uid://dcoo6fuvaat06::::res://Scenes/Menus/SpellEditor/SpellEditorBoard.tscn<>uid://bbe1sd5nwqli5::::res://Scenes/Menus/SpellEditor/drag_overlay.tscn<>uid://jq7ps350h34u::::res://Scenes/Menus/SpellEditor/connect_overlay.tscn
-SpellEditorBoard.tscn::PackedScene::7329446718888992861::1721868514::0::1::::<><>::res://Scripts/Spellcasting/SpellEditing/SpellEditor.cs<>uid://cstn05ab0b735::::res://Scenes/Menus/SpellEditor/RuneSelector.tscn<>uid://bylv51vhw45ca::::res://icon.svg<>res://Scripts/Spellcasting/SpellEditing/SpellSlot.cs<>res://Scripts/Spellcasting/SpellEditing/SpellEditorCamera.cs
+SpellEditor.tscn::PackedScene::8514938830424744635::1722123532::0::1::::<><>::uid://dcoo6fuvaat06::::res://Scenes/Menus/SpellEditor/SpellEditorBoard.tscn<>uid://bbe1sd5nwqli5::::res://Scenes/Menus/SpellEditor/drag_overlay.tscn<>uid://jq7ps350h34u::::res://Scenes/Menus/SpellEditor/connect_overlay.tscn<>uid://cstn05ab0b735::::res://Scenes/Menus/SpellEditor/RuneSelector.tscn<>uid://dg37qmibr4afd::::res://Sprites/background placeholder.png
+SpellEditorBoard.tscn::PackedScene::7329446718888992861::1722123532::0::1::::<><>::res://Scripts/Spellcasting/SpellEditing/SpellEditor.cs<>res://Scripts/Spellcasting/SpellEditing/SpellEditorCamera.cs
 ::res://Scripts/::1718825699
 FontManager.cs::CSharpScript::-1::1718825869::0::1::::FontManager<>Node<>::
 MainScene.cs::CSharpScript::-1::1715983973::0::1::::<>Node2D<>::
@@ -36,7 +36,7 @@ PlayerSpellcasting.cs::CSharpScript::-1::1721520634::0::1::::<>Node2D<>::
 CastingResources.cs::CSharpScript::-1::1715996740::0::1::::<><>::
 CastingResources.md::TextFile::-1::1716559227::0::1::::<><>::
 ICastable.cs::CSharpScript::-1::1716928727::0::1::::<><>::
-Spell.cs::CSharpScript::-1::1717725167::0::1::::Spell<>Resource<>::
+Spell.cs::CSharpScript::-1::1722100278::0::1::::Spell<>Resource<>::
 Spellcasting.Cs::CSharpScript::-1::1716043271::0::1::::<>Node2D<>::
 ::res://Scripts/Spellcasting/Runes/::1715285109
 Rune.cs::CSharpScript::-1::1718836535::0::1::::<>Resource<>::
@@ -44,15 +44,16 @@ RuneCreate.cs::CSharpScript::-1::1718836552::0::1::::RuneCreate<>Resource<>::
 Sigil.cs::CSharpScript::-1::1715897130::0::1::::<><>::
 ::res://Scripts/Spellcasting/SpellEditing/::1719260424
 IPlotable.cs::CSharpScript::-1::1718836477::0::1::::<><>::
-RuneSelector.cs::CSharpScript::-1::1719870739::0::1::::<>Control<>::
+RuneSelector.cs::CSharpScript::-1::1722123526::0::1::::<>Control<>::
 SpellCursor.cs::CSharpScript::-1::1718636581::0::1::::<>TextureRect<>::
-SpellEditor.cs::CSharpScript::-1::1721570230::0::1::::<>Control<>::
+SpellEditor.cs::CSharpScript::-1::1722082792::0::1::::<>Control<>::
 SpellEditorCamera.cs::CSharpScript::-1::1719870880::0::1::::<>Camera2D<>::
-SpellEditorMode.cs::CSharpScript::-1::1721576634::0::1::::<><>::
-SpellLine.cs::CSharpScript::-1::1718636581::0::1::::<>Line2D<>::
-SpellManager.cs::CSharpScript::-1::1718879724::0::1::::<><>::
-SpellSlot.cs::CSharpScript::-1::1721248556::0::1::::<>TextureRect<>::
-::res://Sprites/::1721523132
+SpellEditorMode.cs::CSharpScript::-1::1722122407::0::1::::<><>::
+SpellLine.cs::CSharpScript::-1::1721869943::0::1::::<>Line2D<>::
+SpellManager.cs::CSharpScript::-1::1722084903::0::1::::<><>::
+SpellSlot.cs::CSharpScript::-1::1722102850::0::1::::<>TextureRect<>::
+::res://Sprites/::1722122887
+background placeholder.png::CompressedTexture2D::7640169849200106565::1722122885::1722122887::1::::<><>::
 background_blue.png::CompressedTexture2D::7914473571366252193::1716984289::1716984312::1::::<><>::
 background_tane.png::CompressedTexture2D::8220310927892669673::1716984309::1716984312::1::::<><>::
 cursor.png::CompressedTexture2D::7788606357223075684::1716934480::1716934482::1::::<><>::
@@ -60,13 +61,13 @@ floating_book-Sheet.png::CompressedTexture2D::2346955541681975533::1714924994::1
 Flush.png::CompressedTexture2D::4264386702776645519::1714740128::1714740164::1::::<><>::
 player.png::CompressedTexture2D::694149649927186648::1714872782::1714873577::1::::<><>::
 ::res://Sprites/Menus/::1721523137
-::res://Sprites/Menus/SpellEditor/::1721868512
-Connect-overlay.png::CompressedTexture2D::1705240943275924214::1721868568::1721868573::1::::<><>::
+::res://Sprites/Menus/SpellEditor/::1721868573
+Connect-overlay.png::CompressedTexture2D::1705240943275924214::1721869498::1721868573::1::::<><>::
 Grab-overlay.png::CompressedTexture2D::157850100957663549::1721523337::1721523339::1::::<><>::
-::res://Sprites/Runes/::1716670618
+::res://Sprites/Runes/::1722123618
 Arrow.png::CompressedTexture2D::5658249383523761535::1716670616::1716670618::1::::<><>::
 Brushed.png::CompressedTexture2D::599739100929398662::1716651965::1716652077::1::::<><>::
 Square.png::CompressedTexture2D::6592158689838465104::1716651965::1716652111::1::::<><>::
 Triangles.png::CompressedTexture2D::4881101414596974487::1716651965::1716652115::1::::<><>::
 Wave.png::CompressedTexture2D::2452878105284555419::1716651965::1716652086::1::::<><>::
-zeta.png::CompressedTexture2D::657334754033485780::1716651965::1716652045::1::::<><>::
+Zeta.png::CompressedTexture2D::657334754033485780::1716651965::1722123618::1::::<><>::

@@ -10,7 +10,7 @@ public partial class SpellSlot : TextureRect
 	public Action getMoved;
 	public List<SpellLine> spellLines = new List<SpellLine>();
 	public Action<double> transition;
-	public Vector2 finalPosition;
+	[Export] public Vector2 finalPosition;
 	public float gradValue;
 	public SpellNode node;
 	private IPlotable plotable;
@@ -56,6 +56,8 @@ public partial class SpellSlot : TextureRect
 	{
 		//
 	}
+
+	public void UpdateLinePosition() { foreach(SpellLine line in spellLines) line.UpdatePosition(); }
 }
 
 }

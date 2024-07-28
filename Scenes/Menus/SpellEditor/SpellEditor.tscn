@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://dtkx2fb2sunx0"]
+[gd_scene load_steps=6 format=3 uid="uid://dtkx2fb2sunx0"]
 
 [ext_resource type="PackedScene" uid="uid://dcoo6fuvaat06" path="res://Scenes/Menus/SpellEditor/SpellEditorBoard.tscn" id="1_ivfh1"]
 [ext_resource type="PackedScene" uid="uid://bbe1sd5nwqli5" path="res://Scenes/Menus/SpellEditor/drag_overlay.tscn" id="2_35tnf"]
 [ext_resource type="PackedScene" uid="uid://jq7ps350h34u" path="res://Scenes/Menus/SpellEditor/connect_overlay.tscn" id="3_gq61j"]
+[ext_resource type="PackedScene" uid="uid://cstn05ab0b735" path="res://Scenes/Menus/SpellEditor/RuneSelector.tscn" id="4_vop10"]
+[ext_resource type="Texture2D" uid="uid://dg37qmibr4afd" path="res://Sprites/background placeholder.png" id="5_xu1c1"]
 
 [node name="SpellEditor" type="Control"]
 layout_mode = 3
@@ -12,8 +14,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SpellEditor" parent="." node_paths=PackedStringArray("dragOverlay", "connectOverlay") instance=ExtResource("1_ivfh1")]
+[node name="SpellEditor" parent="." node_paths=PackedStringArray("runeSelector", "dragOverlay", "connectOverlay") instance=ExtResource("1_ivfh1")]
 layout_mode = 1
+runeSelector = NodePath("../Hud/RuneSelector")
 dragOverlay = NodePath("../Hud/dragOverlay")
 connectOverlay = NodePath("../Hud/connectOverlay")
 
@@ -24,3 +27,12 @@ visible = false
 
 [node name="connectOverlay" parent="Hud" instance=ExtResource("3_gq61j")]
 visible = false
+
+[node name="RuneSelector" parent="Hud" instance=ExtResource("4_vop10")]
+visible = false
+
+[node name="BackgroundPlaceholder" type="Sprite2D" parent="."]
+modulate = Color(0.201527, 0.201527, 0.201527, 1)
+position = Vector2(320, 180)
+scale = Vector2(4, 4)
+texture = ExtResource("5_xu1c1")

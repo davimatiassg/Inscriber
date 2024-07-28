@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Inscriber")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d09ffbc34c523741e29659b343dcf0523cd0ecb3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1fd1c2141718c3ce1c06634be52c147e292ff2fc")]
 [assembly: System.Reflection.AssemblyProductAttribute("Inscriber")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Inscriber")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
