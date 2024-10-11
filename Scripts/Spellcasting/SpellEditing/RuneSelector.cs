@@ -28,7 +28,7 @@ public partial class RuneSelector : Control
     public static RuneSelector Instance;
 
 
-    public List<List<IPlotable>> plotables = new List<List<IPlotable>>();
+    public List<List<IGraphDeployable>> plotables = new List<List<IGraphDeployable>>();
     private int selIndex;
     private List<int> rarityIndex = new List<int>();
     private List<RuneTextureRect> visibleSlots = new List<RuneTextureRect>();
@@ -76,14 +76,9 @@ public partial class RuneSelector : Control
     {
         base._Ready();
         // STUB
-        for(int i = 0; i < 9; i++)
-        {
-            AddPlotable(new RuneCreate{ rarity = (Rune.ERuneRarity)(i%9)} );
-            
-        }
-        for(int i = 0; i < 90; i++){ AddPlotable(new RandomTestRune()); }
+        for(int i = 0; i < 9; i++) { AddPlotable(new RuneCreate{ rarity = (Rune.ERuneRarity)(i%9)} ); }
+        for(int i = 0; i < 5; i++){ AddPlotable(new RandomTestRune()); }
         // END STUB
-
 
         if(plotables.Count == 0) {
             nameLabel.Text = "[center][color=white][tornado radius=1.0 freq=20.0 connected=0]No Runes Here ;-;[/tornado][/color][center]";
@@ -172,7 +167,7 @@ public partial class RuneSelector : Control
     }
 
 
-    public IPlotable ConfirmSelection() => plotables[Selected][SelectedRarity];
+    public IGraphDeployable ConfirmSelection() => plotables[Selected][SelectedRarity];
     public Rect2 GetSelectedRect() => visibleSlots[Selected].GetGlobalRect();
     public void SelectLeft(InputEvent @event) { if(inputDelay.IsCompleted && @event.IsPressed()) { Selected--; checkDelay(@event.IsEcho()); }}
     public void SelectRight(InputEvent @event) { if(inputDelay.IsCompleted && @event.IsPressed()) {  Selected++; checkDelay(@event.IsEcho()); }}
@@ -191,25 +186,25 @@ public partial class RuneSelector : Control
         inputDelay = Task.CompletedTask;
     } else { transSpeed = 200; }}
 
-    public bool AddPlotable(IPlotable plotable)
+    public bool AddPlotable(IGraphDeployable plotable)
     {
-        foreach(List<IPlotable> plist in plotables)
+        foreach(List<IGraphDeployable> plist in plotables)
         {
-            foreach(IPlotable p in plist) if(p.Name == plotable.Name) return false;
+            foreach(IGraphDeployable p in plist) if(p.Name == plotable.Name) return false;
             else if(plotable.Category == plist[0].Category)
             {
                 plist.Add(plotable);
                 return true;
             }
         }
-        plotables.Add(new List<IPlotable>{plotable} );
+        plotables.Add(new List<IGraphDeployable>{plotable} );
         rarityIndex.Add(0);
         AddVisibleSlot(plotable);
         return true;
 
     }
 
-    private void AddVisibleSlot(IPlotable plotable) 
+    private void AddVisibleSlot(IGraphDeployable plotable) 
     {
         RuneTextureRect newSlot = new RuneTextureRect
         {

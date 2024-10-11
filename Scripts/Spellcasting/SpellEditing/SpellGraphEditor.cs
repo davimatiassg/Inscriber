@@ -10,16 +10,19 @@ using System.Threading.Tasks;
 namespace SpellEditing
 {
 
+/// <summary>
+/// Class to handle Spell Editor Inputs & UI Behavior
+/// </summary>
     
-public partial class SpellEditor : Control
+public partial class SpellGraphEditor : Control
 {
     private enum EEditorState { SPELL_SELECTOR, FREE_MODE, DRAG_MODE, CONNECT_MODE, RUNE_SELECTOR, META_MENU }
-    public static Action<SpellSlot>    StartSlotConnectionAt;
-    public static Action<SpellSlot>    EndSlotConnectionAt;
-    public static Action<SpellSlot>    GrabSpellSlot;
-    public static Action<SpellSlot>    AddSpellSlot;
-    public static Action<Control>      SelectControl;
-    public static Action               UnselectControl;
+    public static Action<SpellGraphVisualNode>    OnStartConnectionAtNode;
+    public static Action<SpellGraphVisualNode>    OnEndConnectionAtNode;
+    public static Action<SpellGraphVisualNode>    OnGrabNode;
+    public static Action<SpellGraphVisualNode>    OnAddNode;
+    public static Action<SpellGraphVisualNode>    OnSelectNode;
+    public static Action                          OnUnselectNode;
     
 
     private EEditorState state = EEditorState.FREE_MODE;
@@ -30,8 +33,9 @@ public partial class SpellEditor : Control
     }
     [ExportCategory("Editor Objects")]
     [Export] public RuneSelector runeSelector;
-    [Export] public Control plotableMaster;
-    [Export] public Control arrowMaster;
+
+    
+    [Export] public SpellGraphViewer graphView;
 
     [ExportCategory("Editor Mode's Overlays")]
 
@@ -41,7 +45,7 @@ public partial class SpellEditor : Control
     [Export] public Control selectOverlay;
 
     //STATIC MODES REFERENCES
-    public static SpellEditor Instance;
+    public static SpellGraphEditor Instance;
     public static FreeMode freeMode;
     public static DragMode dragMode;
     public static ConnectMode connectMode;
@@ -60,9 +64,7 @@ public partial class SpellEditor : Control
     }
 
 
-    
-
-    
+    public static SpellGraphVisualNode selectedNode;
     
 
     public override void _Ready()
@@ -94,29 +96,51 @@ public partial class SpellEditor : Control
     }
 
 
-    public static SpellSlot AddSlot(IPlotable plotable, Vector2 position)
+    public static SpellGraphVisualNode AddNode<T>(T deployable, Vector2 position) where T : IGraphDeployable
     {
-        SpellSlot slot = new SpellSlot{
-            Plotable = plotable,
-            Position = position
-        };
-        SpellManager.AddNode(slot.node);
-        Instance.plotableMaster.AddChild(slot);
-        return slot;
+        var nodeView = Instance.graphView.DeployNewNode(deployable, position);
+        if(deployable is ICastable castable)
+        {
+            var castableNode = SpellManager.CreateNodeFromCastable(castable);
+            SpellManager.AddNode(castableNode);
+            Instance.graphView.AddNodeViewPair(castableNode, nodeView);
+        }
+        OnAddNode?.Invoke(nodeView);
+        return nodeView;
     }
 
-    public static SpellSlot SubstituteSlot(IPlotable plotable, SpellSlot slot)
+    public static SpellGraphVisualNode SubstituteNode<T>(T deployable, SpellGraphVisualNode nodeView) where T : IGraphDeployable
     {
-        var newslot = AddSlot(plotable, slot.Position);
-        SpellManager.TransferNodeConnections(newslot.node, slot.node);
-        Instance.RemoveSlot(slot);
-        return newslot;
+        if(deployable is ICastable != nodeView.Deployable is ICastable) return nodeView;
+        nodeView.Deployable = deployable;
+        if(deployable is ICastable castable) 
+        {
+            var newCastableNodeView = SpellManager.CreateNodeFromCastable(castable);
+            SpellManager.TransferNodeConnections(Instance.graphView.GetPairNodeFrom(nodeView), newCastableNodeView);
+        }
+        
+        nodeView.Deployable = deployable;
+        OnAddNode?.Invoke(nodeView);
+        return nodeView;
     }
 
-    public void RemoveSlot(SpellSlot slot)
+    public static void RemoveSlot(SpellGraphVisualNode nodeView)
     {
-        SpellManager.RemoveNode(slot.node);
-        plotableMaster.RemoveChild(slot);
+        if(nodeView.Deployable is ICastable castable) SpellManager.RemoveNode(Instance.graphView.GetPairNodeFrom(nodeView));
+        Instance.graphView.RemoveGraphNode(nodeView);
+    }
+
+    public static void ConnectGraphNodes(SpellGraphVisualNode source, SpellGraphVisualNode target)
+    {
+        bool connectionSuccess = SpellManager.AddConnectionToSpellGraph(
+            Instance.graphView.GetPairNodeFrom(source), 
+            Instance.graphView.GetPairNodeFrom(target));
+        if(!connectionSuccess) 
+        { 
+            ///Play Unconection Animation;
+            return;
+        }
+        source.ConnectTo(target);
     }
 }
 }

@@ -4,9 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace SpellEditing
 {
-    using SpellNode = Spell.Node;
+
+
+using SpellNode = Spell.Node;
+
+/// <summary>
+/// Singleton used to alter the spell internally
+/// </summary>
+
 public partial class SpellManager
 {
     private static List<SpellNode> tableNodes = new List<SpellNode>();
@@ -34,7 +42,7 @@ public partial class SpellManager
         foreach(SpellNode n in node.nexts){ n.prevs.Remove(node); }
         foreach(SpellNode n in node.prevs){ n.nexts.Remove(node); }
     }
-    public static void TransferNodeConnections(SpellNode receiver, SpellNode donnor)
+    public static void TransferNodeConnections(SpellNode donnor, SpellNode receiver)
     {
         foreach(SpellNode n in donnor.nexts)
         { 

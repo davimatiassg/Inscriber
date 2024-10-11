@@ -1,3 +1,5 @@
+Sprite2D
+Node
 CanvasLayer
 Control
 TextureRect
@@ -9,6 +11,5 @@ RichTextLabel
 Container
 HBoxContainer
 Line2D
-Node
 TextureButton
 VBoxContainer

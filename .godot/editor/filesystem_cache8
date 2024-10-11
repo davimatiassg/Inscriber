@@ -1,5 +1,5 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1722173577
+::res://::1728592977
 export_presets.cfg::TextFile::-1::1718828531::0::1::::<><>::
 icon.svg::CompressedTexture2D::4094991115362396836::1716824050::1716824052::1::::<><>::
 readme.md::TextFile::-1::1713824598::0::1::::<><>::
@@ -14,13 +14,13 @@ familiar_book.tscn::PackedScene::1147763560798839504::1721524498::0::1::::<><>::
 ::res://Scenes/Levels/::1721524498
 scene_01.tscn::PackedScene::937168825771252012::1721524498::0::1::::<><>::uid://bx0ncbt17l7ip::::res://Scenes/Player.tscn<>uid://ql8q64r2f025::::res://Scenes/Entities/Familiars/familiar_book.tscn
 ::res://Scenes/Menus/::1716663739
-::res://Scenes/Menus/SpellEditor/::1722127797
-connect_overlay.tscn::PackedScene::666700357555954022::1722127797::0::1::::<><>::uid://ykbcl8ymcjni::::res://Sprites/Menus/SpellEditor/Connect-overlay.png
+::res://Scenes/Menus/SpellEditor/::1728593097
+connect_overlay.tscn::PackedScene::666700357555954022::1722287079::0::1::::<><>::uid://ykbcl8ymcjni::::res://Sprites/Menus/SpellEditor/Connect-overlay.png
 drag_overlay.tscn::PackedScene::2466478028984473434::1721933731::0::1::::<><>::uid://cip1d6opyvm8::::res://Sprites/Menus/SpellEditor/Grab-overlay.png
-RuneSelector.tscn::PackedScene::6076299271730932622::1722127797::0::1::::<><>::res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs
+SpellEditorBoard.tscn::PackedScene::4369201766151872079::1728593097::0::1::::<><>::res://Scripts/Spellcasting/SpellEditing/SpellEditor.cs<>res://Scripts/Spellcasting/SpellEditing/SpellEditorCamera.cs
+RuneSelector.tscn::PackedScene::6076299271730932622::1722287079::0::1::::<><>::res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs
 RuneSlot.tscn::PackedScene::837062545038739686::1718636581::0::1::::<><>::uid://cmu5snalrqepb::::res://Sprites/Runes/Arrow.png<>res://Scripts/Spellcasting/SpellEditing/SpellSlot.cs
-SpellEditor.tscn::PackedScene::8514938830424744635::1722127797::0::1::::<><>::uid://dcoo6fuvaat06::::res://Scenes/Menus/SpellEditor/SpellEditorBoard.tscn<>uid://bbe1sd5nwqli5::::res://Scenes/Menus/SpellEditor/drag_overlay.tscn<>uid://jq7ps350h34u::::res://Scenes/Menus/SpellEditor/connect_overlay.tscn<>uid://cstn05ab0b735::::res://Scenes/Menus/SpellEditor/RuneSelector.tscn<>uid://dg37qmibr4afd::::res://Sprites/background placeholder.png
-SpellEditorBoard.tscn::PackedScene::7329446718888992861::1722127797::0::1::::<><>::res://Scripts/Spellcasting/SpellEditing/SpellEditor.cs<>res://Scripts/Spellcasting/SpellEditing/SpellEditorCamera.cs
+SpellEditor.tscn::PackedScene::8514938830424744635::1722287079::0::1::::<><>::uid://dcoo6fuvaat06::::res://Scenes/Menus/SpellEditor/SpellEditorBoard.tscn<>uid://bbe1sd5nwqli5::::res://Scenes/Menus/SpellEditor/drag_overlay.tscn<>uid://jq7ps350h34u::::res://Scenes/Menus/SpellEditor/connect_overlay.tscn<>uid://cstn05ab0b735::::res://Scenes/Menus/SpellEditor/RuneSelector.tscn<>uid://dg37qmibr4afd::::res://Sprites/background placeholder.png
 ::res://Scripts/::1718825699
 FontManager.cs::CSharpScript::-1::1718825869::0::1::::FontManager<>Node<>::
 MainScene.cs::CSharpScript::-1::1715983973::0::1::::<>Node2D<>::
@@ -39,16 +39,16 @@ ICastable.cs::CSharpScript::-1::1716928727::0::1::::<><>::
 Spell.cs::CSharpScript::-1::1722100278::0::1::::Spell<>Resource<>::
 Spellcasting.Cs::CSharpScript::-1::1716043271::0::1::::<>Node2D<>::
 ::res://Scripts/Spellcasting/Runes/::1715285109
-Rune.cs::CSharpScript::-1::1718836535::0::1::::<>Resource<>::
+Rune.cs::CSharpScript::-1::1722175803::0::1::::<>Resource<>::
 RuneCreate.cs::CSharpScript::-1::1718836552::0::1::::RuneCreate<>Resource<>::
 Sigil.cs::CSharpScript::-1::1715897130::0::1::::<><>::
 ::res://Scripts/Spellcasting/SpellEditing/::1719260424
 IPlotable.cs::CSharpScript::-1::1718836477::0::1::::<><>::
-RuneSelector.cs::CSharpScript::-1::1722124145::0::1::::<>Control<>::
+RuneSelector.cs::CSharpScript::-1::1722189774::0::1::::<>Control<>::
 SpellCursor.cs::CSharpScript::-1::1718636581::0::1::::<>TextureRect<>::
 SpellEditor.cs::CSharpScript::-1::1722082792::0::1::::<>Control<>::
 SpellEditorCamera.cs::CSharpScript::-1::1719870880::0::1::::<>Camera2D<>::
-SpellEditorMode.cs::CSharpScript::-1::1722127795::0::1::::<><>::
+SpellEditorMode.cs::CSharpScript::-1::1722287065::0::1::::<><>::
 SpellLine.cs::CSharpScript::-1::1721869943::0::1::::<>Line2D<>::
 SpellManager.cs::CSharpScript::-1::1722084903::0::1::::<><>::
 SpellSlot.cs::CSharpScript::-1::1722102850::0::1::::<>TextureRect<>::

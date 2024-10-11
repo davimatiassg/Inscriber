@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 
-public abstract partial class Rune : Resource, ICastable, SpellEditing.IPlotable
+public abstract partial class Rune : Resource, ICastable, SpellEditing.IGraphDeployable
 {
     public enum ERuneRarity : int { Dull = 0, Common, Uncommon, Rare, Mithic, Arcane, Primal, Profane, Divine }
     public ERuneRarity rarity;

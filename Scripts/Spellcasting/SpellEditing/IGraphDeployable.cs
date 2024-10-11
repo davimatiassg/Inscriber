@@ -4,7 +4,7 @@ using Godot;
 namespace SpellEditing
 {
 
-public interface IPlotable
+public interface IGraphDeployable
 {
     public Texture2D Portrait { get; }
     public string Name { get; protected set; }
