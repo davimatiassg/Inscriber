@@ -1,14 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "gKR5tlG6fghZlGZ+bh6TN6XvN5LbHBaJkHTPl4fFcabyN0U9up3Cg9ulBiDjmx+BCt3DCO+k1KW9UI29yjnfZQ==",
+  "dgSpecHash": "sBsycsJH97E=",
   "success": true,
-  "projectFilePath": "/home/matias/Projects/Inscriber/Inscriber.csproj",
+  "projectFilePath": "C:\\Users\\user\\Downloads\\Nova pasta\\Inscriber\\Inscriber.csproj",
   "expectedPackageFiles": [
-    "/home/matias/.nuget/packages/godot.sourcegenerators/4.2.2/godot.sourcegenerators.4.2.2.nupkg.sha512",
-    "/home/matias/.nuget/packages/godotsharp/4.2.2/godotsharp.4.2.2.nupkg.sha512",
-    "/home/matias/.nuget/packages/godotsharpeditor/4.2.2/godotsharpeditor.4.2.2.nupkg.sha512",
-    "/home/matias/.nuget/packages/microsoft.netcore.app.ref/6.0.32/microsoft.netcore.app.ref.6.0.32.nupkg.sha512",
-    "/home/matias/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.32/microsoft.aspnetcore.app.ref.6.0.32.nupkg.sha512"
+    "C:\\Users\\user\\.nuget\\packages\\godot.sourcegenerators\\4.3.0\\godot.sourcegenerators.4.3.0.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\godotsharp\\4.3.0\\godotsharp.4.3.0.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\godotsharpeditor\\4.3.0\\godotsharpeditor.4.3.0.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.35\\microsoft.netcore.app.ref.6.0.35.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.35\\microsoft.windowsdesktop.app.ref.6.0.35.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.35\\microsoft.aspnetcore.app.ref.6.0.35.nupkg.sha512"
   ],
   "logs": []
 }
