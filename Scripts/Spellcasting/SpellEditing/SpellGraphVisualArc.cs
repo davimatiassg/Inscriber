@@ -23,10 +23,10 @@ public partial class SpellGraphVisualArc : Line2D
     
     
     public void MoveSource(Vector2 vect) => SetPointPosition(0, vect); 
-    public void MoveSource(SpellGraphVisualNode obj) => MoveSource(obj.GetGlobalRect().GetCenter());
+    public void MoveSource(SpellGraphVisualNode obj) => MoveSource(obj.GetRect().GetCenter());
     public void MoveSource() => MoveSource(Source);
     public void MoveTarget(Vector2 vect) => SetPointPosition(1, vect); 
-    public void MoveTarget(SpellGraphVisualNode obj) => MoveTarget(obj.GetGlobalRect().GetCenter());
+    public void MoveTarget(SpellGraphVisualNode obj) => MoveTarget(obj.GetRect().GetCenter());
     public void MoveTarget() => MoveTarget(Target);
 
     public void UpdatePosition() { MoveSource(); MoveTarget(); }

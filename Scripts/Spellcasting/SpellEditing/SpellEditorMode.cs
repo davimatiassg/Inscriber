@@ -11,6 +11,7 @@ public abstract class SpellGraphEditorMode
         prevMode = mode;
         SpellGraphEditor.editorMode = this;
         if(overlay != null) overlay.Visible = true;
+        SpellGraphEditor.Instance.graphView.spellGraphCamera.Position = SpellGraphEditor.selectedNode.Position;
     }
     public virtual void ExitModeTo(SpellGraphEditorMode nextMode) 
     {
@@ -21,14 +22,10 @@ public abstract class SpellGraphEditorMode
     public abstract void _Process(double delta);
     public abstract void _Input (InputEvent @event);
 }
-
-
 public class FreeMode : SpellGraphEditorMode 
 {
-    const float CAMERA_SMOOTH_SPEED = 1f;
+    private const float CAMERA_SMOOTH_SPEED = 1f;
     public SpellGraphVisualNode tempSelection;
-    
-
     protected virtual void ConfirmationInput(InputEvent @event)
     {
         if(@event.IsActionPressed("game_fire_1", false)) 
@@ -54,7 +51,6 @@ public class FreeMode : SpellGraphEditorMode
             return;
         }
     }
-
     public override void _Input(InputEvent @event)
     {
         if(@event is InputEventMouse)
@@ -65,12 +61,7 @@ public class FreeMode : SpellGraphEditorMode
         ConfirmationInput(@event);  
         
     }
-
-    public override void _Process(double delta) 
-    {
-
-    }
-
+    public override void _Process(double delta) { }
     public override void EnterModeFrom(SpellGraphEditorMode prevMode)
     {
         base.EnterModeFrom(prevMode);
@@ -86,9 +77,6 @@ public class FreeMode : SpellGraphEditorMode
 
         tempSelection.CallDeferred(Control.MethodName.GrabFocus);   
     }
-
-    
-
     public override void ExitModeTo(SpellGraphEditorMode nextMode)
     {
         
@@ -100,27 +88,20 @@ public class FreeMode : SpellGraphEditorMode
         
         base.ExitModeTo(nextMode); 
     }
-
     protected virtual void FocusNode(Control selection)
     {
         tempSelection = (SpellGraphVisualNode) selection;
     }
-
     protected virtual void UnFocusNode(Control selection)
     {
         if(selection == tempSelection) tempSelection = null;
     }
-}
 
-public class DragMode : FreeMode
+}
+public class DragMode : SpellGraphEditorMode
 {
-    protected void MovePositionAlongAction()
-    {
-        Vector2 v = Input.GetVector("game_left", "game_right", "game_up", "game_down")*50;
-        if(v == Vector2.Zero) { return; }
-        position += v;
-    }
-    private void CheckTriggerSwap(InputEvent @event)
+    SpellGraphVisualNode tempSelection;
+    protected void ConfirmationInput(InputEvent @event)
     {
         if(@event.IsActionPressed("game_fire_1", false)) 
         {
@@ -134,52 +115,51 @@ public class DragMode : FreeMode
         }
         else if(@event.IsActionPressed("game_fire_3", false)) 
         {
-            if(selectedSlot != null) ExitModeTo(SpellGraphEditor.connectMode);
+            if(tempSelection != null) ExitModeTo(SpellGraphEditor.connectMode);
             return;
         }
         //{ não tem o game_fire_4 
         //}
         else if(@event.IsActionPressed("game_fire_5", false)) 
         {
-            if(selectedSlot != null) ExitModeTo(SpellGraphEditor.runeSelectorMode);
+            if(tempSelection != null) ExitModeTo(SpellGraphEditor.runeSelectorMode);
             return;
         }
     }
     public override void _Input(InputEvent @event)
     {
-        if(@event is InputEventMouse mouseMoveEvent)
-        {
-            if(mouseMoveEvent is InputEventMouseButton) { mouseLocked = true; }
-            else if(mouseLocked) { position = mouseMoveEvent.Position; }
+        if(@event is InputEventMouse mouseMove)
+            if(mouseMove.Position.DistanceTo(SpellGraphEditor.Instance.graphView.spellGraphCamera.GetScreenCenterPosition()) > 500f) {
+                SpellGraphEditor.Instance.graphView.spellGraphCamera.Position = mouseMove.Position;
+                tempSelection.Position = mouseMove.Position;
+            }
+        else { 
+            tempSelection.Position += Input.GetVector("game_left", "game_right", "game_up", "game_down")*50f;
+            SpellGraphEditor.Instance.graphView.spellGraphCamera.Position = tempSelection.Position;
         }
-        else
-        {
-            mouseLocked = false;
-            MovePositionAlongAction();
-        }
-        CheckTriggerSwap(@event);
-        
+
+        ConfirmationInput(@event);  
     }
     public override void _Process(double delta)
-    {
-        base._Process(delta); 
-        selectedSlot.Position = SpellGraphEditorCamera.Instance.GetScreenCenterPosition() - selectedSlot.GetGlobalRect().GetCenter() + selectedSlot.Position;
-    }
+    {    }
     public override void EnterModeFrom(SpellGraphEditorMode prevMode)
     {
-        if(prevMode is FreeMode freePrev) { 
-            this.selectedSlot = freePrev.selectedSlot; 
-        }
-        else if(prevMode is ConnectMode connectMode) { 
-            this.selectedSlot = connectMode.selectedSlot; 
-        }
         base.EnterModeFrom(prevMode);
-        if(selectedSlot == null) { ExitModeTo(prevMode); return; }
+
+        tempSelection = SpellGraphEditor.selectedNode;
+
+        if(tempSelection == null) { ExitModeTo(prevMode); return; }
+        
+        foreach(Control nodeView in SpellGraphEditor.Instance.graphView.graphNodeMaster.GetChildren()){
+            nodeView.FocusMode = Control.FocusModeEnum.None;
+        }
+        tempSelection.FocusMode = Control.FocusModeEnum.All;
+        tempSelection.GrabFocus();
+        
     }
     public override void ExitModeTo(SpellGraphEditorMode nextMode)
     {
         base.ExitModeTo(nextMode);
-        selectedSlot = null;  
     }
 
 }
@@ -216,14 +196,14 @@ public class ConnectMode : FreeMode
     {
         if(@event is InputEventMouseMotion mouseMove && tempSelection != null)
         { 
-            pointer.GlobalPosition = mouseMove.GlobalPosition; 
+            pointer.Position = mouseMove.Position;
         } 
         ConfirmationInput(@event); 
     }
 
     public override void _Process(double delta)
     {
-        tryingArc.MoveTarget(pointer.GlobalPosition);    
+        tryingArc.MoveTarget(pointer.Position);    
     }
 
     public override void EnterModeFrom(SpellGraphEditorMode prevMode)
@@ -337,6 +317,20 @@ public class RuneSelectorMode : SpellGraphEditorMode
         SpellGraphEditor.selectedNode = tempSelection;
         tempSelection = null;
         base.ExitModeTo(nextMode);
+    }
+}
+
+
+public class SelectionMode : FreeMode
+{
+    public override void EnterModeFrom(SpellGraphEditorMode prevMode) 
+    { 
+        base.EnterModeFrom(prevMode);
+    }
+    public override void ExitModeTo(SpellGraphEditorMode nextMode) 
+    {
+        base.ExitModeTo(nextMode);
+        selectedSlot = null;
     }
 }
 
