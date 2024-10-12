@@ -2,6 +2,7 @@ using Godot;
 
 namespace SpellEditing
 {
+
 public abstract class SpellGraphEditorMode
 {
     protected static SpellGraphEditorMode prevMode;
@@ -21,6 +22,30 @@ public abstract class SpellGraphEditorMode
     }
     public abstract void _Process(double delta);
     public abstract void _Input (InputEvent @event);
+}
+public class SingleFocusMode : SpellGraphEditorMode
+{
+    private const float CAMERA_SMOOTH_SPEED = 25f;
+    public override void EnterModeFrom(SpellGraphEditorMode prevMode) 
+    { 
+        base.EnterModeFrom(prevMode);
+        SpellGraphEditor.Instance.graphView.spellGraphCamera.PositionSmoothingSpeed = CAMERA_SMOOTH_SPEED;
+    }
+    public override void ExitModeTo(SpellGraphEditorMode nextMode) 
+    {
+        base.ExitModeTo(nextMode);
+        
+    }
+
+    public override void _Input(InputEvent @event)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void _Process(double delta)
+    {
+        throw new System.NotImplementedException();
+    }
 }
 public class FreeMode : SpellGraphEditorMode 
 {
@@ -163,7 +188,6 @@ public class DragMode : SpellGraphEditorMode
     }
 
 }
-
 public class ConnectMode : FreeMode
 {
     private SpellGraphVisualArc tryingArc = null;
@@ -249,9 +273,6 @@ public class ConnectMode : FreeMode
         return; 
     }
 }
-
-
-
 public class RuneSelectorMode : SpellGraphEditorMode
 {
     public RuneSelector selector;
@@ -317,20 +338,6 @@ public class RuneSelectorMode : SpellGraphEditorMode
         SpellGraphEditor.selectedNode = tempSelection;
         tempSelection = null;
         base.ExitModeTo(nextMode);
-    }
-}
-
-
-public class SelectionMode : FreeMode
-{
-    public override void EnterModeFrom(SpellGraphEditorMode prevMode) 
-    { 
-        base.EnterModeFrom(prevMode);
-    }
-    public override void ExitModeTo(SpellGraphEditorMode nextMode) 
-    {
-        base.ExitModeTo(nextMode);
-        selectedSlot = null;
     }
 }
 
