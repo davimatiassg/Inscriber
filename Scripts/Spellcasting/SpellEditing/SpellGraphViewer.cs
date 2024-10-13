@@ -32,9 +32,10 @@ public partial class SpellGraphViewer : Control
     public Spell.Node GetPairNodeFrom(SpellGraphVisualNode node) => viewPairsReverse[node];
     public SpellGraphVisualNode DeployNewNode(IGraphDeployable deployable, Vector2 position)
     {
-        SpellGraphVisualNode node = new SpellGraphVisualNode();
-        node.Deployable = deployable;
-        node.Position = position;
+        SpellGraphVisualNode node = new SpellGraphVisualNode(){ 
+            Deployable = deployable, 
+            Position = position
+        };
 
         graphNodeMaster.AddChild(node);
         

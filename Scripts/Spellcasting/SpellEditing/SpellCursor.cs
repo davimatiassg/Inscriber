@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 namespace SpellEditing
-{
+{/*
 public partial class SpellCursor : TextureRect
 {
     
@@ -53,6 +53,6 @@ public partial class SpellCursor : TextureRect
 
 
 
-}
+}*/
 
 }

@@ -1,34 +1,44 @@
-[gd_scene load_steps=6 format=3 uid="uid://dtkx2fb2sunx0"]
+[gd_scene load_steps=9 format=3 uid="uid://dtkx2fb2sunx0"]
 
-[ext_resource type="PackedScene" uid="uid://dcoo6fuvaat06" path="res://Scenes/Menus/SpellEditor/SpellEditorBoard.tscn" id="1_ivfh1"]
-[ext_resource type="PackedScene" uid="uid://bbe1sd5nwqli5" path="res://Scenes/Menus/SpellEditor/drag_overlay.tscn" id="2_35tnf"]
-[ext_resource type="PackedScene" uid="uid://jq7ps350h34u" path="res://Scenes/Menus/SpellEditor/connect_overlay.tscn" id="3_gq61j"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphEditor.cs" id="1_uog5c"]
+[ext_resource type="PackedScene" uid="uid://bbe1sd5nwqli5" path="res://Scenes/Menus/SpellEditor/DragOverlay.tscn" id="2_35tnf"]
+[ext_resource type="PackedScene" uid="uid://jq7ps350h34u" path="res://Scenes/Menus/SpellEditor/ConnectOverlay.tscn" id="3_gq61j"]
 [ext_resource type="PackedScene" uid="uid://cstn05ab0b735" path="res://Scenes/Menus/SpellEditor/RuneSelector.tscn" id="4_vop10"]
+[ext_resource type="PackedScene" uid="uid://bgjd84fxagq5m" path="res://Scenes/Menus/SpellEditor/FreeOverlay.tscn" id="5_0cnom"]
 [ext_resource type="Texture2D" uid="uid://dg37qmibr4afd" path="res://Sprites/background placeholder.png" id="5_xu1c1"]
+[ext_resource type="PackedScene" uid="uid://b3iqd5v0ntfk6" path="res://Scenes/Menus/SpellEditor/SpellGraph.tscn" id="6_cd4av"]
+[ext_resource type="PackedScene" uid="uid://crlvvusqaoixg" path="res://Scenes/Menus/SpellEditor/ViewOverlay.tscn" id="6_mf5uq"]
 
-[node name="SpellEditor" type="Control"]
+[node name="SpellEditor" type="Control" node_paths=PackedStringArray("runeSelector", "graphView", "viewOverlay", "freeOverlay", "dragOverlay", "connectOverlay")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="SpellEditor" parent="." node_paths=PackedStringArray("runeSelector", "dragOverlay", "connectOverlay") instance=ExtResource("1_ivfh1")]
-layout_mode = 1
-runeSelector = NodePath("../Hud/RuneSelector")
-dragOverlay = NodePath("../Hud/dragOverlay")
-connectOverlay = NodePath("../Hud/connectOverlay")
+script = ExtResource("1_uog5c")
+runeSelector = NodePath("Hud/RuneSelector")
+graphView = NodePath("Graph")
+viewOverlay = NodePath("Hud/ViewOverlay")
+freeOverlay = NodePath("Hud/FreeOverlay")
+dragOverlay = NodePath("Hud/DragOverlay")
+connectOverlay = NodePath("Hud/ConnectOverlay")
 
 [node name="Hud" type="CanvasLayer" parent="."]
 
-[node name="dragOverlay" parent="Hud" instance=ExtResource("2_35tnf")]
+[node name="DragOverlay" parent="Hud" instance=ExtResource("2_35tnf")]
 visible = false
 
-[node name="connectOverlay" parent="Hud" instance=ExtResource("3_gq61j")]
+[node name="ConnectOverlay" parent="Hud" instance=ExtResource("3_gq61j")]
 visible = false
 
 [node name="RuneSelector" parent="Hud" instance=ExtResource("4_vop10")]
+visible = false
+
+[node name="FreeOverlay" parent="Hud" instance=ExtResource("5_0cnom")]
+visible = false
+
+[node name="ViewOverlay" parent="Hud" instance=ExtResource("6_mf5uq")]
 visible = false
 
 [node name="BackgroundPlaceholder" type="Sprite2D" parent="."]
@@ -36,3 +46,6 @@ modulate = Color(0.201527, 0.201527, 0.201527, 1)
 position = Vector2(320, 180)
 scale = Vector2(4, 4)
 texture = ExtResource("5_xu1c1")
+
+[node name="Graph" parent="." instance=ExtResource("6_cd4av")]
+layout_mode = 1

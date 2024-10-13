@@ -16,7 +16,7 @@ namespace SpellEditing
     
 public partial class SpellGraphEditor : Control
 {
-    private enum EEditorState { SPELL_SELECTOR, FREE_MODE, DRAG_MODE, CONNECT_MODE, RUNE_SELECTOR, META_MENU }
+    private enum EEditorState { SPELL_SELECTOR, VIEW_MODE, FREE_MODE, DRAG_MODE, CONNECT_MODE, RUNE_SELECTOR, META_MENU }
     public static Action<SpellGraphVisualNode>    OnStartConnectionAtNode;
     public static Action<SpellGraphVisualNode>    OnEndConnectionAtNode;
     public static Action<SpellGraphVisualNode>    OnGrabNode;
@@ -38,7 +38,8 @@ public partial class SpellGraphEditor : Control
     [Export] public SpellGraphViewer graphView;
 
     [ExportCategory("Editor Mode's Overlays")]
-
+    
+    [Export] public Control viewOverlay;
     [Export] public Control freeOverlay;
     [Export] public Control dragOverlay;
     [Export] public Control connectOverlay;
@@ -46,16 +47,17 @@ public partial class SpellGraphEditor : Control
 
     //STATIC MODES REFERENCES
     public static SpellGraphEditor Instance;
+    public static ViewMode viewMode;
     public static FreeMode freeMode;
     public static DragMode dragMode;
     public static ConnectMode connectMode;
-    public static SelectionMode selectionMode;
+    public static NodeFocusMode selectionMode;
     public static RuneSelectorMode runeSelectorMode;
     
 
-    public static SpellEditorMode _editorMode;
+    public static SpellGraphEditorMode _editorMode;
 
-    public static SpellEditorMode editorMode 
+    public static SpellGraphEditorMode editorMode 
     {
         get { return _editorMode; }
         set { _editorMode = value;
@@ -72,10 +74,11 @@ public partial class SpellGraphEditor : Control
         base._Ready();
         if(Instance == null) { 
             Instance = this;
+            viewMode = new ViewMode { overlay = viewOverlay };
             freeMode = new FreeMode { overlay = freeOverlay };
             dragMode = new DragMode { overlay = dragOverlay };
             connectMode = new ConnectMode { overlay = connectOverlay };
-            selectionMode = new SelectionMode { overlay = selectOverlay };
+            selectionMode = new NodeFocusMode { overlay = selectOverlay };
             runeSelectorMode = new RuneSelectorMode{ overlay = runeSelector, selector = runeSelector };
 
             editorMode = freeMode;

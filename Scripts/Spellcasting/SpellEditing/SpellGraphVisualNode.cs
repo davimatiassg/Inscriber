@@ -13,6 +13,13 @@ public partial class SpellGraphVisualNode : TextureRect
 {
 	public List<SpellGraphVisualArc> arcs = new List<SpellGraphVisualArc>();
 
+	public new Vector2 Position
+	{
+		get => base.Position + GetRect().Size/2;
+		set => base.Position = value - GetRect().Size/2;
+		
+	}
+
 	private IGraphDeployable deployable;
 	public IGraphDeployable Deployable 
 	{
@@ -89,12 +96,6 @@ public partial class SpellGraphVisualNode : TextureRect
 		}
 		arcs.Clear();
 	}
-}
-
-
-public partial class SpellGraphRuneVisualNode : SpellGraphVisualNode
-{
-	Spell.Node internalSpellNode;
 }
 
 }

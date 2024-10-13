@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://l6qkejsfbqrm"]
+
+[ext_resource type="Texture2D" uid="uid://cmu5snalrqepb" path="res://Sprites/Runes/Arrow.png" id="1_v52of"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphVisualNode.cs" id="2_senea"]
+
+[node name="Node" type="TextureRect"]
+texture_filter = 1
+custom_minimum_size = Vector2(135, 135)
+offset_right = 135.0
+offset_bottom = 135.0
+pivot_offset = Vector2(67, 67)
+texture = ExtResource("1_v52of")
+script = ExtResource("2_senea")
+
+[connection signal="mouse_entered" from="." to="." method="OnMouseEntered"]
