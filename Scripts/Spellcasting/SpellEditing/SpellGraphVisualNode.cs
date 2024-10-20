@@ -56,24 +56,28 @@ public partial class SpellGraphVisualNode : TextureRect
 		SpellGraphVisualArc arc = SearchConnectionArcFor(node);
 		if(arc == null) { 
 			arc = new SpellGraphVisualArc();
+			arc.Source = this;
+			arc.Target = node;
 			this.arcs.Add(arc);
 			node.arcs.Add(arc);
 		}
 		return arc;
 
 	}
-	public void ConnectTo(SpellGraphVisualNode node)
+	public SpellGraphVisualArc ConnectTo(SpellGraphVisualNode node)
 	{
 		SpellGraphVisualArc arc = CreateSafeArcTowards(node);
 		arc.Source = this;
 		arc.Target = node;
+		return arc;
 	}
 
-	public void ConnectFrom(SpellGraphVisualNode node)
+	public SpellGraphVisualArc ConnectFrom(SpellGraphVisualNode node)
 	{
 		SpellGraphVisualArc arc = CreateSafeArcTowards(node);
 		arc.Source = node;
 		arc.Target = this;
+		return arc;
 	}
 
 	public void DisconnectFrom(SpellGraphVisualNode node)

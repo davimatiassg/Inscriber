@@ -14,7 +14,7 @@ public partial class SpellGraphViewer : Control
 {   
     [Export] public Control graphNodeMaster;
     [Export] public Control graphArcsMaster;
-    [Export] public Camera2D spellGraphCamera;
+    [Export] public SpellGraphCamera spellGraphCamera;
     public Dictionary<Spell.Node, SpellGraphVisualNode> viewPairs = new Dictionary<Spell.Node, SpellGraphVisualNode>();
     private Dictionary<SpellGraphVisualNode, Spell.Node> viewPairsReverse = new Dictionary<SpellGraphVisualNode, Spell.Node>();
 

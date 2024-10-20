@@ -1,9 +1,9 @@
-res://Scenes/Menus/SpellEditor/SpellGraph.tscn
 res://Scenes/Menus/SpellEditor/SpellEditor.tscn
-res://Scenes/Menus/SpellEditor/RuneSlot.tscn
+res://Scenes/Menus/SpellEditor/SpellGraph.tscn
 res://Scenes/Menus/SpellEditor/RuneNode.tscn
 res://Scenes/Menus/SpellEditor/RuneSelector.tscn
 res://Scenes/Menus/SpellEditor/FreeOverlay.tscn
+res://Scenes/Menus/SpellEditor/ViewOverlay.tscn
 res://Scripts/Behaviors/Familiars/FamiliarBehavior.cs
 res://Scripts/Spellcasting/Runes/RuneCreate.cs
 res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs
@@ -20,6 +20,5 @@ res://Scripts/Spellcasting/Spell.cs
 res://Scripts/Behaviors/SpellcastingBehavior.cs
 res://Scripts/Spellcasting/SpellEditing/SpellGraphVisualArc.cs
 res://Scripts/Spellcasting/SpellEditing/SpellGraphVisualNode.cs
-res://Scripts/Spellcasting/SpellEditing/SpellEditorCamera.cs
+res://Scripts/Spellcasting/SpellEditing/SpellGraphCamera.cs
 res://Scripts/Behaviors/PhysicalBehavior.cs
-res://Scenes/Menus/SpellEditor/ViewOverlay.tscn

@@ -143,7 +143,7 @@ public partial class SpellGraphEditor : Control
             ///Play Unconection Animation;
             return;
         }
-        source.ConnectTo(target);
+        Instance.graphView.graphArcsMaster.AddChild(source.ConnectTo(target));
     }
 }
 }
