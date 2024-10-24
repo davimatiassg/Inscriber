@@ -88,19 +88,19 @@
     ]
   },
   "packageFolders": {
-    "/home/matias/.nuget/packages/": {}
+    "/home/aluno/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/matias/Projects/Inscriber/Inscriber.csproj",
+      "projectUniqueName": "/home/aluno/Inscriber/Inscriber.csproj",
       "projectName": "Inscriber",
-      "projectPath": "/home/matias/Projects/Inscriber/Inscriber.csproj",
-      "packagesPath": "/home/matias/.nuget/packages/",
-      "outputPath": "/home/matias/Projects/Inscriber/.godot/mono/temp/obj/",
+      "projectPath": "/home/aluno/Inscriber/Inscriber.csproj",
+      "packagesPath": "/home/aluno/.nuget/packages/",
+      "outputPath": "/home/aluno/Inscriber/.godot/mono/temp/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/matias/.nuget/NuGet/NuGet.Config"
+        "/home/aluno/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net6.0"
@@ -118,6 +118,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -151,11 +156,11 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[6.0.32, 6.0.32]"
+            "version": "[6.0.35, 6.0.35]"
           },
           {
             "name": "Microsoft.NETCore.App.Ref",
-            "version": "[6.0.32, 6.0.32]"
+            "version": "[6.0.35, 6.0.35]"
           }
         ],
         "frameworkReferences": {
@@ -163,7 +168,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.107/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/home/aluno/.dotnet/sdk/8.0.403/RuntimeIdentifierGraph.json"
       }
     }
   }

@@ -69,6 +69,7 @@ public partial class SpellGraphVisualNode : TextureRect
 		SpellGraphVisualArc arc = CreateSafeArcTowards(node);
 		arc.Source = this;
 		arc.Target = node;
+		arc.UpdatePosition();
 		return arc;
 	}
 
@@ -77,6 +78,7 @@ public partial class SpellGraphVisualNode : TextureRect
 		SpellGraphVisualArc arc = CreateSafeArcTowards(node);
 		arc.Source = node;
 		arc.Target = this;
+		arc.UpdatePosition();
 		return arc;
 	}
 
