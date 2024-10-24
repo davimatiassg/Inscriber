@@ -12,6 +12,28 @@ public partial class Spell : Resource, ICastable, ICollection<Spell.Node>
     public bool Valid = true;
 
     // Class for the nodes of the Spellcasting graph
+
+    public struct Node : ICastable
+    {
+        uint index;
+        public ICastable castable;
+        public Task<CastingResources> castStatus;
+        public CastingResources CastRequirements { get { return castable.CastRequirements; } }
+        public CastingResources CastReturns { get { return castable.CastReturns; } }
+        public async Task<CastingResources> Cast(CastingResources data)
+        {
+            return await castable.Cast(data);
+        }
+        public async Task<CastingResources> Cast()
+        {
+            foreach(Node dep in prevs)
+            {
+                await dep.castStatus;
+            }
+            return await castable.Cast(CastingResources.Merge(prevs.Select<Node, CastingResources>(i => i.castStatus?.Result).ToArray()));
+        }
+
+    }
     public class Node
     {
         public ICastable castable;
@@ -32,48 +54,12 @@ public partial class Spell : Resource, ICastable, ICollection<Spell.Node>
             }
             return await castable.Cast(CastingResources.Merge(prevs.Select<Node, CastingResources>(i => i.castStatus?.Result).ToArray()));
         }
-        public bool ConnectNext(Node next)
-        { 
-            if(nexts.Contains(next)) return false;
-            nexts.Add(next);
-            next.prevs.Add(this);
-            return true;
-        }
-        public bool ConnectPrev(Node prev)
-        { 
-            if(prevs.Contains(prev)) return false;
-            prevs.Add(prev);
-            prev.nexts.Add(this);
-            return true;
-        }
-
-        public bool DisconnectNext(Node next)
-        { 
-            if(!nexts.Contains(next)) return false;
-            nexts.Remove(next);
-            next.prevs.Remove(this);
-            return true;
-        }
-        public bool DisconnectPrev(Node prev)
-        { 
-            if(!prevs.Contains(prev)) return false;
-            prevs.Remove(prev);
-            prev.nexts.Remove(this);
-            return true;
-        }
-
-        public bool Disconnect(Node node)
-        { 
-            return nexts.Remove(node) || prevs.Remove(node);
-        }
-
-        public override string ToString()
-        {
-            return "Spellnode from " + castable.ToString();
-        }
     }
     public List<Node> nodes;
     public List<Node> inactiveNodes;
+    
+    
+#region SPELL_DATA
     private CastingResources castReqs;
     public CastingResources CastRequirements 
     {   get
@@ -116,13 +102,13 @@ public partial class Spell : Resource, ICastable, ICollection<Spell.Node>
     }
 
 
+
     public Spell()
     { 
         nodes = new List<Node>();
         inactiveNodes = new List<Node>();
     }
-    public Spell(List<Node> active, List<Node> inactive) { 
-        nodes = active; 
+    public Spell(List<Node> inactive) { 
         inactiveNodes = inactive;
     }
     public async Task<CastingResources> Cast(CastingResources data)
@@ -141,7 +127,7 @@ public partial class Spell : Resource, ICastable, ICollection<Spell.Node>
     }
 
 
-
+#endregion SPELL_DATA
 #region GRAPH_METHODS
     public static Dictionary<Node, T> InitializePairType<T>(List<Node> nodes, T defValue)
     {

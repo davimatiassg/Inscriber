@@ -1,2 +1,0 @@
-PlaceholderTexture2D
-Animation
