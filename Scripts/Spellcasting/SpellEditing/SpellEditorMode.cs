@@ -362,7 +362,7 @@ public class RuneSelectorMode : SpellGraphEditorMode
             
             tempSelection = (SpellGraphEditor.selectedNode == null) ? 
                 SpellGraphEditor.AddNode(selector.ConfirmSelection(), graphCamera.Position)
-                : tempSelection = SpellGraphEditor.SubstituteNode(selector.ConfirmSelection(), SpellGraphEditor.selectedNode);   
+                : tempSelection = SpellGraphEditor.ReplaceNode(selector.ConfirmSelection(), SpellGraphEditor.selectedNode);   
             
             ExitModeTo(SpellGraphEditor.freeMode);
             return;

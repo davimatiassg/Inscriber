@@ -5,6 +5,8 @@ using System.Linq;
 using Godot;
 using System.Runtime.CompilerServices;
 using System.Collections;
+using System.Reflection.Metadata.Ecma335;
+using System.Numerics;
 /// <summary>
 /// Class that stores a spell's rune graph agnostically of the data structured used
 /// </summary>
@@ -15,12 +17,17 @@ public abstract class GraphData : ICollection<GraphData.Node>
         /// <summary>
         /// The index of the spell Node on the node's list
         /// </summary>
-        public uint index;
+        public int index;
 
         /// <summary>
         /// The castable associated with this Node
         /// </summary>
         public ICastable castable;
+
+        /// <summary>
+        /// The sigils associated with this Node
+        /// </summary>
+        public Sigil[] sigils;
 
         /*public async Task<CastingResources> Cast()
         {
@@ -30,23 +37,30 @@ public abstract class GraphData : ICollection<GraphData.Node>
             }
             return await castable.Cast(CastingResources.Merge(prevs.Select<Node, CastingResources>(i => i.castStatus?.Result).ToArray()));
         }*/
+
+        public CastingResources GetSigilResources() 
+        {
+            CastingResources res = new CastingResources();
+            foreach(Sigil s in sigils) res.Add(s, s.val);
+            return res;
+        }
     }
 
-    protected Node[] nodes;
+    public List<Node> nodes = new List<Node>();
 
     
 
-    public Node this[uint index] => nodes[index];
+    public Node this[int index] => nodes[index];
 
-    public Node CreateNode(ICastable c) => new Node {castable = c, index = uint.MaxValue };
-    public abstract uint AddNode(Node node);
-    public          uint AddNode(ICastable castable) => AddNode(CreateNode(castable));
+    public Node CreateNode(ICastable c) => new Node {castable = c, index = int.MinValue };
+    public abstract int AddNode(Node node);
+    public          int AddNode(ICastable castable) => AddNode(CreateNode(castable));
 
     public abstract bool RemoveNode(Node node);
-    public          bool RemoveNode(uint idx) => RemoveNode(nodes[idx]);
+    public          bool RemoveNode(int idx) => RemoveNode(nodes[idx]);
 
     public abstract bool ReplaceNode(Node node, ICastable castable);
-    public          bool ReplaceNode(uint idx, ICastable castable) => ReplaceNode(nodes[idx], castable);
+    public          bool ReplaceNode(int idx, ICastable castable) => ReplaceNode(nodes[idx], castable);
     
 
     /// <summary>
@@ -56,21 +70,21 @@ public abstract class GraphData : ICollection<GraphData.Node>
     /// <param name="targetNode">The target node</param>
     /// <returns> true when the connection was successful, false otherwise.</returns>
     public abstract bool Connect(Node sourceNode, Node targetNode);
-    public          bool Connect(uint sourceNodeIndex, Node targetNode) => Connect(nodes[sourceNodeIndex], targetNode);
-    public          bool Connect(Node sourceNode, uint targetNodeIndex) => Connect(sourceNode, nodes[targetNodeIndex]);
-    public          bool Connect(uint sourceNodeIndex, uint targetNodeIndex) => Connect(nodes[sourceNodeIndex], nodes[targetNodeIndex]);
-    public bool Connect(uint[] sourceNodes, uint targetNode) { 
+    public          bool Connect(int sourceNodeIndex, Node targetNode) => Connect(nodes[sourceNodeIndex], targetNode);
+    public          bool Connect(Node sourceNode, int targetNodeIndex) => Connect(sourceNode, nodes[targetNodeIndex]);
+    public          bool Connect(int sourceNodeIndex, int targetNodeIndex) => Connect(nodes[sourceNodeIndex], nodes[targetNodeIndex]);
+    public bool Connect(List<int> sourceNodes, int targetNode) { 
         bool allDone = true; 
-        foreach (uint sourceNode in sourceNodes) 
+        foreach (int sourceNode in sourceNodes) 
         { 
             allDone = allDone && Connect(sourceNode, targetNode); 
         }
         return allDone; 
     }
     
-    public bool Connect(uint sourceNode, uint[] targetNodes) { 
+    public bool Connect(int sourceNode, List<int> targetNodes) { 
         bool allDone = true; 
-        foreach (uint targetNode in targetNodes) 
+        foreach (int targetNode in targetNodes) 
         { 
             allDone = allDone && Connect(sourceNode, targetNode); 
         }
@@ -84,40 +98,40 @@ public abstract class GraphData : ICollection<GraphData.Node>
     /// <param name="targetNode">The target node</param>
     /// <returns> true when the disconnection was successful, false otherwise.</returns>
     public abstract bool Disconnect(Node sourceNode, Node targetNode);
-    public          bool Disconnect(uint sourceNodeIndex, Node targetNode) => Disconnect(nodes[sourceNodeIndex], targetNode);
-    public          bool Disconnect(Node sourceNode, uint targetNodeIndex) => Disconnect(sourceNode, nodes[targetNodeIndex]);
-    public          bool Disconnect(uint sourceNodeIndex, uint targetNodeIndex) => Disconnect(nodes[sourceNodeIndex], nodes[targetNodeIndex]);
+    public          bool Disconnect(int sourceNodeIndex, Node targetNode) => Disconnect(nodes[sourceNodeIndex], targetNode);
+    public          bool Disconnect(Node sourceNode, int targetNodeIndex) => Disconnect(sourceNode, nodes[targetNodeIndex]);
+    public          bool Disconnect(int sourceNodeIndex, int targetNodeIndex) => Disconnect(nodes[sourceNodeIndex], nodes[targetNodeIndex]);
     
-    public bool Disconnect(uint[] sourceNodes, uint targetNode) { 
+    public bool Disconnect(List<int> sourceNodes, int targetNode) { 
         bool allDone = true; 
-        foreach (uint sourceNode in sourceNodes) 
+        foreach (int sourceNode in sourceNodes) 
         { 
             allDone = allDone && Disconnect(sourceNode, targetNode); 
         }
         return allDone; 
     }
-    public bool Disconnect(uint sourceNode, uint[] targetNodes) { 
+    public bool Disconnect(int sourceNode, List<int> targetNodes) { 
         bool allDone = true; 
-        foreach (uint targetNode in targetNodes) 
+        foreach (int targetNode in targetNodes) 
         { 
             allDone = allDone && Disconnect(sourceNode, targetNode); 
         }
         return allDone; 
     }
 
-    public abstract uint[] GetNextNodesOf(Node node);
-    public          uint[] GetNextNodesOf(uint idx) => GetNextNodesOf(nodes[idx]);
-    public abstract uint[] GetPrevNodesOf(Node node);
-    public          uint[] GetPrevNodesOf(uint idx) => GetPrevNodesOf(nodes[idx]);
-    public abstract void SetNextNodesOf(Node node, Node[] nodes);
-    public void SetNextNodesOf(uint idx) => SetNextNodesOf(nodes[idx], nodes);
-    public abstract void SetPrevNodesOf(Node node, Node[] nodes);
-    public void SetPrevNodesOf(uint idx) => SetPrevNodesOf(nodes[idx], nodes);
+    public abstract List<int> GetNextNodesOf(Node node);
+    public          List<int> GetNextNodesOf(int idx) => GetNextNodesOf(nodes[idx]);
+    public abstract List<int> GetPrevNodesOf(Node node);
+    public          List<int> GetPrevNodesOf(int idx) => GetPrevNodesOf(nodes[idx]);
+    public abstract void SetNextNodesOf(Node node, List<Node> nodes);
+    public void SetNextNodesOf(int idx) => SetNextNodesOf(nodes[idx], nodes);
+    public abstract void SetPrevNodesOf(Node node, List<Node> nodes);
+    public void SetPrevNodesOf(int idx) => SetPrevNodesOf(nodes[idx], nodes);
 
 
 
 #region GRAPH_METHODS
-    public static Dictionary<Node, T> InitializePairType<T>(Node[] nodes, T defValue)
+    public static Dictionary<Node, T> InitializePairType<T>(List<Node> nodes, T defValue)
     {
         Dictionary<Node, T> dict = new Dictionary<Node,T>();
         foreach(Node n in nodes)
@@ -126,7 +140,7 @@ public abstract class GraphData : ICollection<GraphData.Node>
         }
         return dict;
     }
-    public static Dictionary<Node, T> InitializePairType<T>(Node[] nodes) where T : new() => InitializePairType<T>(nodes, new T());
+    public static Dictionary<Node, T> InitializePairType<T>(List<Node> nodes) where T : new() => InitializePairType<T>(nodes, new T());
   
     public void UpdateNodeTopSorting() => this.nodes = TopSortNodes(this);
     /// <summary>
@@ -134,14 +148,14 @@ public abstract class GraphData : ICollection<GraphData.Node>
     /// </summary>
     /// <param name="spellGraph">The Graph to be sorted</param>
     /// <returns>The Graph's nodes sorted by topology.</returns>
-    public static Node[] TopSortNodes(GraphData spellGraph)
+    public static List<Node> TopSortNodes(GraphData spellGraph)
     {
 
         Dictionary<Node, bool> markedNodes = InitializePairType<bool>(spellGraph.nodes);
         void TopologicalSortUtil(Node node, ref Stack<Node> stack)
         {
             markedNodes[node] = true;
-            foreach(uint n in spellGraph.GetNextNodesOf(node))
+            foreach(int n in spellGraph.GetNextNodesOf(node))
             {
                 if (!markedNodes[spellGraph[n]]) TopologicalSortUtil(spellGraph[n], ref stack);
             }
@@ -150,10 +164,10 @@ public abstract class GraphData : ICollection<GraphData.Node>
         
         Stack<Node> stack = new Stack<Node>();
         foreach (Node node in spellGraph.nodes) {
-            if (!markedNodes[node] && (spellGraph.GetNextNodesOf(node).Length + spellGraph.GetPrevNodesOf(node).Length > 0)) 
+            if (!markedNodes[node] && (spellGraph.GetNextNodesOf(node).Count + spellGraph.GetPrevNodesOf(node).Count > 0)) 
                 TopologicalSortUtil(node, ref stack);
         }
-        Node[] sortedArray = new Node[spellGraph.nodes.Length];
+        List<Node> sortedArray = new List<Node>(spellGraph.nodes.Count);
         while(stack.Count > 0){ 
             sortedArray.Append(stack.Pop());
         }
@@ -169,7 +183,7 @@ public abstract class GraphData : ICollection<GraphData.Node>
     
     public static void ForEachNodeByBFSIn(GraphData spellGraph, Action<Node> Process)
     {
-        if(spellGraph.nodes.Length == 0) return;
+        if(spellGraph.nodes.Count == 0) return;
         Dictionary<Node, bool> markedNodes = InitializePairType<bool>(spellGraph.nodes);
         Queue<Node> queue = new Queue<Node>();
         queue.Enqueue(spellGraph.nodes[0]);
@@ -177,7 +191,7 @@ public abstract class GraphData : ICollection<GraphData.Node>
         while (queue.Count > 0)
         {   
             Node currNode = queue.Dequeue();
-            foreach(uint nextNode in spellGraph.GetNextNodesOf(currNode))
+            foreach(int nextNode in spellGraph.GetNextNodesOf(currNode))
             {
                 if(!markedNodes[spellGraph[nextNode]])
                 {
@@ -205,7 +219,7 @@ public abstract class GraphData : ICollection<GraphData.Node>
         foreach(Node node in nodes)
         {
             int p = 0;
-            foreach(uint prevNode in GetPrevNodesOf(node))
+            foreach(int prevNode in GetPrevNodesOf(node))
             {
                 p = Mathf.Max(p, weightedDict[this[prevNode]]);
                 result = Mathf.Max(result, p);
@@ -220,13 +234,14 @@ public abstract class GraphData : ICollection<GraphData.Node>
 
 #region INTERFACE_METHODS
 
-    public int Count => nodes.Length;
+    public int Count => nodes.Count;
 
-    public bool IsReadOnly => nodes.IsReadOnly;
+    public bool IsReadOnly => false;
 
+    public void Add(ICastable castable) => AddNode(CreateNode(castable));
     public void Add(Node item) => AddNode(item);
 
-    public void Clear() => nodes = new Node[0];
+    public void Clear() => nodes.Clear();
 
     public bool Contains(Node item) => nodes.Contains(item);
 
@@ -234,7 +249,7 @@ public abstract class GraphData : ICollection<GraphData.Node>
 
     public bool Remove(Node item) => RemoveNode(item);
 
-    public IEnumerator<Node> GetEnumerator() => (IEnumerator<Node>)nodes.GetEnumerator();
+    public IEnumerator<Node> GetEnumerator() => nodes.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => nodes.GetEnumerator();
 

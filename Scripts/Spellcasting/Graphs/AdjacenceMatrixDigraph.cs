@@ -1,6 +1,6 @@
 using Godot;
 using System;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 using System.Linq;
 
 
@@ -11,27 +11,47 @@ public partial class AdjacenceMatrixDigraph : GraphData
 {
 
     /// <summary>
-    /// An array that stores nodes by index. Arr[pivotIndex][y] returns whether there is an arc from node pivotIndex to node y.
+    /// An array that stores nodes by index. 
+    /// AdjMatrix[x][y] returns whether there is an arc from node x to node y.
     /// </summary>
-    private bool[][] AdjMatrix = new bool[0][];
-    private int activeSize = 0;
-    private uint[] removedIndexes = new uint[0];
-    public override uint AddNode(Node node)
+    private List<List<bool>> AdjMatrix = new List<List<bool>>();
+
+    private void PrintArray()
     {
-        if(node == null) return uint.MaxValue;
-        AdjMatrix.Append(new bool[nodes.Length]);
-        for(int i = 0; i < nodes.Length-1; i++) AdjMatrix[i].Append(false);
-        if(node.index == uint.MaxValue) node.index = (uint)nodes.Length;
-        nodes.Append(node);
+        string s = "Printando Array: \n";
+        for(int i = 0; i < AdjMatrix.Count; i++){ for (int j =0; j<AdjMatrix.Count; j++)
+        {
+            s += AdjMatrix[i][j].ToString();
+            s += "\t";
+        } s+="\n"; }
+
+        GD.Print(s);
+    }
+    private int activeSize = 0;
+    private List<int> removedIndexes = new List<int>();
+    public override int AddNode(Node node)
+    {
+        nodes.Add(node);
         activeSize++;
+        if(node == null) return int.MinValue;
+
+        AdjMatrix.Add(new List<bool>(nodes.Count));
+        while(AdjMatrix.Last().Count < AdjMatrix.Count-1) AdjMatrix.Last().Add(false);
+        for(int i = 0; i < AdjMatrix.Count; i++) AdjMatrix[i].Add(false);
+
+        if(node.index == int.MinValue) node.index = (int)nodes.Count-1;
+
         return node.index;
     }
 
     public override bool Connect(Node sourceNode, Node targetNode)
     {
-        if(sourceNode == null || targetNode == null) return false;
-        if(AdjMatrix[sourceNode.index][targetNode.index]) return false;
+        if(sourceNode == null || targetNode == null) {  return false; }
+
+        GD.PrintErr("pos: " + sourceNode.index + "_" + targetNode.index);
         AdjMatrix[sourceNode.index][targetNode.index] = true;
+
+        PrintArray();
         return true;
     }
 
@@ -43,32 +63,26 @@ public partial class AdjacenceMatrixDigraph : GraphData
         return true;
     }
 
-    public override uint[] GetNextNodesOf(Node node)
+    public override List<int> GetNextNodesOf(Node node)
     {
-        uint[] nexts = new uint[0];
+        List<int> nexts = new List<int>();
         if(node == null) return nexts;
-        for(uint i = 0; i < nodes.Length; i++)
-        {
-            if(AdjMatrix[node.index][i]) {nexts.Append(i);}
-        }
+        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[node.index][i]) { nexts.Add(i); } }
         return nexts;
     }
 
-    public override uint[] GetPrevNodesOf(Node node)
+    public override List<int> GetPrevNodesOf(Node node)
     {
-        uint[] prevs = new uint[0];
+        List<int> prevs = new List<int>();
         if(node == null) return prevs;
-        for(uint i = 0; i < nodes.Length; i++)
-        {
-            if(AdjMatrix[i][node.index]) {prevs.Append(i);}
-        }
+        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[i][node.index]) { prevs.Add(i); } }
         return prevs;
     }
 
     private bool DisconnectNode(Node node)
     {
         if(node == null) return false;
-        for(uint i = 0; i < nodes.Length; i++)
+        for(int i = 0; i < nodes.Count; i++)
         {
            AdjMatrix[node.index][i] = false;
            AdjMatrix[i][node.index] = false;
@@ -86,7 +100,7 @@ public partial class AdjacenceMatrixDigraph : GraphData
     public override bool RemoveNode(Node node)
     {
         if(!DisconnectNode(node)) return false;
-        removedIndexes.Append(node.index);
+        removedIndexes.Add(node.index);
         nodes[node.index] = null;
         return true;
     }
@@ -96,12 +110,12 @@ public partial class AdjacenceMatrixDigraph : GraphData
         throw new NotImplementedException();
     }
 
-    public override void SetNextNodesOf(Node node, Node[] nodes)
+    public override void SetNextNodesOf(Node node, List<Node> nodes)
     {
         throw new NotImplementedException();
     }
 
-    public override void SetPrevNodesOf(Node node, Node[] nodes)
+    public override void SetPrevNodesOf(Node node, List<Node> nodes)
     {
         throw new NotImplementedException();
     }
@@ -111,21 +125,21 @@ public partial class AdjacenceMatrixDigraph : GraphData
     /// </summary>
     public void DefragmentArray()
     {
-        removedIndexes = removedIndexes.OrderBy((uint i) => -(int)i ).ToArray();
-        for(int i = 0; i < removedIndexes.Length; i++) DefragmentIndex(removedIndexes[i]);
+        removedIndexes = (List<int>)removedIndexes.OrderBy((int i) => -(int)i );
+        for(int i = 0; i < removedIndexes.Count; i++) DefragmentIndex(removedIndexes[i]);
         ReduceArray();
-        Array.Resize(ref nodes, nodes.Length - removedIndexes.Length);
+        nodes.RemoveRange(nodes.Count - removedIndexes.Count, removedIndexes.Count);
     }
 
-    private void DefragmentIndex(uint n)
+    private void DefragmentIndex(int n)
     {
         activeSize--;
-        for(uint i = 0; i < activeSize; i++)
+        for(int i = 0; i < activeSize; i++)
         {
             if(i == n) continue;
             AdjMatrix[i][n] = AdjMatrix[i][activeSize];   
         }
-        for(uint i = 0; i < activeSize; i++)
+        for(int i = 0; i < activeSize; i++)
         {
             if(i == n) continue;
             AdjMatrix[n][i] = AdjMatrix[activeSize][i];   
@@ -140,9 +154,9 @@ public partial class AdjacenceMatrixDigraph : GraphData
     {
         for(int i = 0; i < activeSize; i++)
         {
-            Array.Resize<bool>(ref AdjMatrix[i], activeSize);
+            AdjMatrix[i].RemoveRange(activeSize, AdjMatrix.Count);
         }
-        Array.Resize<bool[]>(ref AdjMatrix, activeSize);
+        AdjMatrix.RemoveRange(activeSize, AdjMatrix.Count);
     }
 }
 

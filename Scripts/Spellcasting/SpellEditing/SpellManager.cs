@@ -9,7 +9,7 @@ namespace SpellEditing
 {
 
 
-using SpellNode = Spell.Node;
+using SpellNode = GraphData.Node;
 
 /// <summary>
 /// Singleton used to alter the spell internally
@@ -17,48 +17,29 @@ using SpellNode = Spell.Node;
 
 public partial class SpellManager
 {
-    private static List<SpellNode> tableNodes = new List<SpellNode>();
-    private static Spell currentSpell = new Spell();
+    private static Spell currentSpell = new SpellPropagative();
     public Spell CurrentSpell { 
         get { return currentSpell; } 
         set { currentSpell = value; } 
     }
 
-    public static SpellNode CreateNodeFromCastable(ICastable c)
+    public static SpellNode AddNode(ICastable castable)
     {
-
-        SpellNode node = new SpellNode {castable = c};
-        return node;
-    }
-
-    public static void AddNode(SpellNode node)
-    {
-        tableNodes.Add(node);
+        currentSpell.graphData.Add(castable);
+        GD.Print("lol:" + currentSpell.graphData.Last());
+        GD.Print("lol index:" + currentSpell.graphData.Last().index);
+        return currentSpell.graphData.Last();
     }
 
     public static void RemoveNode(SpellNode node)
     {
-        currentSpell.nodes.Remove(node);
-        foreach(SpellNode n in node.nexts){ n.prevs.Remove(node); }
-        foreach(SpellNode n in node.prevs){ n.nexts.Remove(node); }
-    }
-    public static void TransferNodeConnections(SpellNode donnor, SpellNode receiver)
-    {
-        foreach(SpellNode n in donnor.nexts)
-        { 
-            LinkNodes(receiver, n);
-            n.prevs.Remove(donnor); 
-        }
-        donnor.nexts.Clear();
-        foreach(SpellNode n in donnor.prevs){
-            LinkNodes(n, receiver); 
-            n.nexts.Remove(donnor); 
-        }
-        donnor.prevs.Clear();
+        currentSpell.graphData.Remove(node);
     }
     enum ENodeState : int { OUT = 0, IN, PATH };
-    private static bool GraphHasCycle(Dictionary<SpellNode, ENodeState> markedNodes, SpellNode currNode)
+    private static bool GraphHasCycle(GraphData graph, SpellNode currNode)
     {
+        var markedNodes = GraphData.InitializePairType<ENodeState>(graph.nodes);
+
         void MarkNode(SpellNode node, ENodeState state)
         {
             if(markedNodes.ContainsKey(node)) { markedNodes[node] = state; return;}
@@ -68,13 +49,13 @@ public partial class SpellManager
         bool CheckCycleRecursive(SpellNode currNode)
         {
             MarkNode(currNode, ENodeState.PATH);
-            foreach(SpellNode nextNode in currNode.nexts)
+            foreach(int nextNode in graph.GetNextNodesOf(currNode))
             {
-                if(!markedNodes.ContainsKey(nextNode)) { markedNodes.Add(nextNode, ENodeState.OUT); }
-                switch(markedNodes[nextNode])
+                if(!markedNodes.ContainsKey(graph[nextNode])) { markedNodes.Add(graph[nextNode], ENodeState.OUT); }
+                switch(markedNodes[graph[nextNode]])
                 {
                     case ENodeState.OUT:
-                        if(CheckCycleRecursive(nextNode)) { return true; }
+                        if(CheckCycleRecursive(graph[nextNode])) { return true; }
                         break;
                     case ENodeState.PATH:
                         return true;
@@ -88,47 +69,40 @@ public partial class SpellManager
             
         return CheckCycleRecursive(currNode);
     }
-    public static bool GraphHasCycle(List<SpellNode> nodes, SpellNode currNode) => GraphHasCycle(Spell.InitializePairType<ENodeState>(nodes), currNode);
-    public static bool GraphHasCycle(List<SpellNode> nodes) => GraphHasCycle(nodes, nodes[0]);
-    private static bool GraphHasCycle(Dictionary<SpellNode, ENodeState> dict) => GraphHasCycle(dict, currentSpell[0]);
-    public static bool GraphHasCycle() => GraphHasCycle(Spell.InitializePairType<ENodeState>(currentSpell.nodes), currentSpell[0]);
+    public static bool GraphHasCycle(SpellNode currNode) => GraphHasCycle(currentSpell.graphData, currNode);
+    public static bool GraphHasCycle(GraphData graph) => GraphHasCycle(graph, graph[0]);
+    public static bool GraphHasCycle() => GraphHasCycle(currentSpell.graphData, currentSpell.graphData[0]);
 
-    private enum ELinkStatus { FIRST_EQUALS_LAST, HAS_CYCLE, LINKED };
+    private enum ELinkStatus { FIRST_EQUALS_LAST, HAS_CYCLE, LINKED, NULL_NODE_ERROR };
 
-    private static ELinkStatus LinkNodes(SpellNode first, SpellNode last)
+    private static ELinkStatus LinkNodes(GraphData graph, SpellNode first, SpellNode last)
     {
-        if(first == last) { return ELinkStatus.FIRST_EQUALS_LAST; }
-        if(first.nexts.Contains(last)) { return ELinkStatus.HAS_CYCLE; }
-        List<SpellNode> nodes = new List<SpellNode>(currentSpell.nodes);
-        if(!nodes.Contains(first)) { nodes.Add(first); }
-        if(!nodes.Contains(last)) { nodes.Add(last); }
+   
+        if(first == null || last == null) return ELinkStatus.NULL_NODE_ERROR;
+        if(first == last) return ELinkStatus.FIRST_EQUALS_LAST; 
+        if(graph.GetNextNodesOf(first).Contains(last.index)) return ELinkStatus.HAS_CYCLE;
 
-        first.ConnectNext(last);
+        graph.Connect(first, last);
 
-        if(GraphHasCycle(nodes)){ first.DisconnectNext(last); return ELinkStatus.HAS_CYCLE; }
-
-        return ELinkStatus.LINKED;
+        if(!GraphHasCycle(graph)) return ELinkStatus.LINKED;
+        
+        graph.Disconnect(first, last); 
+        return ELinkStatus.HAS_CYCLE;
     }
 
-    public static bool AddConnectionToSpellGraph(SpellNode first, SpellNode last) { 
-        if(LinkNodes(first, last) != ELinkStatus.LINKED) return false;
-        if(currentSpell.Contains(first)) { currentSpell.Add(last); }
-        return true;
-    }
-    public static bool RemoveConnectionToSpellGraph(SpellNode first, SpellNode last) {
-        first.DisconnectNext(last);
-        last.DisconnectPrev(first);
-        return true;
-    }
+    public static bool AddConnectionToSpellGraph(SpellNode first, SpellNode last)
+        => LinkNodes(currentSpell.graphData, first, last) == ELinkStatus.LINKED;
+    
+    public static bool RemoveConnectionToSpellGraph(SpellNode first, SpellNode last) 
+        => currentSpell.graphData.Disconnect(first, last);
 
-    public static (bool, bool) ToggleConnectionOnGraph(SpellNode first, SpellNode last)
-    {
-        if(first.nexts.Contains(last) || last.nexts.Contains(first)) 
-        return (false, RemoveConnectionToSpellGraph(first, last)); 
-        else return (true, AddConnectionToSpellGraph(first, last)); 
-    }
+    
+
+    public static void ReplaceNode(SpellNode node, ICastable castable)
+    => currentSpell.graphData.ReplaceNode(node, castable);
 
 }
+
 
 }
 

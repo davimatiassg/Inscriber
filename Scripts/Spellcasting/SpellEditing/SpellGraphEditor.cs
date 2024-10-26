@@ -61,7 +61,7 @@ public partial class SpellGraphEditor : Control
     {
         get { return _editorMode; }
         set { _editorMode = value;
-            GD.PrintErr("Set editor mode: " + value.GetType()); 
+            //GD.PrintErr("Set editor mode: " + value.GetType()); 
             }
     }
 
@@ -104,22 +104,19 @@ public partial class SpellGraphEditor : Control
         var nodeView = Instance.graphView.DeployNewNode(deployable, position);
         if(deployable is ICastable castable)
         {
-            var castableNode = SpellManager.CreateNodeFromCastable(castable);
-            SpellManager.AddNode(castableNode);
-            Instance.graphView.AddNodeViewPair(castableNode, nodeView);
+            Instance.graphView.AddNodeViewPair(SpellManager.AddNode(castable), nodeView);
         }
         OnAddNode?.Invoke(nodeView);
         return nodeView;
     }
 
-    public static SpellGraphVisualNode SubstituteNode<T>(T deployable, SpellGraphVisualNode nodeView) where T : IGraphDeployable
+    public static SpellGraphVisualNode ReplaceNode<T>(T deployable, SpellGraphVisualNode nodeView) where T : IGraphDeployable
     {
         if(deployable is ICastable != nodeView.Deployable is ICastable) return nodeView;
         nodeView.Deployable = deployable;
         if(deployable is ICastable castable) 
         {
-            var newCastableNodeView = SpellManager.CreateNodeFromCastable(castable);
-            SpellManager.TransferNodeConnections(Instance.graphView.GetPairNodeFrom(nodeView), newCastableNodeView);
+            SpellManager.ReplaceNode(Instance.graphView.GetPairNodeFrom(nodeView), castable);
         }
         
         nodeView.Deployable = deployable;

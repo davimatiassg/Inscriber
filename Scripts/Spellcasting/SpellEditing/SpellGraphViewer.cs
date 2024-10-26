@@ -5,7 +5,7 @@ using System.Linq;
 namespace SpellEditing
 {
 
-
+using SpellNode = GraphData.Node;
 /// <summary>
 /// Control-inherited class that displays a Rune Graph of a Spell.
 /// </summary>
@@ -15,10 +15,10 @@ public partial class SpellGraphViewer : Control
     [Export] public Control graphNodeMaster;
     [Export] public Control graphArcsMaster;
     [Export] public SpellGraphCamera spellGraphCamera;
-    public Dictionary<Spell.Node, SpellGraphVisualNode> viewPairs = new Dictionary<Spell.Node, SpellGraphVisualNode>();
-    private Dictionary<SpellGraphVisualNode, Spell.Node> viewPairsReverse = new Dictionary<SpellGraphVisualNode, Spell.Node>();
+    public Dictionary<SpellNode, SpellGraphVisualNode> viewPairs = new Dictionary<SpellNode, SpellGraphVisualNode>();
+    private Dictionary<SpellGraphVisualNode, SpellNode> viewPairsReverse = new Dictionary<SpellGraphVisualNode, SpellNode>();
 
-    public void AddNodeViewPair(Spell.Node node, SpellGraphVisualNode nodeView)
+    public void AddNodeViewPair(SpellNode node, SpellGraphVisualNode nodeView)
     {
         viewPairs.Add(node, nodeView);
         viewPairsReverse.Add(nodeView, node);
@@ -28,8 +28,8 @@ public partial class SpellGraphViewer : Control
         ///THAT WILL MESS UP EDGE CASES's MEMORY
     }
 
-    public SpellGraphVisualNode GetPairNodeFrom(Spell.Node node) => viewPairs[node];
-    public Spell.Node GetPairNodeFrom(SpellGraphVisualNode node) => viewPairsReverse[node];
+    public SpellGraphVisualNode GetPairNodeFrom(SpellNode node) => viewPairs[node];
+    public SpellNode GetPairNodeFrom(SpellGraphVisualNode node) => viewPairsReverse[node];
     public SpellGraphVisualNode DeployNewNode(IGraphDeployable deployable, Vector2 position)
     {
         SpellGraphVisualNode node = new SpellGraphVisualNode(){ 

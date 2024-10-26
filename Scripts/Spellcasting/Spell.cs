@@ -1,18 +1,21 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using Godot;
-using System.Runtime.CompilerServices;
-using System.Collections;
+
 
 using Node = GraphData.Node;
+
+/// <summary>
+/// Represents a Spell during Runtime.
+/// Is agnostic to graph's storage strategy and casting method.
+/// </summary>
 [GlobalClass]
-public partial class Spell : Resource, ICastable
+public abstract partial class Spell : Resource, ICastable
 {
 
     
-    public bool Valid = true;
+    public bool isValid = true;
 
     // Class for the nodes of the Spellcasting graph
 
@@ -40,10 +43,8 @@ public partial class Spell : Resource, ICastable
     
 #region SPELL_DATA
 
-    private GraphData graphData;
-
-    private Node startingNode;
-    private CastingResources castReqs;
+    public GraphData graphData;
+    protected CastingResources castReqs;
     public CastingResources CastRequirements 
     {   get
         {
@@ -52,7 +53,7 @@ public partial class Spell : Resource, ICastable
             return castReqs;
         }
     }
-    private CastingResources castRets;
+    protected CastingResources castRets;
     public CastingResources CastReturns 
     {   
         get{
@@ -75,38 +76,17 @@ public partial class Spell : Resource, ICastable
     public uint CastingTime { 
         get => (uint) graphData.WalkFullPath( (Node currNode) => { return (int) currNode.castable.CastingTime; } );
     }
-
+#endregion SPELL_DATA
+    
+    
     /// <summary>
-    /// Casts this Spell using the avaliable Casting Resources, starting by the Spell's entryNode.
+    /// Casts this Spell using the avaliable Casting Resources.
     /// </summary>
     /// <param name="data">The resources usable by this spell's casting</param>
     /// <returns>A task that is completed only once the Spell's casting finishes</returns>
     /// <exception cref="InvalidOperationException"></exception>
     
-    public async Task<CastingResources> Cast(CastingResources data)
-    {
-        if(!(data >= castReqs)) throw new InvalidOperationException("Insuficient Data to cast this spell");
-        return data + await CastRecursive(data, startingNode);
-    }
-
-    private async Task<CastingResources> CastRecursive(CastingResources data, Node current)
-    {
-        data += await current.castable.Cast(data);
-        uint[] nexts = graphData.GetNextNodesOf(current);
-
-        Task<CastingResources>[] castTasks = new Task<CastingResources>[nexts.Length];
-
-        foreach(uint node in nexts)
-        {
-            castTasks.Append(new Task(async () => {
-                    await graphData[node].castable.Cast(data);
-                }
-            ));
-        }
-
-        return data + CastingResources.Merge(await Task.WhenAll(castTasks));
-    }
+    public abstract Task<CastingResources> Cast(CastingResources data);
 
 
-#endregion SPELL_DATA
 }
