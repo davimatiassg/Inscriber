@@ -10,7 +10,7 @@ using System.Collections;
 /// </summary>
 public abstract class GraphData : ICollection<GraphData.Node>
 {
-    public struct Node
+    public class Node
     {   
         /// <summary>
         /// The index of the spell Node on the node's list
@@ -38,7 +38,7 @@ public abstract class GraphData : ICollection<GraphData.Node>
 
     public Node this[uint index] => nodes[index];
 
-    public Node CreateNode(ICastable c) => new Node {castable = c, index = (uint)nodes.Length };
+    public Node CreateNode(ICastable c) => new Node {castable = c, index = uint.MaxValue };
     public abstract uint AddNode(Node node);
     public          uint AddNode(ICastable castable) => AddNode(CreateNode(castable));
 
