@@ -99,7 +99,7 @@ public partial class SpellGraphEditor : Control
     }
 
 
-    public static SpellGraphVisualNode AddNode<T>(T deployable, Vector2 position) where T : IGraphDeployable
+    public static SpellGraphVisualNode AddGraphNode<T>(T deployable, Vector2 position) where T : IGraphDeployable
     {
         var nodeView = Instance.graphView.DeployNewNode(deployable, position);
         if(deployable is ICastable castable)
@@ -110,7 +110,7 @@ public partial class SpellGraphEditor : Control
         return nodeView;
     }
 
-    public static SpellGraphVisualNode ReplaceNode<T>(T deployable, SpellGraphVisualNode nodeView) where T : IGraphDeployable
+    public static SpellGraphVisualNode ReplaceGraphNode<T>(T deployable, SpellGraphVisualNode nodeView) where T : IGraphDeployable
     {
         if(deployable is ICastable != nodeView.Deployable is ICastable) return nodeView;
         nodeView.Deployable = deployable;
@@ -124,7 +124,7 @@ public partial class SpellGraphEditor : Control
         return nodeView;
     }
 
-    public static void RemoveSlot(SpellGraphVisualNode nodeView)
+    public static void RemoveGraphNode(SpellGraphVisualNode nodeView)
     {
         if(nodeView.Deployable is ICastable castable) SpellManager.RemoveNode(Instance.graphView.GetPairNodeFrom(nodeView));
         Instance.graphView.RemoveGraphNode(nodeView);
@@ -142,6 +142,8 @@ public partial class SpellGraphEditor : Control
         }
         Instance.graphView.graphArcsMaster.AddChild(source.ConnectTo(target));
     }
+
+    public static SpellGraphVisualNode FindClosestNodeFrom(Vector2 position) => Instance.graphView.FindClosestNodeFrom(position);
 }
 }
 

@@ -8,10 +8,10 @@ using Node = GraphData.Node;
 
 /// <summary>
 /// Represents a Spell during Runtime.
-/// Is agnostic to graph's storage strategy and casting method.
+/// Is agnostic to graph's storage strategy.
 /// </summary>
 [GlobalClass]
-public abstract partial class Spell : Resource, ICastable
+public partial class Spell : Resource, ICastable
 {
 
     
@@ -78,15 +78,41 @@ public abstract partial class Spell : Resource, ICastable
     }
 #endregion SPELL_DATA
     
+
+    public Spell()
+    {
+        graphData =  new AdjacenceMatrixDigraph();
+    }
     
     /// <summary>
     /// Casts this Spell using the avaliable Casting Resources.
+    /// Each of the spell's nodes will only be cast once its predecessor all finish their own casting.
     /// </summary>
     /// <param name="data">The resources usable by this spell's casting</param>
     /// <returns>A task that is completed only once the Spell's casting finishes</returns>
     /// <exception cref="InvalidOperationException"></exception>
+    public async Task<CastingResources> Cast(CastingResources data) 
+    =>  (
+            await Task.WhenAll
+            (
+                graphData.nodes.Where((Node n) => graphData.GetNextNodesOf(n).Count == 0).
+                Select(async (Node n, int idx) => await PreviousCastings(data, n))
+            )
+        ).Aggregate((CastingResources totalRes, CastingResources newRes) => totalRes+newRes);
     
-    public abstract Task<CastingResources> Cast(CastingResources data);
+    private async Task<CastingResources> PreviousCastings(CastingResources data, Node current)
+    {
+        data += current.GetSigilResources();
+        data += (
+                await Task.WhenAll(
+                    graphData.GetPrevNodesOf(current).
+                    Select(async (int nodeIndex, int idx) => await PreviousCastings(data, graphData[nodeIndex]))
+                )
+            ).Aggregate((CastingResources totalRes, CastingResources newRes) => totalRes+newRes);
+        
+        data += await current.castable.Cast(data);
+        return data;
+    }
 
 
 }

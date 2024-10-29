@@ -47,8 +47,6 @@ public partial class AdjacenceMatrixDigraph : GraphData
     public override bool Connect(Node sourceNode, Node targetNode)
     {
         if(sourceNode == null || targetNode == null) {  return false; }
-
-        GD.PrintErr("pos: " + sourceNode.index + "_" + targetNode.index);
         AdjMatrix[sourceNode.index][targetNode.index] = true;
 
         PrintArray();
@@ -102,6 +100,11 @@ public partial class AdjacenceMatrixDigraph : GraphData
         if(!DisconnectNode(node)) return false;
         removedIndexes.Add(node.index);
         nodes[node.index] = null;
+        foreach (var noude in nodes) 
+        {
+            GD.Print(noude);
+        }
+        DefragmentArray();
         return true;
     }
 
@@ -125,38 +128,46 @@ public partial class AdjacenceMatrixDigraph : GraphData
     /// </summary>
     public void DefragmentArray()
     {
-        removedIndexes = (List<int>)removedIndexes.OrderBy((int i) => -(int)i );
-        for(int i = 0; i < removedIndexes.Count; i++) DefragmentIndex(removedIndexes[i]);
+
+        List<int> indexes = removedIndexes.OrderByDescending(n => n).ToList();
+        removedIndexes.Clear();
+        for(int i = 0; i < indexes.Count; i++) {
+            if(indexes[i] < activeSize-1) DefragmentIndex(indexes[i]);
+            else activeSize --;
+        }
         ReduceArray();
-        nodes.RemoveRange(nodes.Count - removedIndexes.Count, removedIndexes.Count);
+        nodes.RemoveRange(nodes.Count - indexes.Count, indexes.Count);
+        PrintArray();
     }
 
     private void DefragmentIndex(int n)
     {
         activeSize--;
-        for(int i = 0; i < activeSize; i++)
+        for(int i = 0; i <= activeSize; i++)
         {
             if(i == n) continue;
             AdjMatrix[i][n] = AdjMatrix[i][activeSize];   
         }
-        for(int i = 0; i < activeSize; i++)
+        for(int i = 0; i <= activeSize; i++)
         {
             if(i == n) continue;
             AdjMatrix[n][i] = AdjMatrix[activeSize][i];   
         }
         AdjMatrix[n][n] = AdjMatrix[activeSize][activeSize];
+        
+        
         nodes[n] = nodes[activeSize];
         nodes[n].index = n;
-        activeSize--;
+       
     }
 
     void ReduceArray()
     {
         for(int i = 0; i < activeSize; i++)
         {
-            AdjMatrix[i].RemoveRange(activeSize, AdjMatrix.Count);
+            AdjMatrix[i].RemoveRange(activeSize, AdjMatrix.Count-activeSize);
         }
-        AdjMatrix.RemoveRange(activeSize, AdjMatrix.Count);
+        AdjMatrix.RemoveRange(activeSize, AdjMatrix.Count-activeSize);
     }
 }
 

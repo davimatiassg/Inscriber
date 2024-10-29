@@ -66,5 +66,22 @@ public partial class SpellGraphViewer : Control
 
 
     }
+
+    public SpellGraphVisualNode FindClosestNodeFrom(Vector2 position)
+    {
+        Control node = null;
+        float distSQR = float.MaxValue;
+        foreach(Control n in graphNodeMaster.GetChildren())
+        {
+            float d = n.Position.DistanceSquaredTo(position);
+            if(d <distSQR)
+            {
+                node = n;
+                distSQR = d;
+            }
+        }
+
+        return (SpellGraphVisualNode)node;
+    }
 }
 }

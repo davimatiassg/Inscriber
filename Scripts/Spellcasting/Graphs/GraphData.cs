@@ -48,7 +48,6 @@ public abstract class GraphData : ICollection<GraphData.Node>
 
     public List<Node> nodes = new List<Node>();
 
-    
 
     public Node this[int index] => nodes[index];
 

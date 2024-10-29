@@ -17,7 +17,7 @@ using SpellNode = GraphData.Node;
 
 public partial class SpellManager
 {
-    private static Spell currentSpell = new SpellPropagative();
+    private static Spell currentSpell = new Spell();
     public Spell CurrentSpell { 
         get { return currentSpell; } 
         set { currentSpell = value; } 
@@ -26,8 +26,6 @@ public partial class SpellManager
     public static SpellNode AddNode(ICastable castable)
     {
         currentSpell.graphData.Add(castable);
-        GD.Print("lol:" + currentSpell.graphData.Last());
-        GD.Print("lol index:" + currentSpell.graphData.Last().index);
         return currentSpell.graphData.Last();
     }
 

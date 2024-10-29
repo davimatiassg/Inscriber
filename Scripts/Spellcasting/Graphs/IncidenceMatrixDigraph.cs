@@ -129,7 +129,9 @@ public partial class IncidenceMatrixDigraph : GraphData
 
     public override bool ReplaceNode(Node node, ICastable castable)
     {
-        throw new NotImplementedException();
+        if(node == null) return false;
+        node.castable = castable;
+        return true;
     }
 
     public override void SetNextNodesOf(Node node, List<Node> nodes)
