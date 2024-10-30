@@ -21,7 +21,6 @@ public abstract class SpellGraphEditorMode
     }
     public virtual void ExitModeTo(SpellGraphEditorMode nextMode) 
     {
-        GD.Print(nextMode);
         prevMode = null; 
         if(overlay != null) overlay.Visible = false;
         SpellGraphEditor.selectedNode = tempSelection;
@@ -198,11 +197,7 @@ public class FreeMode : SpellGraphEditorMode
         { 
             graphCamera.Position = tempSelection.Position; 
             tempSelection.CallDeferred(Control.MethodName.GrabFocus);
-        } else 
-        {
-            GD.Print("lo.");
-            
-        }           
+        }      
     }
 
     private Dictionary<Control, Action> stashedEnterActions = new Dictionary<Control, Action>();

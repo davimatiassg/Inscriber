@@ -9,7 +9,7 @@ namespace SpellEditing
 {
 
 
-using SpellNode = GraphData.Node;
+using SpellNode = Graph.Node;
 
 /// <summary>
 /// Singleton used to alter the spell internally
@@ -18,6 +18,8 @@ using SpellNode = GraphData.Node;
 public partial class SpellManager
 {
     private static Spell currentSpell = new Spell();
+
+    public static Func<Graph, SpellNode, SpellNode, bool> ConnectionMethod = ConnectWithoutCycles;
     public Spell CurrentSpell { 
         get { return currentSpell; } 
         set { currentSpell = value; } 
@@ -33,63 +35,29 @@ public partial class SpellManager
     {
         currentSpell.graphData.Remove(node);
     }
-    enum ENodeState : int { OUT = 0, IN, PATH };
-    private static bool GraphHasCycle(GraphData graph, SpellNode currNode)
+
+    private static bool DirectConnect(Graph graph, SpellNode first, SpellNode last)
     {
-        var markedNodes = GraphData.InitializePairType<ENodeState>(graph.nodes);
-
-        void MarkNode(SpellNode node, ENodeState state)
-        {
-            if(markedNodes.ContainsKey(node)) { markedNodes[node] = state; return;}
-            markedNodes.Add(node, state);
-        }
-
-        bool CheckCycleRecursive(SpellNode currNode)
-        {
-            MarkNode(currNode, ENodeState.PATH);
-            foreach(int nextNode in graph.GetNextNodesOf(currNode))
-            {
-                if(!markedNodes.ContainsKey(graph[nextNode])) { markedNodes.Add(graph[nextNode], ENodeState.OUT); }
-                switch(markedNodes[graph[nextNode]])
-                {
-                    case ENodeState.OUT:
-                        if(CheckCycleRecursive(graph[nextNode])) { return true; }
-                        break;
-                    case ENodeState.PATH:
-                        return true;
-                    default:
-                        break;
-                }
-            }
-            MarkNode(currNode, ENodeState.IN);
-            return false;
-        }
-            
-        return CheckCycleRecursive(currNode);
+        if(first == null || last == null) return false;
+        graph.Connect(first, last);
+        return true;
     }
-    public static bool GraphHasCycle(SpellNode currNode) => GraphHasCycle(currentSpell.graphData, currNode);
-    public static bool GraphHasCycle(GraphData graph) => GraphHasCycle(graph, graph[0]);
-    public static bool GraphHasCycle() => GraphHasCycle(currentSpell.graphData, currentSpell.graphData[0]);
 
-    private enum ELinkStatus { FIRST_EQUALS_LAST, HAS_CYCLE, LINKED, NULL_NODE_ERROR };
-
-    private static ELinkStatus LinkNodes(GraphData graph, SpellNode first, SpellNode last)
+    private static bool ConnectWithoutCycles(Graph graph, SpellNode first, SpellNode last)
     {
    
-        if(first == null || last == null) return ELinkStatus.NULL_NODE_ERROR;
-        if(first == last) return ELinkStatus.FIRST_EQUALS_LAST; 
-        if(graph.GetNextNodesOf(first).Contains(last.index)) return ELinkStatus.HAS_CYCLE;
+        if(first == null || last == null) return false;
 
         graph.Connect(first, last);
-
-        if(!GraphHasCycle(graph)) return ELinkStatus.LINKED;
         
-        graph.Disconnect(first, last); 
-        return ELinkStatus.HAS_CYCLE;
+        if(!graph.HasCycle(first)) return true;
+
+        graph.Disconnect(first, last);
+        return false;
     }
 
     public static bool AddConnectionToSpellGraph(SpellNode first, SpellNode last)
-        => LinkNodes(currentSpell.graphData, first, last) == ELinkStatus.LINKED;
+        => ConnectionMethod(currentSpell.graphData, first, last);
     
     public static bool RemoveConnectionToSpellGraph(SpellNode first, SpellNode last) 
         => currentSpell.graphData.Disconnect(first, last);

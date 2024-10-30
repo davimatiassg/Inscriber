@@ -7,16 +7,16 @@ using System.Linq;
 /// <summary>
 /// Implements a Spell's Directed Graph by storing it on a Adjacence Matrix 
 /// </summary>
-public partial class AdjacenceMatrixDigraph : GraphData
+public partial class AdjacenceMatrixDigraph : Digraph
 {
 
     /// <summary>
     /// An array that stores nodes by index. 
     /// AdjMatrix[x][y] returns whether there is an arc from node x to node y.
     /// </summary>
-    private List<List<bool>> AdjMatrix = new List<List<bool>>();
+    protected List<List<bool>> AdjMatrix = new List<List<bool>>();
 
-    private void PrintArray()
+    public void PrintArray()
     {
         string s = "Printando Array: \n";
         for(int i = 0; i < AdjMatrix.Count; i++){ for (int j =0; j<AdjMatrix.Count; j++)
@@ -48,8 +48,6 @@ public partial class AdjacenceMatrixDigraph : GraphData
     {
         if(sourceNode == null || targetNode == null) {  return false; }
         AdjMatrix[sourceNode.index][targetNode.index] = true;
-
-        PrintArray();
         return true;
     }
 
@@ -118,7 +116,7 @@ public partial class AdjacenceMatrixDigraph : GraphData
         throw new NotImplementedException();
     }
 
-    public override void SetPrevNodesOf(Node node, List<Node> nodes)
+    public void SetPrevNodesOf(Node node, List<Node> nodes)
     {
         throw new NotImplementedException();
     }
@@ -169,5 +167,6 @@ public partial class AdjacenceMatrixDigraph : GraphData
         }
         AdjMatrix.RemoveRange(activeSize, AdjMatrix.Count-activeSize);
     }
+
 }
 

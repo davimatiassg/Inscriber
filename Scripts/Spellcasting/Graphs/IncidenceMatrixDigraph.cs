@@ -6,7 +6,7 @@ using System.Linq;
 /// <summary>
 /// Implements a Spell's Directed Graph by storing it on a Incidence Matrix 
 /// </summary>
-public partial class IncidenceMatrixDigraph : GraphData
+public partial class IncidenceMatrixDigraph : Digraph
 {
     private enum ArcIndicator { src = -1, none = 0, trg = 1 };
 
@@ -139,7 +139,7 @@ public partial class IncidenceMatrixDigraph : GraphData
         throw new NotImplementedException();
     }
 
-    public override void SetPrevNodesOf(Node node, List<Node> nodes)
+    public void SetPrevNodesOf(Node node, List<Node> nodes)
     {
         throw new NotImplementedException();
     }

@@ -5,7 +5,7 @@ using System.Linq;
 namespace SpellEditing
 {
 
-using SpellNode = GraphData.Node;
+using SpellNode = Graph.Node;
 /// <summary>
 /// Control-inherited class that displays a Rune Graph of a Spell.
 /// </summary>

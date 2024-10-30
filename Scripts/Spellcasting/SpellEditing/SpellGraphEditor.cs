@@ -126,8 +126,8 @@ public partial class SpellGraphEditor : Control
 
     public static void RemoveGraphNode(SpellGraphVisualNode nodeView)
     {
-        if(nodeView.Deployable is ICastable castable) SpellManager.RemoveNode(Instance.graphView.GetPairNodeFrom(nodeView));
         Instance.graphView.RemoveGraphNode(nodeView);
+        SpellManager.RemoveNode(Instance.graphView.GetPairNodeFrom(nodeView));
     }
 
     public static void ConnectGraphNodes(SpellGraphVisualNode source, SpellGraphVisualNode target)

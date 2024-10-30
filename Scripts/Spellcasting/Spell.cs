@@ -4,7 +4,7 @@ using System.Linq;
 using Godot;
 
 
-using Node = GraphData.Node;
+using Node = Graph.Node;
 
 /// <summary>
 /// Represents a Spell during Runtime.
@@ -43,13 +43,13 @@ public partial class Spell : Resource, ICastable
     
 #region SPELL_DATA
 
-    public GraphData graphData;
+    public Graph graphData;
     protected CastingResources castReqs;
     public CastingResources CastRequirements 
     {   get
         {
             castReqs = new CastingResources();
-            GraphData.ForEachNodeByBFSIn(graphData, (Node currNode) => castReqs.Merge(currNode.castable.CastRequirements) );
+            Graph.ForEachNodeByBFSIn(graphData, (Node currNode) => castReqs.Merge(currNode.castable.CastRequirements) );
             return castReqs;
         }
     }
@@ -58,7 +58,7 @@ public partial class Spell : Resource, ICastable
     {   
         get{
             castRets = new CastingResources();
-            GraphData.ForEachNodeByBFSIn(graphData, (Node currNode) => castRets.Merge(currNode.castable.CastReturns) );
+            Graph.ForEachNodeByBFSIn(graphData, (Node currNode) => castRets.Merge(currNode.castable.CastReturns) );
             return castRets;
         }
     }
@@ -69,7 +69,7 @@ public partial class Spell : Resource, ICastable
     public int Mana { 
         get{
             int mana = 0;
-            GraphData.ForEachNodeIn(graphData, (Node node) => mana += node.castable.Mana );
+            Graph.ForEachNodeIn(graphData, (Node node) => mana += node.castable.Mana );
             return mana;
         }  
     }
@@ -81,7 +81,7 @@ public partial class Spell : Resource, ICastable
 
     public Spell()
     {
-        graphData =  new AdjacenceMatrixDigraph();
+        graphData =  new AdjacenceMatrixGraph();
     }
     
     /// <summary>
@@ -102,7 +102,7 @@ public partial class Spell : Resource, ICastable
     
     private async Task<CastingResources> PreviousCastings(CastingResources data, Node current)
     {
-        data += current.GetSigilResources();
+        /*data += current.GetSigilResources();
         data += (
                 await Task.WhenAll(
                     graphData.GetPrevNodesOf(current).
@@ -110,7 +110,7 @@ public partial class Spell : Resource, ICastable
                 )
             ).Aggregate((CastingResources totalRes, CastingResources newRes) => totalRes+newRes);
         
-        data += await current.castable.Cast(data);
+        data += await current.castable.Cast(data);*/
         return data;
     }
 
