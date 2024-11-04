@@ -4,7 +4,7 @@ using System.Linq;
 using Godot;
 
 
-using Node = Graph.Node;
+using Node = ISpellGraph.Node;
 
 /// <summary>
 /// Represents a Spell during Runtime.
@@ -81,7 +81,7 @@ public partial class Spell : Resource, ICastable
 
     public Spell()
     {
-        graphData =  new AdjacenceMatrixGraph();
+        graphData = new AdjacenceListGraph();
     }
     
     /// <summary>

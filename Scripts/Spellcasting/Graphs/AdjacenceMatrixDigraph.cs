@@ -7,6 +7,7 @@ using System.Linq;
 /// <summary>
 /// Implements a Spell's Directed Graph by storing it on a Adjacence Matrix 
 /// </summary>
+using Node = ISpellGraph.Node;
 public partial class AdjacenceMatrixDigraph : Digraph
 {
 
@@ -29,11 +30,11 @@ public partial class AdjacenceMatrixDigraph : Digraph
     }
     private int activeSize = 0;
     private List<int> removedIndexes = new List<int>();
-    public override int AddNode(Node node)
+    public override void Add(Node node)
     {
         nodes.Add(node);
         activeSize++;
-        if(node == null) return int.MinValue;
+        if(node == null) return;
 
         AdjMatrix.Add(new List<bool>(nodes.Count));
         while(AdjMatrix.Last().Count < AdjMatrix.Count-1) AdjMatrix.Last().Add(false);
@@ -41,7 +42,7 @@ public partial class AdjacenceMatrixDigraph : Digraph
 
         if(node.index == int.MinValue) node.index = (int)nodes.Count-1;
 
-        return node.index;
+        return;
     }
 
     public override bool Connect(Node sourceNode, Node targetNode)
@@ -93,7 +94,7 @@ public partial class AdjacenceMatrixDigraph : Digraph
     /// </summary>
     /// <param name="node">The node to be taken out of the graph</param>
     /// <returns></returns>
-    public override bool RemoveNode(Node node)
+    public override bool Remove(Node node)
     {
         if(!DisconnectNode(node)) return false;
         removedIndexes.Add(node.index);

@@ -9,7 +9,7 @@ namespace SpellEditing
 {
 
 
-using SpellNode = Graph.Node;
+using SpellNode = ISpellGraph.Node;
 
 /// <summary>
 /// Singleton used to alter the spell internally
@@ -19,7 +19,7 @@ public partial class SpellManager
 {
     private static Spell currentSpell = new Spell();
 
-    public static Func<Graph, SpellNode, SpellNode, bool> ConnectionMethod = ConnectWithoutCycles;
+    public static Func<Graph, SpellNode, SpellNode, bool> ConnectionMethod = DirectConnect;
     public Spell CurrentSpell { 
         get { return currentSpell; } 
         set { currentSpell = value; } 

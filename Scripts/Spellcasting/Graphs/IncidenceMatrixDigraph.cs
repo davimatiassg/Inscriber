@@ -6,6 +6,8 @@ using System.Linq;
 /// <summary>
 /// Implements a Spell's Directed Graph by storing it on a Incidence Matrix 
 /// </summary>
+
+using Node = ISpellGraph.Node;
 public partial class IncidenceMatrixDigraph : Digraph
 {
     private enum ArcIndicator { src = -1, none = 0, trg = 1 };
@@ -26,10 +28,10 @@ public partial class IncidenceMatrixDigraph : Digraph
         } s+="\n"; }
         GD.Print(s);
     }
-    public override int AddNode(Node node)
+    public override void Add(Node node)
     {
         nodes.Add(node);
-        if(node == null) return int.MinValue;
+        if(node == null) return;
         if(node.index == int.MinValue) node.index = (int)nodes.Count-1;
 
         for(int i = 0; i < IncMatrix.Count; i++)
@@ -37,7 +39,7 @@ public partial class IncidenceMatrixDigraph : Digraph
             IncMatrix[i].Insert(node.index, ArcIndicator.none);
         }       
 
-        return node.index;
+        return;
     }
 
     public override bool Connect(Node sourceNode, Node targetNode)
@@ -120,7 +122,7 @@ public partial class IncidenceMatrixDigraph : Digraph
     /// </summary>
     /// <param name="node">The node to be taken out of the graph</param>
     /// <returns></returns>
-    public override bool RemoveNode(Node node)
+    public override bool Remove(Node node)
     {
         if(!DisconnectNode(node)) return false;
         foreach(List<ArcIndicator> arc in IncMatrix) arc.RemoveAt(node.index);

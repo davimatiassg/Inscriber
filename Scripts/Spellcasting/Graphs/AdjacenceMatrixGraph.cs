@@ -7,6 +7,8 @@ using System.Linq;
 /// <summary>
 /// Implements a Spell's Simple Graph by storing it on a Adjacence Matrix 
 /// </summary>
+
+using Node = ISpellGraph.Node;
 public partial class AdjacenceMatrixGraph : Graph
 {
 
@@ -29,20 +31,20 @@ public partial class AdjacenceMatrixGraph : Graph
         GD.Print(s);
     }
 
-    public override int AddNode(Node node)
+    public override void Add(Node node)
     {
         node.index = nodes.Count;
+        if(node == null) return;
+        
         nodes.Add(node);
-
-        if(node == null) return int.MinValue;
 
         AdjMatrix.Add(new List<bool>(nodes.Count));
         foreach(var _n in nodes) AdjMatrix[nodes.Count-1].Add(false);
 
-        return node.index;
+        return;
     }
 
-    public override bool RemoveNode(Node node)
+    public override bool Remove(Node node)
     {
         if(node == null || !nodes.Contains(node)) return false;
         int lastIndex = nodes.Count()-1;
@@ -55,20 +57,10 @@ public partial class AdjacenceMatrixGraph : Graph
 
     }
 
-    private void Swap((int, int) p1, (int, int) p2)
-    {
-        bool temp = AdjMatrix[p2.Item1][p2.Item2];
-        AdjMatrix[p2.Item1][p2.Item2] = AdjMatrix[p1.Item1][p1.Item2];
-        AdjMatrix[p1.Item1][p1.Item2] = temp;
-
-    }
     public override bool ReplaceNode(Node node, ICastable castable)
     {
         if(node == null || !nodes.Contains(node)) return false;
-        int lastIndex = nodes.Count()-1;
-        for(int i = 0; i < node.index; i++)             Swap((node.index,i), (lastIndex,i));
-        for(int i = node.index+1; i < lastIndex; i++)   Swap((i,node.index), (lastIndex,i));
-                                                        Swap((node.index,node.index), (lastIndex,lastIndex));
+        node.castable = castable;
         return true;
     }
     public override bool Connect(Node sourceNode, Node targetNode)
@@ -106,6 +98,7 @@ public partial class AdjacenceMatrixGraph : Graph
     {
         throw new NotImplementedException();
     }
+
 
 
 }
