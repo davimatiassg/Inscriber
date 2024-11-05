@@ -80,11 +80,24 @@ public partial class AdjacenceListGraph : Graph
         return true;
     }
 
-    public override List<int> GetNextNodesOf(Node node) => AdjList[node.index];
 
+
+    public override List<int> GetNextNodesOf(Node node) => AdjList[node.index];
     public override void SetNextNodesOf(Node node, List<Node> nodes)
     {
-        throw new NotImplementedException();
+        foreach(int n in AdjList[node.index]) { AdjList[n].Remove(node.index); }
+        AdjList[node.index] = nodes.Select((Node n) => n.index).ToList();
+        foreach(int n in AdjList[node.index]) { AdjList[n].Add(node.index); }
+    }
+
+
+    public override List<(Node, Node)> Edges { 
+        get => GetEdges(); 
+        set
+        {
+            foreach(List<int> l in AdjList) {l.Clear();}
+            foreach((Node src, Node trg) in value) { Connect(src, trg); } 
+        }
     }
 
 

@@ -30,6 +30,9 @@ public partial class AdjacenceMatrixDigraph : Digraph
     }
     private int activeSize = 0;
     private List<int> removedIndexes = new List<int>();
+
+    
+
     public override void Add(Node node)
     {
         nodes.Add(node);
@@ -99,27 +102,8 @@ public partial class AdjacenceMatrixDigraph : Digraph
         if(!DisconnectNode(node)) return false;
         removedIndexes.Add(node.index);
         nodes[node.index] = null;
-        foreach (var noude in nodes) 
-        {
-            GD.Print(noude);
-        }
         DefragmentArray();
         return true;
-    }
-
-    public override bool ReplaceNode(Node node, ICastable castable)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void SetNextNodesOf(Node node, List<Node> nodes)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void SetPrevNodesOf(Node node, List<Node> nodes)
-    {
-        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -157,7 +141,6 @@ public partial class AdjacenceMatrixDigraph : Digraph
         
         nodes[n] = nodes[activeSize];
         nodes[n].index = n;
-       
     }
 
     void ReduceArray()
@@ -169,5 +152,31 @@ public partial class AdjacenceMatrixDigraph : Digraph
         AdjMatrix.RemoveRange(activeSize, AdjMatrix.Count-activeSize);
     }
 
+    public override List<(Node, Node)> Edges { 
+        get => GetEdges(); 
+        set
+        {
+            foreach(List<bool> adjacences in AdjMatrix) for(int i = 0; i < adjacences.Count; i++) adjacences[i] = false;
+            foreach((Node src, Node trg) in value) AdjMatrix[src.index][trg.index] = true;
+        }
+    }
+
+    public override void SetNextNodesOf(Node node, List<Node> nodes)
+    {
+        Disconnect(node.index, this.nodes.Select((Node n) => n.index).ToList());
+        Connect(node.index, nodes.Select((Node n) => n.index).ToList());
+    }
+    public override void SetPrevNodesOf(Node node, List<Node> nodes)
+    {
+        Disconnect(this.nodes.Select((Node n) => n.index).ToList(), node.index);
+        Connect(nodes.Select((Node n) => n.index).ToList(), node.index);
+    }
+
+    public override bool ReplaceNode(Node node, ICastable castable)
+    {
+        if(node == null || !nodes.Contains(node)) return false;
+        node.castable = castable;
+        return true;
+    }
 }
 

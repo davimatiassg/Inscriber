@@ -5,12 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 using Node = ISpellGraph.Node;
 
 public class GraphUtil 
 {
-
-#region GENERAL_METHODS
     public static Dictionary<T1, T2> InitializePairType<T1, T2>(List<T1> nodes, T2 defValue)
     {
         Dictionary<T1, T2> dict = new Dictionary<T1,T2>();
@@ -76,8 +75,9 @@ public class GraphUtil
     /// </summary>
     /// <param name="spellGraph">The graph where the search will be performed </param>
     /// <param name="startingNode">The spellGraph's node from where the search will start</param>
-    /// <param name="Process">An Action Delegate that executes within the search context.</param>
-    /// 
+    /// <param name="VisitationProcess">An Action Delegate that operates after a node is visited.</param>
+    /// <param name="UnmarkedVisitProcess">An Action Delegate that operates for each unvisited neighbor of the node being visited.</param>
+    /// <param name="MarkedVisitProcess">An Action Delegate that operates for each visited neighbor of the node being visited.</param>
     public static void ForEachNodeByBFSIn(Graph spellGraph, Node startingNode, 
         Action<Node>        VisitationProcess = null, 
         Action<Node, Node>  UnmarkedVisitProcess = null,
@@ -91,17 +91,19 @@ public class GraphUtil
         while (queue.Count > 0)
         {   
             Node currNode = queue.Dequeue();
+            if(markedNodes[currNode]) continue;
+
             foreach(int nextNode in spellGraph.GetNextNodesOf(currNode))
             {
                 if(!markedNodes[spellGraph[nextNode]])
                 {
                     UnmarkedVisitProcess?.Invoke(currNode, spellGraph[nextNode]);
                     queue.Enqueue(spellGraph[nextNode]);
-                    markedNodes[spellGraph[nextNode]] = true;
                 }
                 else { MarkedVisitProcess?.Invoke(currNode, spellGraph[nextNode]); }
             }
             VisitationProcess?.Invoke(currNode);
+            markedNodes[currNode] = true;
         }
     }
     public static void ForEachNodeByBFSIn(Graph spellGraph) => ForEachNodeByBFSIn(spellGraph, spellGraph[0]);
@@ -112,31 +114,36 @@ public class GraphUtil
     /// </summary>
     /// <param name="spellGraph">The graph where the search will be performed </param>
     /// <param name="startingNode">The spellGraph's node from where the search will start</param>
-    /// <param name="Process">An Action Delegate that operates after a node is visited.</param>
+    /// <param name="VisitationProcess">An Action Delegate that operates after a node is visited.</param>
     /// <param name="UnmarkedVisitProcess">An Action Delegate that operates for each unvisited neighbor of the node being visited.</param>
-    public static void ForEachNodeByDFSIn(Graph spellGraph, Node startingNode, 
+    /// <param name="MarkedVisitProcess">An Action Delegate that operates for each visited neighbor of the node being visited.</param>
+    public static void ForEachNodeByDFSIn(ISpellGraph spellGraph, Node startingNode, 
         Action<Node>        VisitationProcess = null, 
         Action<Node, Node>  UnmarkedVisitProcess = null,
         Action<Node, Node>  MarkedVisitProcess = null
     ){
-        if(spellGraph.nodes.Count == 0) return;
-        Dictionary<Node, bool> markedNodes = InitializePairType<bool>(spellGraph.nodes);
+        if(spellGraph.Count == 0) return;
+        Dictionary<Node, bool> markedNodes = InitializePairType<bool>(spellGraph.Nodes);
         Stack<Node> stack = new Stack<Node>();
         markedNodes[startingNode] = true;
+
         while (stack.Count > 0)
         {   
             Node currNode = stack.Pop();
+            if(markedNodes[currNode]) continue;
+
             foreach(int nextNode in spellGraph.GetNextNodesOf(currNode))
             {
                 if(!markedNodes[spellGraph[nextNode]])
                 {
                     UnmarkedVisitProcess?.Invoke(currNode, spellGraph[nextNode]);
                     stack.Push(spellGraph[nextNode]);
-                    markedNodes[spellGraph[nextNode]] = true;
                 }
                 else { MarkedVisitProcess?.Invoke(currNode, spellGraph[nextNode]); }
             }
+            
             VisitationProcess?.Invoke(currNode);
+            markedNodes[currNode] = true;
         }
     }
     public static void ForEachNodeByDFSIn(Graph spellGraph) => ForEachNodeByDFSIn(spellGraph, spellGraph[0]);
@@ -159,7 +166,7 @@ public class GraphUtil
     /// <returns>True if this graph has a cycle</returns>
     public static bool HasCycle(Graph graph, Node startingNode)
     {
-        var nodes = graph.nodes;
+    var nodes = graph.nodes;
         if(nodes.Count == 0) return false;
         Dictionary<int, (ESearchState, int)> markedNodes = InitializePairType(nodes.Select(n => n.index).ToList(), (ESearchState.OUT, -1));
         Stack<int> stack = new Stack<int>();
@@ -192,9 +199,21 @@ public class GraphUtil
         }  
         return false;
     }
+
+
+
+
+    public List<int> TreeToPruffer(Graph graph)
+    {
+        if(GetConnectedComponents(graph).Count != 1)    throw new FormatException("The chosen graph is not connected.");
+        if(HasCycle(graph, graph[0]))                   throw new FormatException("The chosen graph has cycles.");
+        if(graph.Count < 3) return graph.Nodes.Select((Node n) => n.index).ToList();
+
+        List<int> code = new List<int>();
+        
+        return  code;
+    }
 }
-
-
 
 public class DigraphUtil : GraphUtil
 {
@@ -268,9 +287,17 @@ public class DigraphUtil : GraphUtil
         }
         return sortedArray;
     } 
-
-    public TGraph UnderlyingGraph<TGraph>() where TGraph : Graph, new()
+    /// <summary>
+    /// Gets the underlying undirected Graph of given Digraph. 
+    /// </summary>
+    /// <typeparam name="TGraph">The representation of the Graph to be returned.</typeparam>
+    /// <param name="digraph">The Digraph to find the undelying graph from.</param>
+    /// <returns>The undelying graph from the given Digraph.</returns>
+    public static TGraph UnderlyingGraph<TGraph>(Digraph digraph) where TGraph : Graph, new()
     {
-        return  
+        TGraph graph = new TGraph();
+        graph.Nodes = digraph.Nodes;
+        graph.Edges = digraph.Edges;
+        return graph;  
     }
 }

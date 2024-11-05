@@ -49,7 +49,7 @@ public partial class Spell : Resource, ICastable
     {   get
         {
             castReqs = new CastingResources();
-            Graph.ForEachNodeByBFSIn(graphData, (Node currNode) => castReqs.Merge(currNode.castable.CastRequirements) );
+            GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (Node currNode) => castRets.Merge(currNode.castable.CastRequirements));
             return castReqs;
         }
     }
@@ -58,23 +58,34 @@ public partial class Spell : Resource, ICastable
     {   
         get{
             castRets = new CastingResources();
-            Graph.ForEachNodeByBFSIn(graphData, (Node currNode) => castRets.Merge(currNode.castable.CastReturns) );
+            GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (Node currNode) => castRets.Merge(currNode.castable.CastReturns));
             return castRets;
         }
     }
     public uint Cooldown { 
-        get => (uint) graphData.WalkFullPath( (Node currNode) => { return (int) currNode.castable.Cooldown; } );
-
+        ///STUB
+        get  
+        { 
+            uint cd = 0;
+            GraphUtil.ForEachNodeIn(graphData, (Node node) => cd += node.castable.Cooldown );
+            return cd;
+        }
     }
     public int Mana { 
         get{
             int mana = 0;
-            Graph.ForEachNodeIn(graphData, (Node node) => mana += node.castable.Mana );
+            GraphUtil.ForEachNodeIn(graphData, (Node node) => mana += node.castable.Mana );
             return mana;
         }  
     }
-    public uint CastingTime { 
-        get => (uint) graphData.WalkFullPath( (Node currNode) => { return (int) currNode.castable.CastingTime; } );
+    public uint CastingTime {
+        ///STUB
+        get  
+        { 
+            uint ct = 0;
+            GraphUtil.ForEachNodeIn(graphData, (Node node) => ct += node.castable.CastingTime );
+            return ct;
+        }
     }
 #endregion SPELL_DATA
     

@@ -17,7 +17,6 @@ public partial class AdjacenceMatrixGraph : Graph
     /// AdjMatrix[x][y] returns whether there is an arc from node x to node y.
     /// </summary>
     protected List<List<bool>> AdjMatrix = new List<List<bool>>();
-
     public void PrintArray()
     {
         string s = "Printando Array: \n";
@@ -90,13 +89,22 @@ public partial class AdjacenceMatrixGraph : Graph
         for(int i = 0; i < node.index; i++)             if(AdjMatrix[node.index][i]) { nexts.Add(i); } 
         for(int i = node.index; i < nodes.Count; i++)   if(AdjMatrix[i][node.index]) { nexts.Add(i); }
 
-        GD.Print($"{nexts.Count}");
         return nexts;
     }
 
     public override void SetNextNodesOf(Node node, List<Node> nodes)
     {
-        throw new NotImplementedException();
+        Disconnect(node.index, this.nodes.Select((Node n) => n.index).ToList());
+        Connect(node.index, nodes.Select((Node n) => n.index).ToList());
+    }
+
+    public override List<(Node, Node)> Edges { 
+        get => GetEdges(); 
+        set
+        {
+            foreach(List<bool> adjacences in AdjMatrix) for(int i = 0; i < adjacences.Count; i++) adjacences[i] = false;
+            foreach((Node src, Node trg) in value) AdjMatrix[Math.Max(src.index, trg.index)][Math.Min(src.index, trg.index)] = true;
+        }
     }
 
 

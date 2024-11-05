@@ -18,6 +18,8 @@ public partial class IncidenceMatrixDigraph : Digraph
     /// </summary>
     private List<List<ArcIndicator>> IncMatrix = new List<List<ArcIndicator>>();
 
+    
+
     private void PrintArray()
     {
         string s = "Printando Array: \n";
@@ -41,19 +43,17 @@ public partial class IncidenceMatrixDigraph : Digraph
 
         return;
     }
-
     public override bool Connect(Node sourceNode, Node targetNode)
     {
         if(sourceNode == null || targetNode == null) {  return false; }
         IncMatrix.Add(new List<ArcIndicator>(nodes.Count));
+
         foreach(Node _n in nodes) IncMatrix[IncMatrix.Count-1].Add(ArcIndicator.none); 
 
         IncMatrix[IncMatrix.Count-1][sourceNode.index] = ArcIndicator.src;
         IncMatrix[IncMatrix.Count-1][targetNode.index] = ArcIndicator.trg;
-        PrintArray();
         return true;
     }
-
     public override bool Disconnect(Node sourceNode, Node targetNode)
     {
         if(sourceNode == null || targetNode == null) return false;
@@ -69,7 +69,6 @@ public partial class IncidenceMatrixDigraph : Digraph
         }
         return false;
     }
-
     private int FindIndicatorIndexAtArc(ArcIndicator indicator, int arcIndex)
     {
         
@@ -79,6 +78,7 @@ public partial class IncidenceMatrixDigraph : Digraph
         }
         return int.MinValue;
     }
+    
 
     public override List<int> GetNextNodesOf(Node node)
     {
@@ -109,7 +109,7 @@ public partial class IncidenceMatrixDigraph : Digraph
     private bool DisconnectNode(Node node)
     {
         if(node == null) return false;
-        for(int i = 0; i < IncMatrix.Count; i++)
+        for(int i = IncMatrix.Count-1; i >= 0; i--)
         {
             if(IncMatrix[i][node.index] != ArcIndicator.none) IncMatrix.RemoveAt(i);
         }
@@ -138,13 +138,30 @@ public partial class IncidenceMatrixDigraph : Digraph
 
     public override void SetNextNodesOf(Node node, List<Node> nodes)
     {
-        throw new NotImplementedException();
+        for(int i = IncMatrix.Count-1; i >= 0; i--)
+        {
+            if(IncMatrix[i][node.index] == ArcIndicator.src) IncMatrix.RemoveAt(i);
+        }
+        Connect(node.index, nodes.Select((Node n) => n.index).ToList());
     }
-
-    public void SetPrevNodesOf(Node node, List<Node> nodes)
+    public override void SetPrevNodesOf(Node node, List<Node> nodes)
     {
-        throw new NotImplementedException();
+        for(int i = IncMatrix.Count-1; i >= 0; i--)
+        {
+            if(IncMatrix[i][node.index] == ArcIndicator.trg) IncMatrix.RemoveAt(i);
+        }
+        Connect(nodes.Select((Node n) => n.index).ToList(), node.index);
     }
 
-   
+
+    public override List<(Node, Node)> Edges { 
+        get => GetEdges();
+        set
+        {
+            IncMatrix.Clear();
+            foreach((Node src, Node trg) in value) Connect(src, trg);
+        }
+    }
+    
+
 }

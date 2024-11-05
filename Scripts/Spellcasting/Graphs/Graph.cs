@@ -11,12 +11,11 @@ using Godot;
 using Node = ISpellGraph.Node;
 public abstract class Graph : ISpellGraph
 {
-    
-
     public List<Node> nodes = new List<Node>();
 
-    public Node this[int index] => nodes[index];
-
+    public Node this[int index] { get => nodes[index]; set => nodes[index] = value;}
+    public List<Node> Nodes {get => nodes; set => nodes = value;}
+    public abstract List<(Node, Node)> Edges {get; set;}
     public Node CreateNode(ICastable c) => new Node {castable = c, index = int.MinValue };
     public abstract void Add(Node node);
     public          void Add(ICastable castable) => Add(CreateNode(castable));
@@ -32,16 +31,15 @@ public abstract class Graph : ISpellGraph
     public          bool Connect(int sourceNodeIndex, Node targetNode) => Connect(nodes[sourceNodeIndex], targetNode);
     public          bool Connect(Node sourceNode, int targetNodeIndex) => Connect(sourceNode, nodes[targetNodeIndex]);
     public          bool Connect(int sourceNodeIndex, int targetNodeIndex) => Connect(nodes[sourceNodeIndex], nodes[targetNodeIndex]);
-    public bool Connect(List<int> sourceNodes, int targetNode) { 
+    public          bool Connect(List<int> sourceNodes, int targetNode) { 
         bool allDone = true; 
         foreach (int sourceNode in sourceNodes) 
         { 
             allDone = allDone && Connect(sourceNode, targetNode); 
         }
         return allDone; 
-    }
-    
-    public bool Connect(int sourceNode, List<int> targetNodes) { 
+    }   
+    public          bool Connect(int sourceNode, List<int> targetNodes) { 
         bool allDone = true; 
         foreach (int targetNode in targetNodes) 
         { 
@@ -55,8 +53,7 @@ public abstract class Graph : ISpellGraph
     public          bool Disconnect(int sourceNodeIndex, Node targetNode) => Disconnect(nodes[sourceNodeIndex], targetNode);
     public          bool Disconnect(Node sourceNode, int targetNodeIndex) => Disconnect(sourceNode, nodes[targetNodeIndex]);
     public          bool Disconnect(int sourceNodeIndex, int targetNodeIndex) => Disconnect(nodes[sourceNodeIndex], nodes[targetNodeIndex]);
-    
-    public bool Disconnect(List<int> sourceNodes, int targetNode) { 
+    public          bool Disconnect(List<int> sourceNodes, int targetNode) { 
         bool allDone = true; 
         foreach (int sourceNode in sourceNodes) 
         { 
@@ -64,7 +61,7 @@ public abstract class Graph : ISpellGraph
         }
         return allDone; 
     }
-    public bool Disconnect(int sourceNode, List<int> targetNodes) { 
+    public          bool Disconnect(int sourceNode, List<int> targetNodes) { 
         bool allDone = true; 
         foreach (int targetNode in targetNodes) 
         { 
@@ -79,49 +76,21 @@ public abstract class Graph : ISpellGraph
     public void SetNextNodesOf(int idx) => SetNextNodesOf(nodes[idx], nodes);
     
     
-    
-    public bool IsComplete() => EdgeAmmount() == (nodes.Count*nodes.Count) - nodes.Count;
+    public bool IsComplete() => EdgeAmmount() == nodes.Count*(nodes.Count - 1);
     public int NodeAmmount() => nodes.Count;
 
-    public List<(int, int)> Edges()
+    public List<(Node, Node)> GetEdges()
     {
-        List<(int, int)> edges = new List<(int, int)>  ();
-        Stack<Node> previousStack = new Stack<Node>();
-        Action<Node, Dictionary<Node, bool>, IEnumerable<Node>> process = 
-        (Node current) =>
-        {
-            while()
-                
-                if(previousMarks[previousMarks.] edges.Add(current.index, other.index);
-        };
+        List<(Node, Node)> edges = new List<(Node, Node)>  ();
+        Action<Node, Node> newEdgeFound = (Node src, Node trg) => edges.Add((src, trg));
 
-        GraphUtil.ForEachNodeByDFSIn(this, this.nodes[0], process);
+        GraphUtil.ForEachNodeByDFSIn(this, nodes[0], null, newEdgeFound);
+
         return edges;
     }
-    public virtual int EdgeAmmount()
-    {
 
-        
+    public virtual int EdgeAmmount() => GetEdges().Count;
 
-        int ammount = 0;
-        if(nodes.Count < 2) return 0; 
-        Dictionary<int, bool> markedNodes = InitializePairType<int, bool>(nodes.Select(n => n.index).ToList(), false);
-        Stack<int> stack = new Stack<int>();
-        while (stack.Count > 0)
-        {   
-            int currNode = stack.Pop();
-            foreach(int nextNode in GetNextNodesOf(currNode))
-            {
-                if(!markedNodes[nextNode])
-                {
-                    stack.Push(nextNode);
-                    ammount++;
-                }
-            }
-            markedNodes[currNode] = true;
-        }
-        return ammount;
-    }
     /// <summary>
     /// Verify the if two nodes are adjacent to each other.
     /// </summary>

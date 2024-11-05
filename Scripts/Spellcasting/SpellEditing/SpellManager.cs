@@ -19,7 +19,7 @@ public partial class SpellManager
 {
     private static Spell currentSpell = new Spell();
 
-    public static Func<Graph, SpellNode, SpellNode, bool> ConnectionMethod = DirectConnect;
+    public static Func<Graph, SpellNode, SpellNode, bool> ConnectionMethod = ConnectWithoutCycles;
     public Spell CurrentSpell { 
         get { return currentSpell; } 
         set { currentSpell = value; } 
@@ -50,7 +50,7 @@ public partial class SpellManager
 
         graph.Connect(first, last);
         
-        if(!graph.HasCycle(first)) return true;
+        if(!GraphUtil.HasCycle(graph, first)) return true;
 
         graph.Disconnect(first, last);
         return false;
