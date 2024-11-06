@@ -251,69 +251,31 @@ public class GraphUtil
 		*/
 
 
+	
 
-
-	public List<int> TreeToPruffer(Graph graph)
+	public List<int> TreeToPruffer(Graph originalGraph)
 	{
-		if(GetConnectedComponents(graph).Count != 1)    throw new FormatException("The chosen graph is not connected.");
-		if(HasCycle(graph, graph[0]))                   throw new FormatException("The chosen graph has cycles.");
-		if(graph.Count < 3) return graph.Nodes.Select((Node n) => n.index).ToList();
+		if(GetConnectedComponents(originalGraph).Count != 1)    throw new FormatException("The chosen graph is not connected.");
+		if(HasCycle(originalGraph, originalGraph[0]))                   throw new FormatException("The chosen graph has cycles.");
+		if(originalGraph.Count < 3) return Array.Reverse(originalGraph.Nodes.Select((Node n) => n.index)).ToList();
+
+		Graph graph = (Graph)originalGraph.Clone();
 
 		List<int> code = new List<int>();
-		//TODO
+		while(graph.Count > 2)
+		{
+			foreach(Node n in graph.Nodes)
+			{
+				var nexts = graph.GetNextNodesOf(n);
+				if(nexts.Count == 1) { code.Add(nexts[0]); graph.Remove(n); break; }
+			}
+		}
 		return  code;
 	}
-}
 
 
 
 
-
-
-
-
-
-
-
-
-public class DigraphUtil : GraphUtil
-{
-		private enum ESearchState : int { OUT = 0, STACKED, VISITED };
-	/// <summary>
-	/// Uses a DFS algorithm to find out if the graph has a cycle.
-	/// </summary>
-	/// <param name="startingNode">The spellGraph's node from where the search will start</param>
-	/// <returns>True if this graph has a cycle</returns>
-	public static bool HasCycle(Digraph graph, Node startingNode)
-	{
-		var nodes = graph.nodes;
-		if(nodes.Count == 0) return false;
-		Dictionary<Node, ESearchState> markedNodes = InitializePairType(nodes, ESearchState.OUT);
-		Stack<Node> stack = new Stack<Node>();
-		markedNodes[startingNode] = ESearchState.STACKED;
-		stack.Push(startingNode);
-		while (stack.Count > 0)
-		{   
-			Node currNode = stack.Pop();
-			markedNodes[currNode] = ESearchState.VISITED;
-			foreach(int nextNode in graph.GetNextNodesOf(currNode))
-			{
-				switch(markedNodes[nodes[nextNode]])
-				{
-					
-					case ESearchState.OUT:
-						stack.Push(nodes[nextNode]);
-						markedNodes[nodes[nextNode]] = ESearchState.STACKED;
-						break;
-					case ESearchState.VISITED:
-						return true;
-					default:
-						continue;
-				}
-			}
-		}  
-		return false;
-	}
 
 
 	public static void UpdateNodeTopSorting(Digraph digraph) => digraph.nodes = TopSortNodes(digraph);
@@ -362,3 +324,58 @@ public class DigraphUtil : GraphUtil
 		return graph;  
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+/*
+public class DigraphUtil : GraphUtil
+{
+		private enum ESearchState : int { OUT = 0, STACKED, VISITED };
+	/// <summary>
+	/// Uses a DFS algorithm to find out if the graph has a cycle.
+	/// </summary>
+	/// <param name="startingNode">The spellGraph's node from where the search will start</param>
+	/// <returns>True if this graph has a cycle</returns>
+	public static bool HasCycle(Digraph graph, Node startingNode)
+	{
+		var nodes = graph.nodes;
+		if(nodes.Count == 0) return false;
+		Dictionary<Node, ESearchState> markedNodes = InitializePairType(nodes, ESearchState.OUT);
+		Stack<Node> stack = new Stack<Node>();
+		markedNodes[startingNode] = ESearchState.STACKED;
+		stack.Push(startingNode);
+		while (stack.Count > 0)
+		{   
+			Node currNode = stack.Pop();
+			markedNodes[currNode] = ESearchState.VISITED;
+			foreach(int nextNode in graph.GetNextNodesOf(currNode))
+			{
+				switch(markedNodes[nodes[nextNode]])
+				{
+					
+					case ESearchState.OUT:
+						stack.Push(nodes[nextNode]);
+						markedNodes[nodes[nextNode]] = ESearchState.STACKED;
+						break;
+					case ESearchState.VISITED:
+						return true;
+					default:
+						continue;
+				}
+			}
+		}  
+		return false;
+	}
+
+
+	
+}
+*/

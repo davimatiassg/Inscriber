@@ -92,7 +92,7 @@ public partial class Spell : Resource, ICastable
 
 	public Spell()
 	{
-		graphData = new IncidenceMatrixDigraph();
+		graphData = new IncidenceMatrixGraph();
 	}
 	
 	/// <summary>

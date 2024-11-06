@@ -9,7 +9,7 @@ using Godot;
 /// </summary>
 /// 
 using Node = ISpellGraph.Node;
-public abstract class Graph : ISpellGraph
+public abstract class Graph : ISpellGraph, ICloneable
 {
     public List<Node> nodes = new List<Node>();
 
@@ -101,7 +101,13 @@ public abstract class Graph : ISpellGraph
     public int Degree(int n) =>  Degree(nodes[n]);
     public int Degree(Node n) => GetNextNodesOf(n).Count;
 
-    
+    public Object Clone()
+    {
+        Graph graph = new Graph();
+        graph.Nodes = this.Nodes;
+        graph.Edges = this.Edges;
+        return graph;
+    }
     
 
 #region GRAPH_METHODS

@@ -57,4 +57,7 @@ public interface ISpellGraph : ICollection<ISpellGraph.Node>
     public void SetNextNodesOf(Node node, List<Node> nodes);
     public int EdgeAmmount();
     public bool AdjacenceBetween(Node n1, Node n2);
+
+
+    public int Degree(Node n);
 }
