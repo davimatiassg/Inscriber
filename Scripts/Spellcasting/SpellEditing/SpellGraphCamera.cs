@@ -79,7 +79,6 @@ public partial class SpellGraphCamera : Camera2D
     /// <param name="length">the distance that must be contained in the screen </param>
     private void ZoomToFit(float length)
     {
-        GD.Print(length);
         if(length <= 0) throw new DivideByZeroException();
         Vector2 viewSize = this.GetViewport().GetVisibleRect().Size;
         Zoom = Vector2.One * Mathf.Min(viewSize.X, viewSize.Y) / (ZOOM_OUT_SCALE*length);

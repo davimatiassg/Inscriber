@@ -83,5 +83,13 @@ public partial class SpellGraphViewer : Control
 
         return (SpellGraphVisualNode)node;
     }
+
+    public void ClearView()
+    {
+        foreach(Node n in graphArcsMaster.GetChildren()){ n.QueueFree(); }
+        foreach(Node n in graphArcsMaster.GetChildren()){ n.QueueFree(); }
+        viewPairs.Clear();
+        viewPairsReverse.Clear();
+    }
 }
 }

@@ -90,6 +90,20 @@ public partial class SpellGraphEditor : Control
     {
         base._Input(@event);
         editorMode._Input(@event);
+
+        if (@event is InputEventKey eventKey && eventKey.Pressed && eventKey.Keycode == Key.P)
+        {
+            var pruffer = GraphUtil.TreeToPruffer((Graph)SpellManager.currentSpell.graphData);
+            string s = "[b]Pruffer code: { ";
+            foreach(int i in pruffer) 
+                s += GraphUtil.TestNodeString(SpellManager.currentSpell.graphData[i]) + " " ;
+            s += "}[/b]" ;
+
+            AdjacenceListGraph g = GraphUtil.ConvertGraphTo<AdjacenceListGraph>((Graph)SpellManager.currentSpell.graphData);
+            g.Edges = new List<(ISpellGraph.Node, ISpellGraph.Node)>();
+            LoadSpellGraph(GraphUtil.PrufferToTree<AdjacenceListGraph>((Graph)SpellManager.currentSpell.graphData, pruffer));
+
+        }
     }
 
     public override void _Process(double delta)
@@ -144,6 +158,41 @@ public partial class SpellGraphEditor : Control
     }
 
     public static SpellGraphVisualNode FindClosestNodeFrom(Vector2 position) => Instance.graphView.FindClosestNodeFrom(position);
+
+
+
+    //STUB!!!!!
+    public void LoadSpellGraph(ISpellGraph graph)
+    {
+        graphView.ClearView();
+
+        SpellManager.currentSpell.graphData = graph;
+
+        if(graph.Count == 0) return;
+
+        float angleSpread = 2*Mathf.Pi/graph.Count;
+        Vector2 position = new Vector2(125*graph.Count, 0);
+
+        foreach(ISpellGraph.Node graphNode in graph.Nodes)
+        {
+            if(graphNode.castable is IGraphDeployable deployable){
+            var nodeView = Instance.graphView.DeployNewNode(deployable, position);
+            Instance.graphView.AddNodeViewPair(graphNode, nodeView);
+            }
+            position = position.Rotated(angleSpread);
+        }
+
+        foreach((ISpellGraph.Node src, ISpellGraph.Node trg) in graph.Edges)
+        {
+            var source = Instance.graphView.GetPairNodeFrom(src);
+            var target = Instance.graphView.GetPairNodeFrom(trg);
+
+            Instance.graphView.graphArcsMaster.AddChild(source.ConnectTo(target));
+        }
+    }
+
+
+
 }
 }
 

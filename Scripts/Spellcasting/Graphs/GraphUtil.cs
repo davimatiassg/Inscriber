@@ -61,18 +61,17 @@ public class GraphUtil
 	public static List<List<Node>> GetConnectedComponents(Graph graph)
 	{
 		List<List<Node>> connectedComponents = new List<List<Node>>();
-		List<Node> remainingNodes = graph.nodes;
 		List<Node> currentComponent = new List<Node>();
 		
+		int remainingCount = graph.Count;
 		Action<Node> process = (Node n) => 
 		{
-			
 			currentComponent.Add(n);
-			remainingNodes.RemoveAt(n.index);
+			remainingCount --;
 		};
 
 
-		while(remainingNodes.Count > 0)
+		while(remainingCount > 0)
 		{
 			ForEachNodeByDFSIn(graph, graph.nodes[0], process);
 			connectedComponents.Add(currentComponent);
@@ -191,9 +190,10 @@ public class GraphUtil
 	public static bool HasCycle(Graph graph, Node startingNode)
 	{
 		bool cycled = false;
-		Dictionary<Node, Node> Predecessors = new Dictionary<Node, Node>();
-
-		Predecessors.Add(startingNode, startingNode);
+		Dictionary<Node, Node> Predecessors = new Dictionary<Node, Node>
+        {
+            { startingNode, startingNode }
+        };
 
 		Action<Node, Node>  UnmarkedVisitProcess = (Node n1, Node n2) => 
 		{ if(!Predecessors.Keys.Contains(n2)) Predecessors.Add(n2, n1); };
@@ -257,10 +257,11 @@ public class GraphUtil
 
 	public static void PrintPruffer()
 	{
-		string s = "[b]Pruffer code: ";
-		foreach(int i in TreeToPruffer((Graph)(SpellManager.currentSpell.graphData))) 
+		string s = "[b]Pruffer code: { ";
+		foreach(int i in TreeToPruffer((Graph)SpellManager.currentSpell.graphData)) 
 			s += TestNodeString(SpellManager.currentSpell.graphData[i]) + " " ;
-		s += " }[/b]" ;
+		s += "}[/b]" ;
+
 		GD.PrintRich(s);
 	}
 
@@ -274,19 +275,24 @@ public class GraphUtil
 	{
 		if(GetConnectedComponents(originalGraph).Count != 1)   	throw new FormatException("The chosen graph is not connected.");
 		if(HasCycle(originalGraph, originalGraph[0]))           throw new FormatException("The chosen graph has cycles.");
-		if(originalGraph.Count < 3) return (originalGraph.Nodes.Select((Node n) => n.index)).ToList();
+		if(originalGraph.Count < 3) return originalGraph.Nodes.Select((Node n) => n.index).ToList();
 
 		Graph graph = (Graph)originalGraph.Clone();
 
 		List<int> code = new List<int>();
-		while(graph.Count > 2)
+		while(code.Count < graph.Count-2)
 		{
 			foreach(Node n in graph.Nodes)
 			{
 				var nexts = graph.GetNextNodesOf(n);
-				if(nexts.Count == 1) { code.Add(nexts[0]); graph.SetNextNodesOf(n, new List<Node>()); break; }
+				if(nexts.Count == 1) { 
+					code.Add(nexts[0]); 
+					graph.SetNextNodesOf(n, new List<Node>()); 
+					break; 
+				}
 			}
 		}
+
 		return code;
 	}
 
@@ -325,6 +331,7 @@ public class GraphUtil
 
 		graph.Connect(graph.Nodes.Count-1, graph.Nodes.Count-2);
 
+		SpellGraphEditor.Instance.LoadSpellGraph(graph);
 
 		return graph;
 	}
@@ -376,13 +383,21 @@ public class GraphUtil
 	{
 		TGraph graph = new TGraph();
 		graph.Nodes = digraph.Nodes;
+		List<(Node, Node)> edges = digraph.Edges;
+		for(int i = 0; i < edges.Count; i++)
+		{
+			(Node, Node) duplicate = (edges[i].Item2, edges[i].Item1);
+			edges.Remove(duplicate);
+		}
 		graph.Edges = digraph.Edges;
+		return graph;  
+	}
 
-		
-
-
-
-
+	public static TGraph ConvertGraphTo<TGraph>(Graph originalGraph) where TGraph : Graph, new()
+	{
+		TGraph graph = new TGraph();
+		graph.Nodes = originalGraph.Nodes;
+		graph.Edges = originalGraph.Edges;
 		return graph;  
 	}
 }
