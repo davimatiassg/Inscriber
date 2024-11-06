@@ -101,13 +101,7 @@ public abstract class Graph : ISpellGraph, ICloneable
     public int Degree(int n) =>  Degree(nodes[n]);
     public int Degree(Node n) => GetNextNodesOf(n).Count;
 
-    public Object Clone()
-    {
-        Graph graph = new Graph();
-        graph.Nodes = this.Nodes;
-        graph.Edges = this.Edges;
-        return graph;
-    }
+    public abstract Object Clone();
     
 
 #region GRAPH_METHODS

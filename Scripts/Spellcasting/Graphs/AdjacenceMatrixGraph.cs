@@ -109,5 +109,14 @@ public partial class AdjacenceMatrixGraph : Graph
 
 
 
+    public override Object Clone() {
+        AdjacenceMatrixGraph graph = new AdjacenceMatrixGraph();
+        graph.Nodes = this.Nodes;
+        graph.Edges = this.Edges;
+        return graph;
+    }
+
+
+
 }
 

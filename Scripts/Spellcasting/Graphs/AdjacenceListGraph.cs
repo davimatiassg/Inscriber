@@ -36,10 +36,10 @@ public partial class AdjacenceListGraph : Graph
 
     public override void Add(Node node)
     {
-        node.index = nodes.Count;
+        node.index = Nodes.Count;
         if(node == null) return;
 
-        nodes.Add(node);
+        Nodes.Add(node);
 
         AdjList.Add(new List<int>());
         return;
@@ -47,17 +47,17 @@ public partial class AdjacenceListGraph : Graph
 
     public override bool Remove(Node node)
     {
-        if(node == null || !nodes.Contains(node)) return false;
+        if(node == null || !Nodes.Contains(node)) return false;
         foreach(List<int> adjs in AdjList) { adjs.Remove(node.index); }
         AdjList.RemoveAt(node.index);
-        nodes.RemoveAt(node.index);
+        Nodes.RemoveAt(node.index);
         return true;
 
     }
 
     public override bool ReplaceNode(Node node, ICastable castable)
     {
-        if(node == null || !nodes.Contains(node)) return false;
+        if(node == null || !Nodes.Contains(node)) return false;
         node.castable = castable;
         return true;
     }
@@ -98,6 +98,14 @@ public partial class AdjacenceListGraph : Graph
             foreach(List<int> l in AdjList) {l.Clear();}
             foreach((Node src, Node trg) in value) { Connect(src, trg); } 
         }
+    }
+
+    
+    public override Object Clone() {
+        AdjacenceListGraph graph = new AdjacenceListGraph();
+        graph.Nodes = this.Nodes;
+        graph.Edges = this.Edges;
+        return graph;
     }
 
 

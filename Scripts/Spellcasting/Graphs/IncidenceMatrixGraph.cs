@@ -128,6 +128,13 @@ public partial class IncidenceMatrixGraph : Graph
         }
     }
 
+    
+    public override Object Clone() {
+        IncidenceMatrixGraph graph = new IncidenceMatrixGraph();
+        graph.Nodes = this.Nodes;
+        graph.Edges = this.Edges;
+        return graph;
+    }
 
 }
 

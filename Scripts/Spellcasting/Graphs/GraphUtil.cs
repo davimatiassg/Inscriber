@@ -1,12 +1,13 @@
-/// <summary>
-/// Class that stores a spell's rune graph agnostically of the data structured used
-/// </summary>
-/// 
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using SpellEditing;
+
+
 using Node = ISpellGraph.Node;
+
 
 public class GraphUtil 
 {
@@ -60,11 +61,12 @@ public class GraphUtil
 	public static List<List<Node>> GetConnectedComponents(Graph graph)
 	{
 		List<List<Node>> connectedComponents = new List<List<Node>>();
-		List<Node> remainingNodes = new List<Node>(graph.nodes);
-		
+		List<Node> remainingNodes = graph.nodes;
 		List<Node> currentComponent = new List<Node>();
+		
 		Action<Node> process = (Node n) => 
 		{
+			
 			currentComponent.Add(n);
 			remainingNodes.RemoveAt(n.index);
 		};
@@ -121,6 +123,8 @@ public class GraphUtil
 	}
 	public static void ForEachNodeByBFSIn(ISpellGraph spellGraph) => ForEachNodeByBFSIn(spellGraph, spellGraph[0]);
 	
+
+
 
 	/// <summary>
 	/// Runs a full Depth First Search trought the graph's nodes and executes a choosen expression at each node.
@@ -251,13 +255,26 @@ public class GraphUtil
 		*/
 
 
-	
-
-	public List<int> TreeToPruffer(Graph originalGraph)
+	public static void PrintPruffer()
 	{
-		if(GetConnectedComponents(originalGraph).Count != 1)    throw new FormatException("The chosen graph is not connected.");
-		if(HasCycle(originalGraph, originalGraph[0]))                   throw new FormatException("The chosen graph has cycles.");
-		if(originalGraph.Count < 3) return Array.Reverse(originalGraph.Nodes.Select((Node n) => n.index)).ToList();
+		string s = "[b]Pruffer code: ";
+		foreach(int i in TreeToPruffer((Graph)(SpellManager.currentSpell.graphData))) 
+			s += TestNodeString(SpellManager.currentSpell.graphData[i]) + " " ;
+		s += " }[/b]" ;
+		GD.PrintRich(s);
+	}
+
+	/// <summary>
+	/// Obtains the Prüffer sequence from certain tree graph.
+	/// </summary>
+	/// <param name="originalGraph">the tree graph</param>
+	/// <returns>The pruffer sequence in a list..</returns>
+	/// <exception cref="FormatException"></exception>
+	public static List<int> TreeToPruffer(Graph originalGraph)
+	{
+		if(GetConnectedComponents(originalGraph).Count != 1)   	throw new FormatException("The chosen graph is not connected.");
+		if(HasCycle(originalGraph, originalGraph[0]))           throw new FormatException("The chosen graph has cycles.");
+		if(originalGraph.Count < 3) return (originalGraph.Nodes.Select((Node n) => n.index)).ToList();
 
 		Graph graph = (Graph)originalGraph.Clone();
 
@@ -267,10 +284,49 @@ public class GraphUtil
 			foreach(Node n in graph.Nodes)
 			{
 				var nexts = graph.GetNextNodesOf(n);
-				if(nexts.Count == 1) { code.Add(nexts[0]); graph.Remove(n); break; }
+				if(nexts.Count == 1) { code.Add(nexts[0]); graph.SetNextNodesOf(n, new List<Node>()); break; }
 			}
 		}
-		return  code;
+		return code;
+	}
+
+	/// <summary>
+	/// Receives a void Graph and a Prüffer sequence, and returns the tree from that sequence.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="originalGraph">The void graph</param>
+	/// <param name="pruffer">The list that stores a pruffer sequence</param>
+	/// <returns></returns>
+	/// <exception cref="FormatException"></exception>
+	public static T PrufferToTree<T>(Graph originalGraph, List<int> pruffer) where T : Graph, new()
+	{
+		if(originalGraph.EdgeAmmount() > 0)   		throw new FormatException("The chosen graph is not void.");
+		if(originalGraph.Count != pruffer.Count+2) 	throw new FormatException("Incongruent graph and pruffer sequence sizes.");
+
+		T graph = new T();
+		graph.Nodes = originalGraph.Nodes;
+
+		Dictionary<Node, int> degrees = InitializePairType<Node, int>(graph.Nodes, 1);
+
+		foreach(int p in pruffer) { degrees[graph[p]]++; }
+
+		foreach(int p in pruffer)
+		{
+			foreach(Node n in graph.Nodes)
+			{
+				if(graph.Degree(n) == 1) {
+					graph.Connect(n, p);
+					degrees[graph[p]]--;
+					degrees[n]--;
+					break;
+				}
+			}
+		}
+
+		graph.Connect(graph.Nodes.Count-1, graph.Nodes.Count-2);
+
+
+		return graph;
 	}
 
 
@@ -321,6 +377,12 @@ public class GraphUtil
 		TGraph graph = new TGraph();
 		graph.Nodes = digraph.Nodes;
 		graph.Edges = digraph.Edges;
+
+		
+
+
+
+
 		return graph;  
 	}
 }

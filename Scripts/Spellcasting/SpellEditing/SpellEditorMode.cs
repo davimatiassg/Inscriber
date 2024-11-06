@@ -60,6 +60,11 @@ public class NodeFocusMode : SpellGraphEditorMode
         base.EnterModeFrom(prevMode);
 
 
+///STUB!!!!!!!!!!!!!!!!!!!1
+        GraphUtil.PrintPruffer();
+
+
+        
         if(tempSelection == null || !tempSelection.IsNodeReady()) { ExitModeTo(prevMode); return; }
         
         foreach(Control nodeView in SpellGraphEditor.Instance.graphView.graphNodeMaster.GetChildren()){

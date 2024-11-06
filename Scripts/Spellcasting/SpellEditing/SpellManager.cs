@@ -17,7 +17,7 @@ using SpellNode = ISpellGraph.Node;
 
 public partial class SpellManager
 {
-	private static Spell currentSpell = new Spell();
+	public static Spell currentSpell = new Spell();
 
 	public static Func<ISpellGraph, SpellNode, SpellNode, bool> ConnectionMethod = ConnectWithoutCycles;
 	public Spell CurrentSpell { 
