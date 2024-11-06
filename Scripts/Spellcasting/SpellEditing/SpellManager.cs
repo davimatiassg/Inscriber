@@ -17,55 +17,55 @@ using SpellNode = ISpellGraph.Node;
 
 public partial class SpellManager
 {
-    private static Spell currentSpell = new Spell();
+	private static Spell currentSpell = new Spell();
 
-    public static Func<Graph, SpellNode, SpellNode, bool> ConnectionMethod = ConnectWithoutCycles;
-    public Spell CurrentSpell { 
-        get { return currentSpell; } 
-        set { currentSpell = value; } 
-    }
+	public static Func<ISpellGraph, SpellNode, SpellNode, bool> ConnectionMethod = ConnectWithoutCycles;
+	public Spell CurrentSpell { 
+		get { return currentSpell; } 
+		set { currentSpell = value; } 
+	}
 
-    public static SpellNode AddNode(ICastable castable)
-    {
-        currentSpell.graphData.Add(castable);
-        return currentSpell.graphData.Last();
-    }
+	public static SpellNode AddNode(ICastable castable)
+	{
+		currentSpell.graphData.Add(castable);
+		return currentSpell.graphData.Last();
+	}
 
-    public static void RemoveNode(SpellNode node)
-    {
-        currentSpell.graphData.Remove(node);
-    }
+	public static void RemoveNode(SpellNode node)
+	{
+		currentSpell.graphData.Remove(node);
+	}
 
-    private static bool DirectConnect(Graph graph, SpellNode first, SpellNode last)
-    {
-        if(first == null || last == null) return false;
-        graph.Connect(first, last);
-        return true;
-    }
+	private static bool DirectConnect(ISpellGraph graph, SpellNode first, SpellNode last)
+	{
+		if(first == null || last == null) return false;
+		graph.Connect(first, last);
+		return true;
+	}
 
-    private static bool ConnectWithoutCycles(Graph graph, SpellNode first, SpellNode last)
-    {
-   
-        if(first == null || last == null) return false;
-
-        graph.Connect(first, last);
+	private static bool ConnectWithoutCycles(ISpellGraph graph, SpellNode first, SpellNode last)
+	{
         
-        if(!GraphUtil.HasCycle(graph, first)) return true;
+		if(first == null || last == null ) return false;
 
-        graph.Disconnect(first, last);
-        return false;
-    }
+		graph.Connect(first, last);
+		if(graph is Graph) { if(!GraphUtil.HasCycle((Graph)graph, first)) return true; }
+        else if(graph is Digraph) { if(!GraphUtil.HasCycle((Digraph)graph, first)) return true; }
 
-    public static bool AddConnectionToSpellGraph(SpellNode first, SpellNode last)
-        => ConnectionMethod(currentSpell.graphData, first, last);
-    
-    public static bool RemoveConnectionToSpellGraph(SpellNode first, SpellNode last) 
-        => currentSpell.graphData.Disconnect(first, last);
+		graph.Disconnect(first, last);
+		return false;
+	}
 
-    
+	public static bool AddConnectionToSpellGraph(SpellNode first, SpellNode last)
+		=> ConnectionMethod(currentSpell.graphData, first, last);
+	
+	public static bool RemoveConnectionToSpellGraph(SpellNode first, SpellNode last) 
+		=> currentSpell.graphData.Disconnect(first, last);
 
-    public static void ReplaceNode(SpellNode node, ICastable castable)
-    => currentSpell.graphData.ReplaceNode(node, castable);
+	
+
+	public static void ReplaceNode(SpellNode node, ICastable castable)
+	=> currentSpell.graphData.ReplaceNode(node, castable);
 
 }
 
@@ -79,11 +79,11 @@ GD.PrintRich("[rainbow freq=1.0 sat=0.8 val=0.8] Entangling process start! [/rai
 GD.PrintRich("[b]Printing the current spell's nodes[/b]");
 foreach(SpellNode n in currentSpell)
 {
-    GD.PrintRich("[b]Node [color=" + Rune.ColorByRarity(((Rune)n.castable).rarity).ToHtml() + "]" + n + "[/color][/b]");
+	GD.PrintRich("[b]Node [color=" + Rune.ColorByRarity(((Rune)n.castable).rarity).ToHtml() + "]" + n + "[/color][/b]");
 }
 GD.PrintRich("[b]Printing the current spell's inactive nodes[/b]");
 foreach(SpellNode n in currentSpell.inactiveNodes)
 {
-    GD.PrintRich("[b]Node [color=" + Rune.ColorByRarity(((Rune)n.castable).rarity).ToHtml() + "]" + n.ToString() + "[/color][/b]");
+	GD.PrintRich("[b]Node [color=" + Rune.ColorByRarity(((Rune)n.castable).rarity).ToHtml() + "]" + n.ToString() + "[/color][/b]");
 }
 */
