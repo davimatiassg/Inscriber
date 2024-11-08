@@ -10,7 +10,7 @@ A. Grafos:
 
 B. Digrafos:
 - 17 ao 19;
-- 22.
+- 22;
 
 Link do Vídeo de apresentação:
 https://youtu.be/mt65-jNrXi4
