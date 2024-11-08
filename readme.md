@@ -17,3 +17,7 @@ https://youtu.be/mt65-jNrXi4
 
 Repositório no github (acompanhamento):
 https://github.com/davimatiassg/Inscriber
+
+Link com a Build do projeto (Linux):
+https://drive.google.com/file/d/1Xjrdjm2HFuKq02svcZLpRUVMBYA_4yGj/view?usp=sharing
+
