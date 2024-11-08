@@ -10,6 +10,8 @@ using Node = ISpellGraph.Node;
 /// Represents a Spell during Runtime.
 /// Is agnostic to graph's storage strategy.
 /// </summary>
+/// 
+using GraphType = AdjacenceListGraph;
 [GlobalClass]
 public partial class Spell : Resource, ICastable
 {
@@ -92,7 +94,7 @@ public partial class Spell : Resource, ICastable
 
 	public Spell()
 	{
-		graphData = new IncidenceMatrixGraph();
+		graphData = new GraphType();
 	}
 	
 	/// <summary>

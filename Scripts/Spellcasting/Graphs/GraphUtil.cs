@@ -11,8 +11,9 @@ using Node = ISpellGraph.Node;
 
 public class GraphUtil 
 {
-
+	///UTILITY FUNCTIONS
 	public static string TestNodeString(Node n) => "[color=" + ((Rune)n.castable).Color.ToHtml() + "]" + n.index + "[/color]";
+	public static string NodeStringName(Node n) => "[color=" + ((Rune)n.castable).Color.ToHtml() + "]" + ((Rune)n.castable).Name + "[/color]";
 	public static Dictionary<T1, T2> InitializePairType<T1, T2>(List<T1> nodes, T2 defValue)
 	{
 		Dictionary<T1, T2> dict = new Dictionary<T1,T2>();
@@ -24,15 +25,77 @@ public class GraphUtil
 	}
 	public static Dictionary<Node, T> InitializePairType<T>(List<Node> nodes) where T : new() => InitializePairType<Node, T>(nodes, new T());   
 
-
-	public static List<int> LowPT(ISpellGraph graph)
+	/// <summary>
+	/// Finds all the articulations from certain graph.
+	/// 
+	/// Performs a Breadth-First Search to construct a graph tree 
+	/// and classify the graph's edges, assert node's depth relative 
+	/// to the search's root, calculate the LowPT for each node and 
+	/// finally select the articulations, if there are any. 
+	/// </summary>
+	/// <param name="graph"></param>
+	/// <returns></returns>
+	public static List<Node> FindArticulations(ISpellGraph graph, Node root)
 	{
-		List<int> lowpts = new List<int>(graph.Count);
+		List<Node> articulations = new List<Node>();
 
-		return lowpts;
+		List<(Node, Node)> treeEdges = new List<(Node, Node)>();
+		Dictionary<Node, int> depths = new Dictionary<Node, int> { { root, 0 }};
+		Dictionary<Node, Node> lowpts = new Dictionary<Node, Node> { { root, root }};
+		
+		void UpdateLowPT(Node node, Node newLowPT)
+		{
+			(Node, Node)[] currEdges;
+			Node curr_node = node;
+			do
+			{
+				if(depths[lowpts[curr_node]] > depths[newLowPT]) lowpts[curr_node] = newLowPT;
+				else break;
+				
+				currEdges = treeEdges.Where(((Node, Node) n) => n.Item2 == curr_node).ToArray();
+				curr_node = currEdges[0].Item1;
+			} while(currEdges.Length > 0);
+		}
+		
+
+		
+		Action<Node, Node>  UnmarkedVisitProcess = (Node current, Node next) =>
+		{
+			treeEdges.Add((current, next));
+			if(depths.Keys.Contains(next)) return;
+			
+			depths.Add(next, depths[current]+1);
+			lowpts.Add(next, next);
+			
+		};
+
+		Action<Node, Node>  MarkedVisitProcess = (Node current, Node next) =>
+		{
+			if(depths[lowpts[current]] > depths[next]) UpdateLowPT(current, next);
+		};
+
+        ForEachNodeByBFSIn(graph, root, null, UnmarkedVisitProcess, MarkedVisitProcess);
+
+		foreach(Node node in graph.Nodes)
+		{
+			if(node == root) continue;
+			foreach(int next in graph.GetNextNodesOf(node))
+			{
+				if(lowpts[graph[next]] == graph[next] || lowpts[graph[next]] == node) 
+				if(!articulations.Contains(node)) articulations.Add(node);
+			}
+		}
+
+		if(treeEdges.Where(((Node, Node) n) => n.Item1 == root || n.Item2 == root).Count() > 1) articulations.Add(root);
+
+		return articulations;
 	}
 
-	public static bool IsGraphConnected(Graph graph) => GetConnectedComponents(graph).Count == 1;
+	/// <summary>
+	/// Returns whether the graph is Bipartite
+	/// </summary>
+	/// <param name="graph">The graph to check</param>
+	/// <returns>true the graph is bipartite, false otherwise.</returns>
 	public static bool IsGraphBipartite(Graph graph)
 	{
 		int brand = 1;
@@ -58,28 +121,37 @@ public class GraphUtil
 		return true;
 	}
 
+	/// <summary>
+	/// Returns a list with the connected components of a given graph.
+	/// </summary>
+	/// <param name="graph">The graph to get connected components from</param>
+	/// <returns>A List with the connected components of the graph</returns>
 	public static List<List<Node>> GetConnectedComponents(Graph graph)
 	{
 		List<List<Node>> connectedComponents = new List<List<Node>>();
 		List<Node> currentComponent = new List<Node>();
-		
-		int remainingCount = graph.Count;
-		Action<Node> process = (Node n) => 
-		{
-			currentComponent.Add(n);
-			remainingCount --;
-		};
 
+        List<Node> remainingNodes = graph.Nodes.ToArray().ToList();
 
-		while(remainingCount > 0)
-		{
-			ForEachNodeByDFSIn(graph, graph.nodes[0], process);
+        Action<Node> visitedNewNode = (Node n) => {remainingNodes.Remove(n); currentComponent.Add(n);};
+
+        
+        while(remainingNodes.Count > 0)
+        {
+           	ForEachNodeByDFSIn(graph, remainingNodes[0], visitedNewNode);
 			connectedComponents.Add(currentComponent);
-			currentComponent = new List<Node>();
-		}
+        }
 		
-		return connectedComponents;
+        
+        return connectedComponents;
 	}
+
+	/// <summary>
+	/// Returns whether the graph is Connected
+	/// </summary>
+	/// <param name="graph">The graph to check</param>
+	/// <returns>true if there is only one connected component in the graph, false otherwise.</returns>
+	public static bool IsGraphConnected(Graph graph) => GetConnectedComponents(graph).Count == 1;
 	
 	/// <summary>
 	/// Runs a full Breadth First Search trought the graph's nodes and executes a choosen expression at each node.
@@ -219,48 +291,12 @@ public class GraphUtil
 		return cycled;
 	}
 
-		/*
-		var nodes = graph.nodes;
-		if(nodes.Count == 0) return false;
-		Dictionary<int, (ESearchState, int)> markedNodes = InitializePairType(nodes.Select(n => n.index).ToList(), (ESearchState.OUT, -1));
-		Stack<int> stack = new Stack<int>();
-		markedNodes[startingNode.index] = (ESearchState.STACKED, startingNode.index);
-		stack.Push(startingNode.index);
-		int currNode = startingNode.index;
-		while (stack.Count > 0)
-		{   
-			
-			foreach(int nextNode in graph.GetNextNodesOf(currNode))
-			{   
-				switch( markedNodes[nextNode].Item1 )
-				{
-					case ESearchState.OUT:
-						stack.Push(nextNode);
-						markedNodes[nextNode] = (ESearchState.STACKED, currNode);
-						break;
-					case ESearchState.VISITED:
-						if(markedNodes[currNode].Item2 != nextNode) { 
-							return true;}
-						break;
-					default:
-						continue;
-				}
-			}
-
-			markedNodes[currNode] = (ESearchState.VISITED, markedNodes[currNode].Item2);
-			currNode = stack.Pop();
-			
-		}  
-		return false;
-		*/
-
-
 	public static void PrintPruffer()
 	{
-		string s = "[b]Pruffer code: { ";
+		string s = "[b]Pruffer code: { [/b]";
 		foreach(int i in TreeToPruffer((Graph)SpellManager.currentSpell.graphData)) 
-			s += TestNodeString(SpellManager.currentSpell.graphData[i]) + " " ;
-		s += "}[/b]" ;
+			s += NodeStringName(SpellManager.currentSpell.graphData[i]) + " " ;
+		s += "[b]}[/b]" ;
 
 		GD.PrintRich(s);
 	}
@@ -273,8 +309,8 @@ public class GraphUtil
 	/// <exception cref="FormatException"></exception>
 	public static List<int> TreeToPruffer(Graph originalGraph)
 	{
-		if(GetConnectedComponents(originalGraph).Count != 1)   	throw new FormatException("The chosen graph is not connected.");
-		if(HasCycle(originalGraph, originalGraph[0]))           throw new FormatException("The chosen graph has cycles.");
+		if(GetConnectedComponents(originalGraph).Count != 1)   	{GD.Print("The chosen graph is not connected."); return null;}
+		if(HasCycle(originalGraph, originalGraph[0]))           {GD.Print("The chosen graph has cycles."); return null;}
 		if(originalGraph.Count < 3) return originalGraph.Nodes.Select((Node n) => n.index).ToList();
 
 		Graph graph = (Graph)originalGraph.Clone();
@@ -320,7 +356,7 @@ public class GraphUtil
 		{
 			foreach(Node n in graph.Nodes)
 			{
-				if(graph.Degree(n) == 1) {
+				if(degrees[n] == 1) {
 					graph.Connect(n, p);
 					degrees[graph[p]]--;
 					degrees[n]--;
@@ -328,10 +364,10 @@ public class GraphUtil
 				}
 			}
 		}
+		
+		List<Node> finalEdge = degrees.Where((pair)=> pair.Value == 1).Select((pair) => pair.Key).ToList();
 
-		graph.Connect(graph.Nodes.Count-1, graph.Nodes.Count-2);
-
-		SpellGraphEditor.Instance.LoadSpellGraph(graph);
+		graph.Connect(finalEdge[0], finalEdge[1]);
 
 		return graph;
 	}

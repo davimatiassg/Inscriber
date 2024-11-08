@@ -16,7 +16,7 @@ public partial class SpellGraphViewer : Control
     [Export] public Control graphArcsMaster;
     [Export] public SpellGraphCamera spellGraphCamera;
     public Dictionary<SpellNode, SpellGraphVisualNode> viewPairs = new Dictionary<SpellNode, SpellGraphVisualNode>();
-    private Dictionary<SpellGraphVisualNode, SpellNode> viewPairsReverse = new Dictionary<SpellGraphVisualNode, SpellNode>();
+    public Dictionary<SpellGraphVisualNode, SpellNode> viewPairsReverse = new Dictionary<SpellGraphVisualNode, SpellNode>();
 
     public void AddNodeViewPair(SpellNode node, SpellGraphVisualNode nodeView)
     {
@@ -86,7 +86,7 @@ public partial class SpellGraphViewer : Control
 
     public void ClearView()
     {
-        foreach(Node n in graphArcsMaster.GetChildren()){ n.QueueFree(); }
+        foreach(Node n in graphNodeMaster.GetChildren()){ n.QueueFree(); }
         foreach(Node n in graphArcsMaster.GetChildren()){ n.QueueFree(); }
         viewPairs.Clear();
         viewPairsReverse.Clear();

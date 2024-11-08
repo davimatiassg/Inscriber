@@ -36,9 +36,10 @@ public partial class AdjacenceListGraph : Graph
 
     public override void Add(Node node)
     {
-        node.index = Nodes.Count;
+        
         if(node == null) return;
-
+        node.index = Nodes.Count;
+        
         Nodes.Add(node);
 
         AdjList.Add(new List<int>());

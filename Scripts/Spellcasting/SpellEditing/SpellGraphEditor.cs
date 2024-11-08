@@ -13,9 +13,13 @@ namespace SpellEditing
 /// <summary>
 /// Class to handle Spell Editor Inputs & UI Behavior
 /// </summary>
-    
+
+
+using GraphType = AdjacenceListGraph;
 public partial class SpellGraphEditor : Control
 {
+
+   
     private enum EEditorState { SPELL_SELECTOR, VIEW_MODE, FREE_MODE, DRAG_MODE, CONNECT_MODE, RUNE_SELECTOR, META_MENU }
     public static Action<SpellGraphVisualNode>    OnStartConnectionAtNode;
     public static Action<SpellGraphVisualNode>    OnEndConnectionAtNode;
@@ -91,18 +95,46 @@ public partial class SpellGraphEditor : Control
         base._Input(@event);
         editorMode._Input(@event);
 
-        if (@event is InputEventKey eventKey && eventKey.Pressed && eventKey.Keycode == Key.P)
-        {
-            var pruffer = GraphUtil.TreeToPruffer((Graph)SpellManager.currentSpell.graphData);
-            string s = "[b]Pruffer code: { ";
-            foreach(int i in pruffer) 
-                s += GraphUtil.TestNodeString(SpellManager.currentSpell.graphData[i]) + " " ;
-            s += "}[/b]" ;
+        if (@event is InputEventKey eventKey && eventKey.Pressed){
+            
+            if(eventKey.Keycode == Key.O)
+            {
+                GraphUtil.PrintPruffer();
+            }
 
-            AdjacenceListGraph g = GraphUtil.ConvertGraphTo<AdjacenceListGraph>((Graph)SpellManager.currentSpell.graphData);
-            g.Edges = new List<(ISpellGraph.Node, ISpellGraph.Node)>();
-            LoadSpellGraph(GraphUtil.PrufferToTree<AdjacenceListGraph>((Graph)SpellManager.currentSpell.graphData, pruffer));
+            if(eventKey.Keycode == Key.P){
+        
+                var pruffer = GraphUtil.TreeToPruffer((Graph)SpellManager.currentSpell.graphData);
+                string s = "[b]Pruffer code: { ";
+                foreach(int i in pruffer) 
+                    s += GraphUtil.TestNodeString(SpellManager.currentSpell.graphData[i]) + " " ;
+                s += "}[/b]" ;
+                
 
+                GraphType g = GraphUtil.ConvertGraphTo<GraphType>((Graph)SpellManager.currentSpell.graphData);
+                
+                g.Edges = new List<(ISpellGraph.Node, ISpellGraph.Node)>();
+
+                LoadSpellGraph(GraphUtil.PrufferToTree<GraphType>(g, pruffer));
+            }
+
+            if (eventKey.Keycode == Key.Enter)
+            {
+                GraphParser.parent = this;
+                GraphParser.OpenGraph<GraphType>();
+                editorMode.ExitModeTo(viewMode);
+            }
+
+            if (eventKey.Keycode == Key.R && editorMode is NodeFocusMode)
+            {
+                string s = "[b]Articulações: {[/b] ";
+                foreach(var node in GraphUtil.FindArticulations((Graph)SpellManager.currentSpell.graphData, graphView.viewPairsReverse[selectedNode]))
+                {
+                    s += ((Rune)node.castable).Name + " ";
+                }
+                s += "[b]}[/b]";
+                GD.Print(s);
+            }
         }
     }
 
@@ -162,16 +194,17 @@ public partial class SpellGraphEditor : Control
 
 
     //STUB!!!!!
-    public void LoadSpellGraph(ISpellGraph graph)
+    public static void LoadSpellGraph(ISpellGraph graph)
     {
-        graphView.ClearView();
+        editorMode.ExitModeTo(viewMode);
+        Instance.graphView.ClearView();
 
         SpellManager.currentSpell.graphData = graph;
 
         if(graph.Count == 0) return;
 
         float angleSpread = 2*Mathf.Pi/graph.Count;
-        Vector2 position = new Vector2(125*graph.Count, 0);
+        Vector2 position = new Vector2(25*graph.Count, 0);
 
         foreach(ISpellGraph.Node graphNode in graph.Nodes)
         {
@@ -189,6 +222,11 @@ public partial class SpellGraphEditor : Control
 
             Instance.graphView.graphArcsMaster.AddChild(source.ConnectTo(target));
         }
+
+        selectedNode = (SpellGraphVisualNode)Instance.graphView.graphNodeMaster.GetChild(0);
+
+        editorMode.ExitModeTo(freeMode);
+
     }
 
 

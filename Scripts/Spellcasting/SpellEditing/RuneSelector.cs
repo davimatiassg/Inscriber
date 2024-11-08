@@ -77,7 +77,7 @@ public partial class RuneSelector : Control
         base._Ready();
         // STUB
         for(int i = 0; i < 9; i++) { AddPlotable(new RuneCreate{ rarity = (Rune.ERuneRarity)(i%9)} ); }
-        for(int i = 0; i < 5; i++){ AddPlotable(new RandomTestRune()); }
+        for(int i = 0; i < 12; i++){ AddPlotable(new RandomTestRune()); }
         // END STUB
 
         if(plotables.Count == 0) {

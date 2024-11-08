@@ -13,6 +13,9 @@ public partial class SpellGraphVisualNode : TextureRect
 {
 	public List<SpellGraphVisualArc> arcs = new List<SpellGraphVisualArc>();
 
+
+	[Export] public Label nameLabel; 
+
 	public new Vector2 Position
 	{
 		get => base.Position + GetRect().Size/2;
@@ -30,10 +33,33 @@ public partial class SpellGraphVisualNode : TextureRect
 		}
 	}
 
+	public SpellGraphVisualNode()
+	{
+		
+	}
+
+	private void InitNameLabel()
+	{	
+		nameLabel = new Label
+        {
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            VerticalAlignment = VerticalAlignment.Top,
+            HorizontalAlignment = HorizontalAlignment.Center,
+			LabelSettings = new LabelSettings{ FontSize = 10 }
+        };
+		AddChild(nameLabel);
+		nameLabel.Position = new Vector2(-135/3, 50);
+		nameLabel.Size = new Vector2I(135, 40);
+	}
+
 	public void UpdateVisuals()
 	{
 		this.Modulate = Rune.ColorByRarity(((Rune)deployable).rarity);
 		this.Texture = deployable.Portrait;
+		if(deployable is CharacterTextRune) { 
+			if(this.nameLabel == null) InitNameLabel();
+			this.nameLabel.Text = ((Rune)deployable).Name; 
+		}
 	}
 	public void UpdateArcPosition() { foreach(SpellGraphVisualArc arc in arcs) arc.UpdatePosition(); }
 

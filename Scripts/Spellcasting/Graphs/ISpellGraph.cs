@@ -26,6 +26,11 @@ public interface ISpellGraph : ICollection<ISpellGraph.Node>
             foreach(Sigil s in sigils) res.Add(s, s.val);
             return res;
         }
+
+        public override string ToString()
+        {
+            return $"index: {index}, CastableName: {((Rune)castable).Name}";
+        }
     }
 
     public Node this[int index] {get; set;}

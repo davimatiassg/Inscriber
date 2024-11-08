@@ -62,14 +62,13 @@ public abstract partial class Rune : Resource, ICastable, SpellEditing.IGraphDep
 public partial class RandomTestRune : Rune
 {
 
+    Texture2D texture;
     public RandomTestRune()
     {
+        string[] names = {"Zeta", "Wave", "Triangles", "Square", "Brushed", "Arrow"}; 
         randomFactor = new Random().Next(0, 90);
-        var names = new List<String>(DirAccess.Open("res://Sprites/Runes/").GetFiles());
-        var nnames = new List<String>();
-        foreach(string name in names) { if(!name.Contains(".import")) {nnames.Add(name);}}
-        imgpath = nnames[randomFactor%nnames.Count()];
         rarity = (ERuneRarity)(randomFactor%9);
+        texture = (Texture2D)ResourceLoader.Load<Texture2D>("res://Sprites/Runes/" + names[randomFactor%names.Length] + ".png");
     }
     private string imgpath;
     private int randomFactor;
@@ -79,9 +78,31 @@ public partial class RandomTestRune : Rune
     public override int Mana => throw new NotImplementedException();
     public override uint CastingTime => throw new NotImplementedException();
     public override string Category { get => "??? - " + randomFactor; }
-    public override string Name { get => Category; set => base.Name = value; }
+
+    private string name;
+    public override string Name { get => name; set => name = value; }
     public override Texture2D Portrait { 
-        get { return (Texture2D)ResourceLoader.Load<Texture2D>("res://Sprites/Runes/" + imgpath); }
+        get  => texture;
     }
     public override Task<CastingResources> Cast(CastingResources res) => throw new NotImplementedException();
+}
+
+
+
+
+
+
+
+
+
+
+
+public partial class CharacterTextRune : RandomTestRune
+{
+    string name;
+    public CharacterTextRune(string text)
+    {
+        this.name = text;   
+    }
+    public override string Name { get => name; set => name = value; }
 }

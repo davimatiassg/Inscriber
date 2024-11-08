@@ -14,7 +14,14 @@ public abstract class Graph : ISpellGraph, ICloneable
     public List<Node> nodes = new List<Node>();
 
     public Node this[int index] { get => nodes[index]; set => nodes[index] = value;}
-    public List<Node> Nodes {get => nodes; set => nodes = value;}
+    public List<Node> Nodes {get => nodes;
+
+        set
+        {
+            if(value != nodes) nodes.Clear(); 
+            foreach(Node n in value) Add(n);
+        }
+    }
     public abstract List<(Node, Node)> Edges {get; set;}
     public Node CreateNode(ICastable c) => new Node {castable = c, index = int.MinValue };
     public abstract void Add(Node node);
@@ -79,13 +86,26 @@ public abstract class Graph : ISpellGraph, ICloneable
     public bool IsComplete() => EdgeAmmount() == nodes.Count*(nodes.Count - 1);
     public int NodeAmmount() => nodes.Count;
 
+
+    /// <summary>
+    /// Runs a repetitive DFS to get each Edge of the graph.
+    /// </summary>
+    /// <returns>A List of Node pairs, which each represent a edge on this graph</returns>
     public List<(Node, Node)> GetEdges()
     {
         List<(Node, Node)> edges = new List<(Node, Node)>  ();
+        List<Node> remainingNodes = this.Nodes.ToArray().ToList();
+
         Action<Node, Node> newEdgeFound = (Node src, Node trg) => edges.Add((src, trg));
 
-        GraphUtil.ForEachNodeByDFSIn(this, nodes[0], null, newEdgeFound);
+        Action<Node> visitedNewNode = (Node n) => remainingNodes.Remove(n);
 
+        
+        while(remainingNodes.Count > 0)
+        {
+            GraphUtil.ForEachNodeByDFSIn(this, remainingNodes[0], visitedNewNode, newEdgeFound);
+        }
+        
         return edges;
     }
 

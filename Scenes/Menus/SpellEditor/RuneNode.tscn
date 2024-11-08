@@ -1,9 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://l6qkejsfbqrm"]
+[gd_scene load_steps=4 format=3 uid="uid://l6qkejsfbqrm"]
 
 [ext_resource type="Texture2D" uid="uid://cmu5snalrqepb" path="res://Sprites/Runes/Arrow.png" id="1_v52of"]
 [ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphVisualNode.cs" id="2_senea"]
 
-[node name="Node" type="TextureRect"]
+[sub_resource type="LabelSettings" id="LabelSettings_53by7"]
+
+[node name="Node" type="TextureRect" node_paths=PackedStringArray("nameLabel")]
 texture_filter = 1
 custom_minimum_size = Vector2(135, 135)
 offset_right = 135.0
@@ -11,5 +13,17 @@ offset_bottom = 135.0
 pivot_offset = Vector2(67, 67)
 texture = ExtResource("1_v52of")
 script = ExtResource("2_senea")
+nameLabel = NodePath("Label")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_top = 133.0
+offset_right = 138.0
+offset_bottom = 156.0
+text = "AAAAAAAAAAAAA"
+label_settings = SubResource("LabelSettings_53by7")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 
 [connection signal="mouse_entered" from="." to="." method="OnMouseEntered"]

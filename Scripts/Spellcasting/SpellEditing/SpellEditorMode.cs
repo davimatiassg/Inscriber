@@ -9,7 +9,7 @@ public abstract class SpellGraphEditorMode
 {
     protected static SpellGraphEditorMode prevMode;
     public Control overlay;
-    protected SpellGraphVisualNode tempSelection;
+    public SpellGraphVisualNode tempSelection;
     protected SpellGraphCamera graphCamera;
     public virtual void EnterModeFrom(SpellGraphEditorMode mode) 
     {
@@ -58,12 +58,6 @@ public class NodeFocusMode : SpellGraphEditorMode
     public override void EnterModeFrom(SpellGraphEditorMode prevMode) 
     { 
         base.EnterModeFrom(prevMode);
-
-
-///STUB!!!!!!!!!!!!!!!!!!!1
-        GraphUtil.PrintPruffer();
-
-
         
         if(tempSelection == null || !tempSelection.IsNodeReady()) { ExitModeTo(prevMode); return; }
         
