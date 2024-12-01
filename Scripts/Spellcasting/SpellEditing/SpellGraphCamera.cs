@@ -16,7 +16,7 @@ public partial class SpellGraphCamera : Camera2D
     }
 
     
-    public void ZoomToFitGraph(SpellGraphViewer graph, Vector2 center) => ZoomToFitChildren(graph.graphNodeMaster, center);
+    public void ZoomToFitGraph(SpellGraphView graph, Vector2 center) => ZoomToFitChildren(graph.graphNodeMaster, center);
 
 
     /// <summary>
@@ -24,7 +24,7 @@ public partial class SpellGraphCamera : Camera2D
     /// </summary>
     /// <param name="graph"> The graph to fit </param>
     /// <param name="center">The position to center the screen on</param>
-    public void ZoomToFitGraph(SpellGraphViewer graph)
+    public void ZoomToFitGraph(SpellGraphView graph)
     {
         if(graph.graphNodeMaster.GetChildCount() < 2) { return; }
 

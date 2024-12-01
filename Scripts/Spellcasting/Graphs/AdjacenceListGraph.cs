@@ -8,8 +8,7 @@ using System.Linq;
 /// Implements a Spell's Simple Graph by storing it on a Adjacence List 
 /// </summary>
 
-using Node = ISpellGraph.Node;
-public partial class AdjacenceListGraph : Graph
+public partial class AdjacenceListGraph<T> : Graph<T> where T : ISpellGraphNode, new()
 {
 
     /// <summary>
@@ -34,11 +33,11 @@ public partial class AdjacenceListGraph : Graph
         GD.Print(s);
     }
 
-    public override void Add(Node node)
+    public override void Add(T node)
     {
         
         if(node == null) return;
-        node.index = Nodes.Count;
+        node.Index = Nodes.Count;
         
         Nodes.Add(node);
 
@@ -46,64 +45,64 @@ public partial class AdjacenceListGraph : Graph
         return;
     }
 
-    public override bool Remove(Node node)
+    public override bool Remove(T node)
     {
         if(node == null || !Nodes.Contains(node)) return false;
-        foreach(List<int> adjs in AdjList) { adjs.Remove(node.index); }
-        AdjList.RemoveAt(node.index);
-        Nodes.RemoveAt(node.index);
+        foreach(List<int> adjs in AdjList) { adjs.Remove(node.Index); }
+        AdjList.RemoveAt(node.Index);
+        Nodes.RemoveAt(node.Index);
         return true;
 
     }
 
-    public override bool ReplaceNode(Node node, ICastable castable)
+    public override bool ReplaceNode(T node, ICastable castable)
     {
         if(node == null || !Nodes.Contains(node)) return false;
-        node.castable = castable;
+        node.Castable = castable;
         return true;
     }
-    public override bool Connect(Node sourceNode, Node targetNode)
+    public override bool Connect(T sourceNode, T targetNode)
     {
         if(AdjacenceBetween(sourceNode, targetNode)) return false;
 
-        AdjList[sourceNode.index].Add(targetNode.index);
-        AdjList[targetNode.index].Add(sourceNode.index);
+        AdjList[sourceNode.Index].Add(targetNode.Index);
+        AdjList[targetNode.Index].Add(sourceNode.Index);
 
         return true;
     }
 
-    public override bool Disconnect(Node sourceNode, Node targetNode)
+    public override bool Disconnect(T sourceNode, T targetNode)
     {
         if(!AdjacenceBetween(sourceNode, targetNode)) return false;
 
-        AdjList[sourceNode.index].Remove(targetNode.index);
-        AdjList[targetNode.index].Remove(sourceNode.index);
+        AdjList[sourceNode.Index].Remove(targetNode.Index);
+        AdjList[targetNode.Index].Remove(sourceNode.Index);
         return true;
     }
 
 
 
-    public override List<int> GetNextNodesOf(Node node) => AdjList[node.index];
-    public override void SetNextNodesOf(Node node, List<Node> nodes)
+    public override List<int> GetNextNodesOf(T node) => AdjList[node.Index];
+    public override void SetNextNodesOf(T node, List<T> nodes)
     {
-        foreach(int n in AdjList[node.index]) { AdjList[n].Remove(node.index); }
-        AdjList[node.index] = nodes.Select((Node n) => n.index).ToList();
-        foreach(int n in AdjList[node.index]) { AdjList[n].Add(node.index); }
+        foreach(int n in AdjList[node.Index]) { AdjList[n].Remove(node.Index); }
+        AdjList[node.Index] = nodes.Select((T n) => n.Index).ToList();
+        foreach(int n in AdjList[node.Index]) { AdjList[n].Add(node.Index); }
     }
 
 
-    public override List<(Node, Node)> Edges { 
+    public override List<(T, T)> Edges { 
         get => GetEdges(); 
         set
         {
             foreach(List<int> l in AdjList) {l.Clear();}
-            foreach((Node src, Node trg) in value) { Connect(src, trg); } 
+            foreach((T src, T trg) in value) { Connect(src, trg); } 
         }
     }
 
     
     public override Object Clone() {
-        AdjacenceListGraph graph = new AdjacenceListGraph();
+        AdjacenceListGraph<T> graph = new AdjacenceListGraph<T>();
         graph.Nodes = this.Nodes;
         graph.Edges = this.Edges;
         return graph;

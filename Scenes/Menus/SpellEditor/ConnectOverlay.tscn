@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://jq7ps350h34u"]
 
-[ext_resource type="Texture2D" uid="uid://ykbcl8ymcjni" path="res://Sprites/Menus/SpellEditor/Connect-overlay.png" id="1_n4pkc"]
+[ext_resource type="Texture2D" uid="uid://ykbcl8ymcjni" path="res://Sprites/Menus/SpellEditorStateMachine/Connect-overlay.png" id="1_n4pkc"]
 
 [node name="connectOverlay" type="Control"]
 layout_mode = 3

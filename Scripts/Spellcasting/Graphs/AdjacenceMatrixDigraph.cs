@@ -7,8 +7,7 @@ using System.Linq;
 /// <summary>
 /// Implements a Spell's Directed Graph by storing it on a Adjacence Matrix 
 /// </summary>
-using Node = ISpellGraph.Node;
-public partial class AdjacenceMatrixDigraph : Digraph
+public partial class AdjacenceMatrixDigraph<T> : Digraph<T> where T : ISpellGraphNode, new()
 {
 
     /// <summary>
@@ -33,7 +32,7 @@ public partial class AdjacenceMatrixDigraph : Digraph
 
     
 
-    public override void Add(Node node)
+    public override void Add(T node)
     {
         nodes.Add(node);
         activeSize++;
@@ -43,49 +42,49 @@ public partial class AdjacenceMatrixDigraph : Digraph
         while(AdjMatrix.Last().Count < AdjMatrix.Count-1) AdjMatrix.Last().Add(false);
         for(int i = 0; i < AdjMatrix.Count; i++) AdjMatrix[i].Add(false);
 
-        if(node.index == int.MinValue) node.index = (int)nodes.Count-1;
+        if(node.Index == int.MinValue) node.Index = (int)nodes.Count-1;
 
         return;
     }
 
-    public override bool Connect(Node sourceNode, Node targetNode)
+    public override bool Connect(T sourceNode, T targetNode)
     {
         if(sourceNode == null || targetNode == null) {  return false; }
-        AdjMatrix[sourceNode.index][targetNode.index] = true;
+        AdjMatrix[sourceNode.Index][targetNode.Index] = true;
         return true;
     }
 
-    public override bool Disconnect(Node sourceNode, Node targetNode)
+    public override bool Disconnect(T sourceNode, T targetNode)
     {
         if(sourceNode == null || targetNode == null) return false;
-        if(!AdjMatrix[sourceNode.index][targetNode.index]) return false;
-        AdjMatrix[sourceNode.index][targetNode.index] = false;
+        if(!AdjMatrix[sourceNode.Index][targetNode.Index]) return false;
+        AdjMatrix[sourceNode.Index][targetNode.Index] = false;
         return true;
     }
 
-    public override List<int> GetNextNodesOf(Node node)
+    public override List<int> GetNextNodesOf(T node)
     {
         List<int> nexts = new List<int>();
         if(node == null) return nexts;
-        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[node.index][i]) { nexts.Add(i); } }
+        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[node.Index][i]) { nexts.Add(i); } }
         return nexts;
     }
 
-    public override List<int> GetPrevNodesOf(Node node)
+    public override List<int> GetPrevNodesOf(T node)
     {
         List<int> prevs = new List<int>();
         if(node == null) return prevs;
-        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[i][node.index]) { prevs.Add(i); } }
+        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[i][node.Index]) { prevs.Add(i); } }
         return prevs;
     }
 
-    private bool DisconnectNode(Node node)
+    private bool DisconnectNode(T node)
     {
         if(node == null) return false;
         for(int i = 0; i < nodes.Count; i++)
         {
-           AdjMatrix[node.index][i] = false;
-           AdjMatrix[i][node.index] = false;
+           AdjMatrix[node.Index][i] = false;
+           AdjMatrix[i][node.Index] = false;
         }
         return true;
     }
@@ -97,11 +96,11 @@ public partial class AdjacenceMatrixDigraph : Digraph
     /// </summary>
     /// <param name="node">The node to be taken out of the graph</param>
     /// <returns></returns>
-    public override bool Remove(Node node)
+    public override bool Remove(T node)
     {
         if(!DisconnectNode(node)) return false;
-        removedIndexes.Add(node.index);
-        nodes[node.index] = null;
+        removedIndexes.Add(node.Index);
+        nodes[node.Index] = default;
         DefragmentArray();
         return true;
     }
@@ -140,7 +139,7 @@ public partial class AdjacenceMatrixDigraph : Digraph
         
         
         nodes[n] = nodes[activeSize];
-        nodes[n].index = n;
+        nodes[n].Index = n;
     }
 
     void ReduceArray()
@@ -152,30 +151,30 @@ public partial class AdjacenceMatrixDigraph : Digraph
         AdjMatrix.RemoveRange(activeSize, AdjMatrix.Count-activeSize);
     }
 
-    public override List<(Node, Node)> Edges { 
+    public override List<(T, T)> Edges { 
         get => GetEdges(); 
         set
         {
             foreach(List<bool> adjacences in AdjMatrix) for(int i = 0; i < adjacences.Count; i++) adjacences[i] = false;
-            foreach((Node src, Node trg) in value) AdjMatrix[src.index][trg.index] = true;
+            foreach((T src, T trg) in value) AdjMatrix[src.Index][trg.Index] = true;
         }
     }
 
-    public override void SetNextNodesOf(Node node, List<Node> nodes)
+    public override void SetNextNodesOf(T node, List<T> nodes)
     {
-        Disconnect(node.index, this.nodes.Select((Node n) => n.index).ToList());
-        Connect(node.index, nodes.Select((Node n) => n.index).ToList());
+        Disconnect(node.Index, this.nodes.Select((T n) => n.Index).ToList());
+        Connect(node.Index, nodes.Select((T n) => n.Index).ToList());
     }
-    public override void SetPrevNodesOf(Node node, List<Node> nodes)
+    public override void SetPrevNodesOf(T node, List<T> nodes)
     {
-        Disconnect(this.nodes.Select((Node n) => n.index).ToList(), node.index);
-        Connect(nodes.Select((Node n) => n.index).ToList(), node.index);
+        Disconnect(this.nodes.Select((T n) => n.Index).ToList(), node.Index);
+        Connect(nodes.Select((T n) => n.Index).ToList(), node.Index);
     }
 
-    public override bool ReplaceNode(Node node, ICastable castable)
+    public override bool ReplaceNode(T node, ICastable castable)
     {
         if(node == null || !nodes.Contains(node)) return false;
-        node.castable = castable;
+        node.Castable = castable;
         return true;
     }
 }

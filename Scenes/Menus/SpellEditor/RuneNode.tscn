@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://l6qkejsfbqrm"]
 
 [ext_resource type="Texture2D" uid="uid://cmu5snalrqepb" path="res://Sprites/Runes/Arrow.png" id="1_v52of"]
-[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphVisualNode.cs" id="2_senea"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphViewer.cs" id="2_senea"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_53by7"]
 

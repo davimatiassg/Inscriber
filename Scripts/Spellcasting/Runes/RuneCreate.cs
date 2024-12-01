@@ -7,20 +7,35 @@ public partial class RuneCreate : Rune
 {
     public override string Name { 
         get { return rarity.ToString() + " Create"; } 
-        set => throw new System.InvalidOperationException("You can not rename a create rune!"); 
+        set => throw new System.InvalidOperationException("You can not rename a Create rune!"); 
         }
+
+    public override CastingResources CastDefaults
+    { get{
+        CastingResources res = new CastingResources
+        {
+            { "CASTER", CastParam.ECastParamType.TARGET },
+            { "POSITION", CastParam.ECastParamType.VECTOR2 },
+            { "PACKED_OBJECT", CastParam.ECastParamType.STRING }
+        };
+        return res;
+    } }
     public override CastingResources CastRequirements
     { get{
-        CastingResources res = new CastingResources();
-        res.Add("CASTER", CastParam.ECastParamType.VECTOR2);
-        res.Add("POSITION", CastParam.ECastParamType.VECTOR2);
-        res.Add("PACKED_OBJECT", CastParam.ECastParamType.STRING);
+        CastingResources res = new CastingResources
+        {
+            { "CASTER", CastParam.ECastParamType.TARGET },
+            { "POSITION", CastParam.ECastParamType.VECTOR2 },
+            { "PACKED_OBJECT", CastParam.ECastParamType.STRING }
+        };
         return res;
     } }
     public override CastingResources CastReturns
     { get{
-        CastingResources res = new CastingResources();
-        res.Add("OBJECT", CastParam.ECastParamType.NODE2D);
+        CastingResources res = new CastingResources
+        {
+            { "OBJECT", CastParam.ECastParamType.NODE2D }
+        };
         return res;
     } }
     public override uint CastingTime
@@ -31,13 +46,13 @@ public partial class RuneCreate : Rune
     {get{ return 50 - (int)rarity*5; }}
     public override string Category { get => "Create Rune"; }
     public override Texture2D Portrait { 
-        get { return (Texture2D)ResourceLoader.Load<Texture2D>("res://Sprites/Runes/Wave.png"); }
+        get { return ResourceLoader.Load<Texture2D>("res://Sprites/Runes/Wave.png"); }
     }
 
     public override async Task<CastingResources> Cast(CastingResources res)
     {
         await Task.Delay((int)this.CastingTime);
-        res.Merge(GatherResources());
+        res.Merge(SigilResources);
 
         Node2D spawn;
         unsafe {

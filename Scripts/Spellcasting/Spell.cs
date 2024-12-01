@@ -3,55 +3,28 @@ using System.Threading.Tasks;
 using System.Linq;
 using Godot;
 
-
-using Node = ISpellGraph.Node;
-
 /// <summary>
 /// Represents a Spell during Runtime.
 /// Is agnostic to graph's storage strategy.
 /// </summary>
-/// 
-using GraphType = AdjacenceListGraph;
+using GraphType = AdjacenceListGraph<DefaultSpellGraphNode>;
+using SpellEditing;
+
 [GlobalClass]
 public partial class Spell : Resource, ICastable
 {
-
-	
 	public bool isValid = true;
-
-	// Class for the nodes of the Spellcasting graph
-
-	/*public struct Node : ICastable
-	{
-		uint index;
-		public ICastable castable;
-		public Task<CastingResources> castStatus;
-		public CastingResources CastRequirements { get { return castable.CastRequirements; } }
-		public CastingResources CastReturns { get { return castable.CastReturns; } }
-
-		public uint CastingTime => castable.CastingTime;
-
-		public uint Cooldown => castable.Cooldown;
-
-		public int Mana => castable.Mana;
-
-		public async Task<CastingResources> Cast(CastingResources data)
-		{
-			return await castable.Cast(data);
-		}
-
-	}*/
 	
 	
 #region SPELL_DATA
 
-	public ISpellGraph graphData;
+	public ISpellGraph<ISpellGraphNode> graphData;
 	protected CastingResources castReqs;
 	public CastingResources CastRequirements 
 	{   get
 		{
 			castReqs = new CastingResources();
-			GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (Node currNode) => castRets.Merge(currNode.castable.CastRequirements));
+			GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (currNode) => castRets.Merge(currNode.Castable.CastRequirements));
 			return castReqs;
 		}
 	}
@@ -60,8 +33,18 @@ public partial class Spell : Resource, ICastable
 	{   
 		get{
 			castRets = new CastingResources();
-			GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (Node currNode) => castRets.Merge(currNode.castable.CastReturns));
+			GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (currNode) => castRets.Merge(currNode.Castable.CastReturns));
 			return castRets;
+		}
+	}
+
+	protected CastingResources castDefs;
+	public CastingResources CastDefaults
+	{   
+		get{
+			castDefs = new CastingResources();
+			GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (currNode) => castRets.Merge(currNode.Castable.CastDefaults));
+			return castDefs;
 		}
 	}
 	public uint Cooldown { 
@@ -69,14 +52,14 @@ public partial class Spell : Resource, ICastable
 		get  
 		{ 
 			uint cd = 0;
-			GraphUtil.ForEachNodeIn(graphData, (Node node) => cd += node.castable.Cooldown );
+			GraphUtil.ForEachNodeIn(graphData, (node) => cd += node.Castable.Cooldown );
 			return cd;
 		}
 	}
 	public int Mana { 
 		get{
 			int mana = 0;
-			GraphUtil.ForEachNodeIn(graphData, (Node node) => mana += node.castable.Mana );
+			GraphUtil.ForEachNodeIn(graphData, (node) => mana += node.Castable.Mana );
 			return mana;
 		}  
 	}
@@ -85,16 +68,28 @@ public partial class Spell : Resource, ICastable
 		get  
 		{ 
 			uint ct = 0;
-			GraphUtil.ForEachNodeIn(graphData, (Node node) => ct += node.castable.CastingTime );
+			GraphUtil.ForEachNodeIn(graphData, (node) => ct += node.Castable.CastingTime );
 			return ct;
 		}
 	}
-#endregion SPELL_DATA
-	
 
-	public Spell()
+    public Texture2D Portrait => throw new NotImplementedException();
+
+    public string Category => throw new NotImplementedException();
+
+    public string Description => throw new NotImplementedException();
+
+    public Color Color => throw new NotImplementedException();
+
+    string IMagicSymbol.Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+
+    #endregion SPELL_DATA
+
+
+    public Spell()
 	{
-		graphData = new GraphType();
+		graphData = (ISpellGraph<ISpellGraphNode>) new GraphType();
 	}
 	
 	/// <summary>
@@ -108,24 +103,17 @@ public partial class Spell : Resource, ICastable
 	=>  (
 			await Task.WhenAll
 			(
-				graphData.Nodes.Where((Node n) => graphData.GetNextNodesOf(n).Count == 0).
-				Select(async (Node n, int idx) => await PreviousCastings(data, n))
+				graphData.Nodes.Where((n) => graphData.GetNextNodesOf(n).Count == 0).
+				Select(async (n, idx) => await PreviousCastings(data, n))
 			)
 		).Aggregate((CastingResources totalRes, CastingResources newRes) => totalRes+newRes);
 	
-	private async Task<CastingResources> PreviousCastings(CastingResources data, Node current)
+	private async Task<CastingResources> PreviousCastings(CastingResources data, ISpellGraphNode current)
 	{
-		/*data += current.GetSigilResources();
-		data += (
-				await Task.WhenAll(
-					graphData.GetPrevNodesOf(current).
-					Select(async (int nodeIndex, int idx) => await PreviousCastings(data, graphData[nodeIndex]))
-				)
-			).Aggregate((CastingResources totalRes, CastingResources newRes) => totalRes+newRes);
-		
-		data += await current.castable.Cast(data);*/
 		return data;
 	}
 
+
+	
 
 }

@@ -24,11 +24,19 @@ public class GraphParser
         parent.AddChild(fileDialog);
         
     }
-    public static void OpenGraph<T>() where T : ISpellGraph, new()
+
+    public static void OpenGraph<TGraph, TNode>() 
+        where TGraph : ISpellGraph<TNode>, new()
+        where TNode :  ISpellGraphNode, new()
     {
         if(fileDialog == null) { InitiateDialog(parent); }
-        fileDialog.FileSelected += (string path) => SpellGraphEditor.LoadSpellGraph(ParseGraphFile<T>(path));
+
+
+        // HACK This does nothing! 
+        fileDialog.FileSelected += (string path) => ParseGraphFile<TGraph, TNode>(path);
+        
         fileDialog.PopupCentered();
+
     }
 
     
@@ -38,7 +46,9 @@ public class GraphParser
     /// <typeparam name="TGraph">The representation of the Graph.</typeparam>
     /// <param name="filePath">The path of the file to be read.</param>
     /// <returns>The graph contained in the specified file;</returns>
-    public static ISpellGraph ParseGraphFile<TGraph>(string filePath) where TGraph : ISpellGraph, new()
+    public static TGraph ParseGraphFile<TGraph, TNode>(string filePath) 
+        where TGraph : ISpellGraph<TNode>, new()
+        where TNode :  ISpellGraphNode, new()
     {
 
         TGraph graph = new TGraph();

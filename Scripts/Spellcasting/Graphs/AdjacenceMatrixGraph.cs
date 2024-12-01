@@ -7,13 +7,11 @@ using System.Linq;
 /// <summary>
 /// Implements a Spell's Simple Graph by storing it on a Adjacence Matrix 
 /// </summary>
-
-using Node = ISpellGraph.Node;
-public partial class AdjacenceMatrixGraph : Graph
+public partial class AdjacenceMatrixGraph<T> : Graph<T> where T : ISpellGraphNode, new()
 {
 
     /// <summary>
-    /// An array that stores nodes by index. 
+    /// An array that stores nodes by Index. 
     /// AdjMatrix[x][y] returns whether there is an arc from node x to node y.
     /// </summary>
     protected List<List<bool>> AdjMatrix = new List<List<bool>>();
@@ -30,9 +28,9 @@ public partial class AdjacenceMatrixGraph : Graph
         GD.Print(s);
     }
 
-    public override void Add(Node node)
+    public override void Add(T node)
     {
-        node.index = nodes.Count;
+        node.Index = nodes.Count;
         if(node == null) return;
         
         nodes.Add(node);
@@ -43,28 +41,28 @@ public partial class AdjacenceMatrixGraph : Graph
         return;
     }
 
-    public override bool Remove(Node node)
+    public override bool Remove(T node)
     {
         if(node == null || !nodes.Contains(node)) return false;
         int lastIndex = nodes.Count()-1;
-        for(int i = 0; i < node.index; i++)             AdjMatrix[node.index][i] = AdjMatrix[lastIndex][i];
-        for(int i = node.index+1; i < lastIndex; i++)   AdjMatrix[i][node.index] = AdjMatrix[lastIndex][i];
-                                                        AdjMatrix[node.index][node.index] = AdjMatrix[lastIndex][lastIndex];
+        for(int i = 0; i < node.Index; i++)             AdjMatrix[node.Index][i] = AdjMatrix[lastIndex][i];
+        for(int i = node.Index+1; i < lastIndex; i++)   AdjMatrix[i][node.Index] = AdjMatrix[lastIndex][i];
+                                                        AdjMatrix[node.Index][node.Index] = AdjMatrix[lastIndex][lastIndex];
         nodes.RemoveAt(lastIndex);
         AdjMatrix.RemoveAt(lastIndex);
         return true;
 
     }
 
-    public override bool ReplaceNode(Node node, ICastable castable)
+    public override bool ReplaceNode(T node, ICastable castable)
     {
         if(node == null || !nodes.Contains(node)) return false;
-        node.castable = castable;
+        node.Castable = castable;
         return true;
     }
-    public override bool Connect(Node sourceNode, Node targetNode)
+    public override bool Connect(T sourceNode, T targetNode)
     {
-        (int, int) pair = sourceNode.index > targetNode.index? (sourceNode.index, targetNode.index) : (targetNode.index, sourceNode.index);
+        (int, int) pair = sourceNode.Index > targetNode.Index? (sourceNode.Index, targetNode.Index) : (targetNode.Index, sourceNode.Index);
         GD.Print($"({pair.Item1}, {pair.Item2}). max INDEX: ({AdjMatrix.Count-1},{AdjMatrix[AdjMatrix.Count-1].Count-1})");
         if(sourceNode == null || targetNode == null) {  return false; }
         AdjMatrix[pair.Item1][pair.Item2] = true;   
@@ -73,44 +71,44 @@ public partial class AdjacenceMatrixGraph : Graph
         return true;
     }
 
-    public override bool Disconnect(Node sourceNode, Node targetNode)
+    public override bool Disconnect(T sourceNode, T targetNode)
     {
-        (int, int) pair = sourceNode.index > targetNode.index? (sourceNode.index, targetNode.index) : (targetNode.index, sourceNode.index);
+        (int, int) pair = sourceNode.Index > targetNode.Index? (sourceNode.Index, targetNode.Index) : (targetNode.Index, sourceNode.Index);
         if(sourceNode == null || targetNode == null) {  return false; }
         AdjMatrix[pair.Item1][pair.Item2] = false;
         return true;
     }
 
-    public override List<int> GetNextNodesOf(Node node)
+    public override List<int> GetNextNodesOf(T node)
     {
         List<int> nexts = new List<int>();
         if(node == null) return nexts;
 
-        for(int i = 0; i < node.index; i++)             if(AdjMatrix[node.index][i]) { nexts.Add(i); } 
-        for(int i = node.index; i < nodes.Count; i++)   if(AdjMatrix[i][node.index]) { nexts.Add(i); }
+        for(int i = 0; i < node.Index; i++)             if(AdjMatrix[node.Index][i]) { nexts.Add(i); } 
+        for(int i = node.Index; i < nodes.Count; i++)   if(AdjMatrix[i][node.Index]) { nexts.Add(i); }
 
         return nexts;
     }
 
-    public override void SetNextNodesOf(Node node, List<Node> nodes)
+    public override void SetNextNodesOf(T node, List<T> nodes)
     {
-        Disconnect(node.index, this.nodes.Select((Node n) => n.index).ToList());
-        Connect(node.index, nodes.Select((Node n) => n.index).ToList());
+        Disconnect(node.Index, this.nodes.Select((T n) => n.Index).ToList());
+        Connect(node.Index, nodes.Select((T n) => n.Index).ToList());
     }
 
-    public override List<(Node, Node)> Edges { 
+    public override List<(T, T)> Edges { 
         get => GetEdges(); 
         set
         {
             foreach(List<bool> adjacences in AdjMatrix) for(int i = 0; i < adjacences.Count; i++) adjacences[i] = false;
-            foreach((Node src, Node trg) in value) AdjMatrix[Math.Max(src.index, trg.index)][Math.Min(src.index, trg.index)] = true;
+            foreach((T src, T trg) in value) AdjMatrix[Math.Max(src.Index, trg.Index)][Math.Min(src.Index, trg.Index)] = true;
         }
     }
 
 
 
     public override Object Clone() {
-        AdjacenceMatrixGraph graph = new AdjacenceMatrixGraph();
+        AdjacenceMatrixGraph<T> graph = new AdjacenceMatrixGraph<T>();
         graph.Nodes = this.Nodes;
         graph.Edges = this.Edges;
         return graph;

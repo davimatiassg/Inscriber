@@ -8,8 +8,7 @@ using System.Linq;
 /// Implements a Spell's Simple Graph by storing it on a Incidence Matrix 
 /// </summary>
 
-using Node = ISpellGraph.Node;
-public partial class IncidenceMatrixGraph : Graph
+public partial class IncidenceMatrixGraph<T> : Graph<T> where T : ISpellGraphNode, new()
 {
     /// <summary>
     /// The incidence matrix that stores arcs data in the graph. 
@@ -27,38 +26,38 @@ public partial class IncidenceMatrixGraph : Graph
         } s+="\n"; }
         GD.Print(s);
     }
-    public override void Add(Node node)
+    public override void Add(T node)
     {
         nodes.Add(node);
         if(node == null) return;
-        if(node.index == int.MinValue) node.index = (int)nodes.Count-1;
+        if(node.Index == int.MinValue) node.Index = (int)nodes.Count-1;
 
         for(int i = 0; i < IncMatrix.Count; i++)
         {
-            IncMatrix[i].Insert(node.index, false);
+            IncMatrix[i].Insert(node.Index, false);
         }       
 
         return;
     }
-    public override bool Connect(Node sourceNode, Node targetNode)
+    public override bool Connect(T sourceNode, T targetNode)
     {
         if(sourceNode == null || targetNode == null) {  return false; }
         IncMatrix.Add(new List<bool>(nodes.Count));
 
-        foreach(Node _n in nodes) IncMatrix[IncMatrix.Count-1].Add(false); 
+        foreach(T _n in nodes) IncMatrix[IncMatrix.Count-1].Add(false); 
 
-        IncMatrix[IncMatrix.Count-1][sourceNode.index] = true;
-        IncMatrix[IncMatrix.Count-1][targetNode.index] = true;
+        IncMatrix[IncMatrix.Count-1][sourceNode.Index] = true;
+        IncMatrix[IncMatrix.Count-1][targetNode.Index] = true;
         return true;
     }
-    public override bool Disconnect(Node sourceNode, Node targetNode)
+    public override bool Disconnect(T sourceNode, T targetNode)
     {
         if(sourceNode == null || targetNode == null) return false;
 
         for(int i = 0; i<IncMatrix.Count; i++)
         {
-            if( IncMatrix[i][sourceNode.index] == true && 
-                IncMatrix[i][targetNode.index] == true)
+            if( IncMatrix[i][sourceNode.Index] == true && 
+                IncMatrix[i][targetNode.Index] == true)
             {
                 IncMatrix.RemoveAt(i);
                 return true;
@@ -68,25 +67,25 @@ public partial class IncidenceMatrixGraph : Graph
     }
     
 
-    public override List<int> GetNextNodesOf(Node node)
+    public override List<int> GetNextNodesOf(T node)
     {
         List<int> nexts = new List<int>();
         if(node == null) return nexts;
         for (int i = 0; i < IncMatrix.Count; i++)
         {
-            if(IncMatrix[i][node.index] != true) continue;
+            if(IncMatrix[i][node.Index] != true) continue;
             for(int j = 0; j < nodes.Count; j++)
-            { if(j != node.index && IncMatrix[i][j]) nexts.Add(j); }
+            { if(j != node.Index && IncMatrix[i][j]) nexts.Add(j); }
         }
         return nexts;
     }
 
-    private bool DisconnectNode(Node node)
+    private bool DisconnectNode(T node)
     {
         if(node == null) return false;
         for(int i = IncMatrix.Count-1; i >= 0; i--)
         {
-            if(IncMatrix[i][node.index] == true) IncMatrix.RemoveAt(i);
+            if(IncMatrix[i][node.Index] == true) IncMatrix.RemoveAt(i);
         }
         return true;
     }
@@ -97,40 +96,40 @@ public partial class IncidenceMatrixGraph : Graph
     /// </summary>
     /// <param name="node">The node to be taken out of the graph</param>
     /// <returns></returns>
-    public override bool Remove(Node node)
+    public override bool Remove(T node)
     {
         if(!DisconnectNode(node)) return false;
-        foreach(List<bool> arc in IncMatrix) arc.RemoveAt(node.index);
+        foreach(List<bool> arc in IncMatrix) arc.RemoveAt(node.Index);
         return true;
     }
 
-    public override bool ReplaceNode(Node node, ICastable castable)
+    public override bool ReplaceNode(T node, ICastable castable)
     {
         if(node == null) return false;
-        node.castable = castable;
+        node.Castable = castable;
         return true;
     }
 
-    public override void SetNextNodesOf(Node node, List<Node> nodes)
+    public override void SetNextNodesOf(T node, List<T> nodes)
     {
         for(int i = IncMatrix.Count-1; i >= 0; i--)
         {
-            if(IncMatrix[i][node.index] == true) IncMatrix.RemoveAt(i);
+            if(IncMatrix[i][node.Index] == true) IncMatrix.RemoveAt(i);
         }
-        Connect(node.index, nodes.Select((Node n) => n.index).ToList());
+        Connect(node.Index, nodes.Select((T n) => n.Index).ToList());
     }
-    public override List<(Node, Node)> Edges { 
+    public override List<(T, T)> Edges { 
         get => GetEdges();
         set
         {
             IncMatrix.Clear();
-            foreach((Node src, Node trg) in value) Connect(src, trg);
+            foreach((T src, T trg) in value) Connect(src, trg);
         }
     }
 
     
     public override Object Clone() {
-        IncidenceMatrixGraph graph = new IncidenceMatrixGraph();
+        IncidenceMatrixGraph<T> graph = new IncidenceMatrixGraph<T>();
         graph.Nodes = this.Nodes;
         graph.Edges = this.Edges;
         return graph;

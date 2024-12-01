@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b3iqd5v0ntfk6"]
 
-[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphViewer.cs" id="1_1afin"]
+[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphView.cs" id="1_p27kb"]
 [ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphCamera.cs" id="2_kv6kc"]
 
 [node name="Graph" type="Control" node_paths=PackedStringArray("graphNodeMaster", "graphArcsMaster", "spellGraphCamera")]
@@ -12,10 +12,16 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-script = ExtResource("1_1afin")
+script = ExtResource("1_p27kb")
 graphNodeMaster = NodePath("Nodes")
 graphArcsMaster = NodePath("Arcs")
 spellGraphCamera = NodePath("Camera2D")
+
+[node name="Nodes" type="Control" parent="."]
+z_index = 6
+anchors_preset = 0
+offset_right = 640.0
+offset_bottom = 360.0
 
 [node name="Arcs" type="Control" parent="."]
 z_index = 5
@@ -25,12 +31,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Nodes" type="Control" parent="."]
-z_index = 6
-anchors_preset = 0
-offset_right = 640.0
-offset_bottom = 360.0
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(4, 4)

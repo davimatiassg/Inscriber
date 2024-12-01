@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 
-public abstract partial class Rune : Resource, ICastable, SpellEditing.IGraphDeployable
+public abstract partial class Rune : Resource, ICastable, SpellEditing.IMagicSymbol
 {
     public enum ERuneRarity : int { Dull = 0, Common, Uncommon, Rare, Mithic, Arcane, Primal, Profane, Divine }
     public ERuneRarity rarity;
@@ -14,6 +14,8 @@ public abstract partial class Rune : Resource, ICastable, SpellEditing.IGraphDep
     {   get { return rarity.ToString() + " ???"; } 
         set => throw new System.InvalidOperationException("You can not rename a unknown rune!"); }
     public List<Sigil> sigils = new List<Sigil>();
+    public abstract CastingResources CastDefaults 
+    { get; }
     public abstract CastingResources CastRequirements
     { get; }
     public abstract CastingResources CastReturns
@@ -24,12 +26,13 @@ public abstract partial class Rune : Resource, ICastable, SpellEditing.IGraphDep
     { get; }
     public abstract uint CastingTime
     { get; }
-    public virtual Color Color { get => ColorByRarity(rarity); }
-    public virtual string Category { get => "Unknown Rune";  }
+    public virtual Color Color => ColorByRarity(rarity);
+    public virtual string Category => "Unknown Rune"; 
+    public virtual string Description => "No Effect";
 
-    public CastingResources GatherResources()
+    public CastingResources SigilResources
     {
-        return CastingResources.Merge(sigils.Select<Sigil, CastingResources>(i => i.AsCastingResource).ToArray());
+        get => CastingResources.Merge(sigils.Select(sigil => sigil.AsCastingResource).ToArray());
     }
     public abstract Task<CastingResources> Cast(CastingResources res);
 
@@ -72,8 +75,9 @@ public partial class RandomTestRune : Rune
     }
     private string imgpath;
     private int randomFactor;
-    public override CastingResources CastRequirements => throw new NotImplementedException();
-    public override CastingResources CastReturns => throw new NotImplementedException();
+    public override CastingResources CastDefaults => new CastingResources();
+    public override CastingResources CastRequirements => new CastingResources();
+    public override CastingResources CastReturns => new CastingResources();
     public override uint Cooldown => throw new NotImplementedException();
     public override int Mana => throw new NotImplementedException();
     public override uint CastingTime => throw new NotImplementedException();
@@ -84,6 +88,9 @@ public partial class RandomTestRune : Rune
     public override Texture2D Portrait { 
         get  => texture;
     }
+
+    
+
     public override Task<CastingResources> Cast(CastingResources res) => throw new NotImplementedException();
 }
 

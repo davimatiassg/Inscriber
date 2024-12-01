@@ -9,25 +9,30 @@ using System.Linq;
 /// Implements a Spell's Directed Graph by storing it on a Adjacence Matrix 
 /// </summary>
 
-using Node = ISpellGraph.Node;
-public abstract partial class Digraph : ISpellGraph
+public abstract partial class Digraph<T> : ISpellDigraph<T> where T: ISpellGraphNode, new()
 {
-    public List<Node> nodes = new List<Node>();
+    public List<T> nodes = new List<T>();
 
-    public Node this[int index] { get => nodes[index]; set => nodes[index] = value;}
-    public Node CreateNode(ICastable c) => new Node {castable = c, index = int.MinValue };
-    public abstract void Add(Node node);
+    public T this[int index] { get => nodes[index]; set => nodes[index] = value;}
+    public T CreateNode(ICastable c)
+    {
+        T node = new T();
+        node.Castable = c;
+        node.Index = int.MinValue;
+        return node;
+    }
+    public abstract void Add(T node);
     public          void Add(ICastable castable) => Add(CreateNode(castable));
 
-    public abstract bool Remove(Node node);
+    public abstract bool Remove(T node);
     public          bool Remove(int idx) => Remove(nodes[idx]);
 
-    public abstract bool ReplaceNode(Node node, ICastable castable);
+    public abstract bool ReplaceNode(T node, ICastable castable);
     public          bool ReplaceNode(int idx, ICastable castable) => ReplaceNode(nodes[idx], castable);
     
-    public abstract bool Connect(Node sourceNode, Node targetNode);
-    public          bool Connect(int sourceNodeIndex, Node targetNode) => Connect(nodes[sourceNodeIndex], targetNode);
-    public          bool Connect(Node sourceNode, int targetNodeIndex) => Connect(sourceNode, nodes[targetNodeIndex]);
+    public abstract bool Connect(T sourceNode, T targetNode);
+    public          bool Connect(int sourceNodeIndex, T targetNode) => Connect(nodes[sourceNodeIndex], targetNode);
+    public          bool Connect(T sourceNode, int targetNodeIndex) => Connect(sourceNode, nodes[targetNodeIndex]);
     public          bool Connect(int sourceNodeIndex, int targetNodeIndex) => Connect(nodes[sourceNodeIndex], nodes[targetNodeIndex]);
     public          bool Connect(List<int> sourceNodes, int targetNode) { 
         bool allDone = true; 
@@ -47,9 +52,9 @@ public abstract partial class Digraph : ISpellGraph
     }
 
 
-    public abstract bool Disconnect(Node sourceNode, Node targetNode);
-    public          bool Disconnect(int sourceNodeIndex, Node targetNode) => Disconnect(nodes[sourceNodeIndex], targetNode);
-    public          bool Disconnect(Node sourceNode, int targetNodeIndex) => Disconnect(sourceNode, nodes[targetNodeIndex]);
+    public abstract bool Disconnect(T sourceNode, T targetNode);
+    public          bool Disconnect(int sourceNodeIndex, T targetNode) => Disconnect(nodes[sourceNodeIndex], targetNode);
+    public          bool Disconnect(T sourceNode, int targetNodeIndex) => Disconnect(sourceNode, nodes[targetNodeIndex]);
     public          bool Disconnect(int sourceNodeIndex, int targetNodeIndex) => Disconnect(nodes[sourceNodeIndex], nodes[targetNodeIndex]);
     public          bool Disconnect(List<int> sourceNodes, int targetNode) { 
         bool allDone = true; 
@@ -68,15 +73,15 @@ public abstract partial class Digraph : ISpellGraph
         return allDone; 
     }
 
-    public abstract List<int> GetNextNodesOf(Node node);
+    public abstract List<int> GetNextNodesOf(T node);
     public          List<int> GetNextNodesOf(int idx) => GetNextNodesOf(nodes[idx]);
-    public abstract void SetNextNodesOf(Node node, List<Node> nodes);
+    public abstract void SetNextNodesOf(T node, List<T> nodes);
     public          void SetNextNodesOf(int idx) => SetNextNodesOf(nodes[idx], nodes);
 
 
-    public abstract List<int> GetPrevNodesOf(Node node);
+    public abstract List<int> GetPrevNodesOf(T node);
     public          List<int> GetPrevNodesOf(int idx) => GetPrevNodesOf(nodes[idx]);
-    public abstract void SetPrevNodesOf(Node node, List<Node> nodes);
+    public abstract void SetPrevNodesOf(T node, List<T> nodes);
     public          void SetPrevNodesOf(int idx) => SetPrevNodesOf(nodes[idx], nodes);
     
     
@@ -84,12 +89,12 @@ public abstract partial class Digraph : ISpellGraph
     public bool IsComplete() => EdgeAmmount() == (nodes.Count*nodes.Count) - nodes.Count;
     public int NodeAmmount() => nodes.Count;
 
-    public List<(Node, Node)> GetEdges()
+    public List<(T, T)> GetEdges()
     {
-        List<(Node, Node)> edges = new List<(Node, Node)>  ();
-        Action<Node, Node> newEdgeFound = (Node src, Node trg) => edges.Add((src, trg));
+        List<(T, T)> edges = new List<(T, T)>  ();
+        Action<ISpellGraphNode, ISpellGraphNode> onFindNewEdge = (src, trg) => edges.Add(((T)src, (T)trg));
 
-        GraphUtil.ForEachNodeByDFSIn(this, nodes[0], null, newEdgeFound);
+        GraphUtil.ForEachNodeByDFSIn((ISpellGraph<ISpellGraphNode>)this, nodes[0], null, onFindNewEdge);
 
         return edges;
     }
@@ -100,19 +105,19 @@ public abstract partial class Digraph : ISpellGraph
     /// <param name="n1">The first nodes</param>
     /// <param name="n2">The second nodes</param>
     /// <returns></returns>
-    public virtual bool AdjacenceBetween(Node n1, Node n2) => GetNextNodesOf(n1).Contains(n2.index);
+    public virtual bool AdjacenceBetween(T n1, T n2) => GetNextNodesOf(n1).Contains(n2.Index);
     public int InwardsDegree(int n) =>  InwardsDegree(nodes[n]);
-    public int InwardsDegree(Node n) => GetPrevNodesOf(n).Count;
+    public int InwardsDegree(T n) => GetPrevNodesOf(n).Count;
 
     public int OutwardsDegree(int n) =>  OutwardsDegree(nodes[n]);
-    public int OutwardsDegree(Node n) => GetNextNodesOf(n).Count;
+    public int OutwardsDegree(T n) => GetNextNodesOf(n).Count;
 
     public int Degree(int n) =>  Degree(nodes[n]);
-    public int Degree(Node n) => InwardsDegree(n) - OutwardsDegree(n);
+    public int Degree(T n) => InwardsDegree(n) - OutwardsDegree(n);
 
 
-    public List<Node> Nodes {get => nodes; set => nodes = value;}
-    public abstract List<(Node, Node)> Edges {get; set;}
+    public List<T> Nodes {get => nodes; set => nodes = value;}
+    public abstract List<(T, T)> Edges {get; set;}
 
     
 
@@ -124,11 +129,11 @@ public abstract partial class Digraph : ISpellGraph
 
     public void Clear() => nodes.Clear();
 
-    public bool Contains(Node item) => nodes.Contains(item);
+    public bool Contains(T item) => nodes.Contains(item);
 
-    public void CopyTo(Node[] array, int arrayIndex) => nodes.CopyTo(array, arrayIndex);
+    public void CopyTo(T[] array, int arrayIndex) => nodes.CopyTo(array, arrayIndex);
 
-    public IEnumerator<Node> GetEnumerator() => nodes.GetEnumerator();
+    public IEnumerator<T> GetEnumerator() => nodes.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => nodes.GetEnumerator();
 

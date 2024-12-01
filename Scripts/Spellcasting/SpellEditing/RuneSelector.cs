@@ -28,7 +28,7 @@ public partial class RuneSelector : Control
     public static RuneSelector Instance;
 
 
-    public List<List<IGraphDeployable>> plotables = new List<List<IGraphDeployable>>();
+    public List<List<ICastable>> plotables = new List<List<ICastable>>();
     private int selIndex;
     private List<int> rarityIndex = new List<int>();
     private List<RuneTextureRect> visibleSlots = new List<RuneTextureRect>();
@@ -167,7 +167,7 @@ public partial class RuneSelector : Control
     }
 
 
-    public IGraphDeployable ConfirmSelection() => plotables[Selected][SelectedRarity];
+    public ICastable ConfirmSelection() => plotables[Selected][SelectedRarity];
     public Rect2 GetSelectedRect() => visibleSlots[Selected].GetGlobalRect();
     public void SelectLeft(InputEvent @event) { if(inputDelay.IsCompleted && @event.IsPressed()) { Selected--; checkDelay(@event.IsEcho()); }}
     public void SelectRight(InputEvent @event) { if(inputDelay.IsCompleted && @event.IsPressed()) {  Selected++; checkDelay(@event.IsEcho()); }}
@@ -186,25 +186,25 @@ public partial class RuneSelector : Control
         inputDelay = Task.CompletedTask;
     } else { transSpeed = 200; }}
 
-    public bool AddPlotable(IGraphDeployable plotable)
+    public bool AddPlotable(ICastable plotable)
     {
-        foreach(List<IGraphDeployable> plist in plotables)
+        foreach(List<ICastable> plist in plotables)
         {
-            foreach(IGraphDeployable p in plist) if(p.Name == plotable.Name) return false;
+            foreach(ICastable p in plist) if(p.Name == plotable.Name) return false;
             else if(plotable.Category == plist[0].Category)
             {
                 plist.Add(plotable);
                 return true;
             }
         }
-        plotables.Add(new List<IGraphDeployable>{plotable} );
+        plotables.Add(new List<ICastable>{plotable} );
         rarityIndex.Add(0);
         AddVisibleSlot(plotable);
         return true;
 
     }
 
-    private void AddVisibleSlot(IGraphDeployable plotable) 
+    private void AddVisibleSlot(ICastable plotable) 
     {
         RuneTextureRect newSlot = new RuneTextureRect
         {
