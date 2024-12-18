@@ -96,3 +96,8 @@ public interface ISpellDigraph<T> : ISpellGraph<T> where T : ISpellGraphNode
     public int OutwardsDegree(T n);
 
 }
+
+public interface IWeighted
+{
+    public Dictionary<(ISpellGraphNode, ISpellGraphNode), int> WeightedEdges {get; set;}
+}

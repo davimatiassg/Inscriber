@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Godot;
 using SpellEditing;
 
@@ -466,8 +467,27 @@ public class GraphUtil
 	}
 
 
+
+	class NodeParams
+	{
+		int distance = int.MaxValue;
+		ISpellGraphNode parent = default;
+		public int Distance 
+		{
+			get => distance;
+			set => distance = value;
+		}
+
+		public ISpellGraphNode Parent 
+		{
+			get => parent;
+			set => parent = value;
+		}
+
+	}
+
 	/// <summary>
-    /// Executes a breadth-first search and finds the shortest path between two nodes of a graph, if it exists.
+    /// Executes a breadth-first search and finds the shortest path between two nodes of a graph, if it exists, using Dijkstra algorithm.
     /// </summary>
     /// <param name="spellGraph">The graph where the search will be performed </param>
     /// <param name="startingNode">The spellGraph's node where the path starts</param>
@@ -477,143 +497,56 @@ public class GraphUtil
     /// <param name="MarkedVisitProcess">An Action Delegate that operates for each visited neighbor of the node being visited.</param>
     /// <returns> A List of nodes forming the path </returns>
 
-    public static List<TNode> ShortestPathDjikstra<TGraph, TNode, TWeight>(TGraph spellGraph, TNode startingNode, TNode endingNode, 
-        Action<TNode>           VisitationProcess = null, 
-        Action<TNode, TNode>    UnmarkedVisitProcess = null,
-        Action<TNode, TNode>    MarkedVisitProcess = null
-	)
-		where TGraph : ISpellGraph<TNode>, IWeighted<TNode, TWeight>, new() //TODO! DECLARE THIS IWeightedGraph<TNode> INTERFACE
-		where TNode : ISpellGraphNode, new()
-		where TWeight : IMinMaxValue<TWeight>, IAdditionOperators<TWeight, TWeight, TWeight>, new()
-    }{
-        struct NodeParams<TWeight> 
-            where TWeight : IMinMaxValue<TWeight>, IAdditionOperators<TWeight, TWeight, TWeight>, new()
-        {
-            TWeight distance = TWeight.MaxValue();
-            TNode parent = null;
-        }
-
-        if(spellGraph.Count == 0) return;
-        Dictionary<Node, NodeParams<TWeight>> nodeStats = InitializePairType<NodeParams<TWeight>>(spellGraph.Nodes, new NodeParams());
-        Dictionary<(TNode, TNode), TWeight> weightedEdges = spellGraph.weightedEdges;
-
-        nodeStats[startingNode].distance = 0;
-        
-        UnmarkedVisitProcess += (TNode current, TNode next) => nodeStats[next] = new NodeParams(weightedEdges[(current, next)] + nodeStats[current].distance, current);
-
-        MarkedVisitProcess += (TNode current, TNode next) => 
-        {
-            if(nodeStats[next].distance > weightedEdges[(current, next)] + nodeStats[current].distance)
-            {
-                nodeStats[next] = new NodeParams(weightedEdges[(current, next)] + nodeStats[current].distance, current);
-            }
-        }
-
-        ForEachNodeByBFSIn(spellGraph, startingNode, VisitationProcess, UnmarkedVisitProcess, MarkedVisitProcess);
-        
-        List<TNode> path = new List<TNode>();
-        if(nodeStats[endingNode].distance < TWeight.MaxValue()) 
-        { 
-            for(TNode current = endingNode; current != endingNode; current = nodeStats[current].parent) path.Add(current); 
-        }
-        return path.Reverse();
-        
-
-    }
-
-
-    public List<TNode>  ShortestPathDjikstra<TGraph, TNode>(TGraph spellGraph, TNode startingNode, TNode endingNode, 
-        Action<TNode>           VisitationProcess = null, 
-        Action<TNode, TNode>    UnmarkedVisitProcess = null,
-        Action<TNode, TNode>    MarkedVisitProcess = null
-    )
-        where TGraph : ISpellGraph<TNode>, new() //TODO! DECLARE THIS IWeightedGraph<TNode> INTERFACE
-        where TNode : ISpellGraphNode, new()
+    public static List<ISpellGraphNode> ShortestPathDijkstra<TGraph>(TGraph spellGraph, ISpellGraphNode startingNode, ISpellGraphNode endingNode, 
+        Action<ISpellGraphNode>           VisitationProcess = null, 
+        Action<ISpellGraphNode, ISpellGraphNode>    UnmarkedVisitProcess = null,
+        Action<ISpellGraphNode, ISpellGraphNode>    MarkedVisitProcess = null
+	)	
+		where TGraph : ISpellGraph<ISpellGraphNode>, new() 
     {
-        struct NodeParams {
-            int distance = int.MaxValue();
-            TNode parent = null;
-        }
+		
 
-        if(spellGraph.Count == 0) return;
-        Dictionary<Node, NodeParams> nodeStats = InitializePairType<NodeParams>(spellGraph.Nodes, new NodeParams());
+        if(spellGraph.Count == 0) return spellGraph.Nodes;
+        Dictionary<ISpellGraphNode, NodeParams> nodeStats = InitializePairType(spellGraph.Nodes.Cast<ISpellGraphNode>().ToList(), new NodeParams());
+        		
+		var edgeWeight = ((ISpellGraphNode, ISpellGraphNode) edge) => { return 1;};
+		if(spellGraph is IWeighted)
+		{
+			Dictionary<(ISpellGraphNode, ISpellGraphNode), int> weightedEdges = ((IWeighted)spellGraph).WeightedEdges;
+			edgeWeight = ((ISpellGraphNode, ISpellGraphNode) edge) => { return weightedEdges[edge]; };
+		}
+		
 
-        nodeStats[startingNode].distance = 0;
+        nodeStats[startingNode].Distance = 0;
         
-        UnmarkedVisitProcess += (TNode current, TNode next) => nodeStats[next] = new NodeParams(1 + nodeStats[current].distance, current);
+        UnmarkedVisitProcess += (ISpellGraphNode current, ISpellGraphNode next) => 
+		{
+			nodeStats[next].Distance = edgeWeight((current, next)) + nodeStats[current].Distance;
+			nodeStats[next].Parent = current;
+		};
 
-        MarkedVisitProcess += (TNode current, TNode next) => 
+        MarkedVisitProcess += (ISpellGraphNode current, ISpellGraphNode next) => 
         {
-            if(nodeStats[next].distance > 1 + nodeStats[current].distance)
+            if(nodeStats[next].Distance > edgeWeight((current, next)) + nodeStats[current].Distance)
             {
-                nodeStats[next] = new NodeParams(1 + nodeStats[current].distance, current);
+                nodeStats[next].Distance = edgeWeight((current, next)) + nodeStats[current].Distance;
+				nodeStats[next].Parent = current;
             }
-        }
+        };
 
-        ForEachNodeByBFSIn(spellGraph, startingNode, VisitationProcess, UnmarkedVisitProcess, MarkedVisitProcess);
+        ForEachNodeByBFSIn(spellGraph, startingNode, 
+		VisitationProcess, UnmarkedVisitProcess, MarkedVisitProcess);
         
-        List<TNode> path = new List<TNode>();
-        if(nodeStats[endingNode].distance < TWeight.MaxValue()) 
-        { 
-            for(TNode current = endingNode; current != endingNode; current = nodeStats[current].parent) path.Add(current); 
-        }
-        return path.Reverse();
-        
-
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-/*
-public class DigraphUtil : GraphUtil
-{
-		private enum ESearchState : int { OUT = 0, STACKED, VISITED };
-	/// <summary>
-	/// Uses a DFS algorithm to find out if the graph has a cycle.
-	/// </summary>
-	/// <param name="startingNode">The spellGraph's node from where the search will start</param>
-	/// <returns>True if this graph has a cycle</returns>
-	public static bool HasCycle(Digraph graph, ISpellGraphNode startingNode)
-	{
-		var nodes = graph.nodes;
-		if(nodes.Count == 0) return false;
-		Dictionary<ISpellGraphNode, ESearchState> markedNodes = InitializePairType(nodes, ESearchState.OUT);
-		Stack<ISpellGraphNode> stack = new Stack<ISpellGraphNode>();
-		markedNodes[startingNode] = ESearchState.STACKED;
-		stack.Push(startingNode);
-		while (stack.Count > 0)
-		{   
-			ISpellGraphNode currNode = stack.Pop();
-			markedNodes[currNode] = ESearchState.VISITED;
-			foreach(int nextNode in graph.GetNextNodesOf(currNode))
-			{
-				switch(markedNodes[nodes[nextNode]])
-				{
-					
-					case ESearchState.OUT:
-						stack.Push(nodes[nextNode]);
-						markedNodes[nodes[nextNode]] = ESearchState.STACKED;
-						break;
-					case ESearchState.VISITED:
-						return true;
-					default:
-						continue;
-				}
-			}
-		}  
-		return false;
-	}
-
-
+        List<ISpellGraphNode> path = new List<ISpellGraphNode>();
 	
+        if(nodeStats[endingNode].Distance < int.MaxValue) 
+        { 
+            for(ISpellGraphNode current = endingNode; !current.Equals(endingNode); current = nodeStats[current].Parent) path.Add(current); 
+        }
+        path.Reverse();
+	
+		return path;
+    }
+
+
 }
-*/
