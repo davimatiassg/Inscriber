@@ -82,8 +82,8 @@ where T : ISpellGraphNode, new()
         return allDone; 
     }
 
-    public abstract List<int> GetNextNodesOf(T node);
-    public          List<int> GetNextNodesOf(int idx) => GetNextNodesOf(nodes[idx]);
+    public abstract List<T> GetNextNodesOf(T node);
+    public          List<T> GetNextNodesOf(int idx) => GetNextNodesOf(nodes[idx]);
     public abstract void SetNextNodesOf(T node, List<T> nodes);
     public void SetNextNodesOf(int idx) => SetNextNodesOf(nodes[idx], nodes);
     
@@ -108,7 +108,7 @@ where T : ISpellGraphNode, new()
         
         while(remainingNodes.Count > 0)
         {
-            GraphUtil.ForEachNodeByDFSIn((ISpellGraph<ISpellGraphNode>)this, (ISpellGraphNode)remainingNodes[0], visitedNewNode, newEdgeFound);
+            GraphUtil.ForEachNodeByDFSIn((ISpellGraph<ISpellGraphNode>)this, remainingNodes[0], visitedNewNode, newEdgeFound);
         }
         
         return edges;
@@ -122,7 +122,7 @@ where T : ISpellGraphNode, new()
     /// <param name="n1">The first nodes</param>
     /// <param name="n2">The second nodes</param>
     /// <returns></returns>
-    public virtual bool AdjacenceBetween(T n1, T n2) => GetNextNodesOf(n1).Contains(n2.Index);
+    public virtual bool AdjacenceBetween(T n1, T n2) => GetNextNodesOf(n1).Contains(n2);
     public int Degree(int n) =>  Degree(nodes[n]);
     public int Degree(T n) => GetNextNodesOf(n).Count;
 

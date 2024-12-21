@@ -79,13 +79,13 @@ public partial class AdjacenceMatrixGraph<T> : Graph<T> where T : ISpellGraphNod
         return true;
     }
 
-    public override List<int> GetNextNodesOf(T node)
+    public override List<T> GetNextNodesOf(T node)
     {
-        List<int> nexts = new List<int>();
+        List<T> nexts = new List<T>();
         if(node == null) return nexts;
 
-        for(int i = 0; i < node.Index; i++)             if(AdjMatrix[node.Index][i]) { nexts.Add(i); } 
-        for(int i = node.Index; i < nodes.Count; i++)   if(AdjMatrix[i][node.Index]) { nexts.Add(i); }
+        for(int i = 0; i < node.Index; i++)             if(AdjMatrix[node.Index][i]) { nexts.Add(Nodes[i]); } 
+        for(int i = node.Index; i < nodes.Count; i++)   if(AdjMatrix[i][node.Index]) { nexts.Add(Nodes[i]); }
 
         return nexts;
     }

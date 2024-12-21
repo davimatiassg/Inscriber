@@ -62,19 +62,19 @@ public partial class AdjacenceMatrixDigraph<T> : Digraph<T> where T : ISpellGrap
         return true;
     }
 
-    public override List<int> GetNextNodesOf(T node)
+    public override List<T> GetNextNodesOf(T node)
     {
-        List<int> nexts = new List<int>();
+        List<T> nexts = new List<T>();
         if(node == null) return nexts;
-        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[node.Index][i]) { nexts.Add(i); } }
+        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[node.Index][i]) { nexts.Add(Nodes[i]); } }
         return nexts;
     }
 
-    public override List<int> GetPrevNodesOf(T node)
+    public override List<T> GetPrevNodesOf(T node)
     {
-        List<int> prevs = new List<int>();
+        List<T> prevs = new List<T>();
         if(node == null) return prevs;
-        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[i][node.Index]) { prevs.Add(i); } }
+        for(int i = 0; i < nodes.Count; i++) { if(AdjMatrix[i][node.Index]) { prevs.Add(Nodes[i]); } }
         return prevs;
     }
 

@@ -77,7 +77,7 @@ public interface ISpellGraph<T> : ICollection<T> where T : ISpellGraphNode
     /// 
     public bool Disconnect(T sourceNode, T targetNode);
     public bool ReplaceNode(T node, ICastable castable);
-    public List<int> GetNextNodesOf(T node);
+    public List<T> GetNextNodesOf(T node);
     public void SetNextNodesOf(T node, List<T> nodes);
     public int EdgeAmmount();
     public bool AdjacenceBetween(T n1, T n2);
@@ -90,14 +90,16 @@ public interface ISpellDigraph<T> : ISpellGraph<T> where T : ISpellGraphNode
 {
     
 
-    public List<int> GetPrevNodesOf(T node);
+    public List<T> GetPrevNodesOf(T node);
     public void SetPrevNodesOf(T node, List<T> nodes);
     public int InwardsDegree(T n);
     public int OutwardsDegree(T n);
 
 }
 
-public interface IWeighted
+public interface IWeighted<T>  where T : ISpellGraphNode
 {
-    public Dictionary<(ISpellGraphNode, ISpellGraphNode), int> WeightedEdges {get; set;}
+    public Dictionary<(T, T), int> WeightedEdges {get; set;}
+
+    public bool Connect(T sourceNode, T targetNode, int weight);
 }

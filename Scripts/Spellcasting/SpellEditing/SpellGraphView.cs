@@ -9,7 +9,7 @@ namespace SpellEditing
 /// Control-inherited class that displays a Rune Graph of a Spell.
 /// </summary>
     
-public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.VisualNode>
+public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.VisualNode>, IWeighted<SpellGraphView.VisualNode>
 {
 #region SPELLGRAPH_INTERFACE
 
@@ -21,18 +21,37 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
         get => graphNodeMaster.GetChildren().Cast<VisualNode>().ToList(); 
         set { Clear(); foreach(var node in value) graphNodeMaster.AddChild(node); }
     }
+    
+
+    Dictionary<(VisualNode, VisualNode), int> edges;
     public List<(VisualNode, VisualNode)> Edges 
     {
-        get => 
-        graphArcsMaster.GetChildren()
-        .Select((arc) => (((VisualArc)arc).Source, ((VisualArc)arc).Target))
-        .ToList();
+        get => WeightedEdges.Keys.ToList();
 
         set
         {
             var nodes = Nodes;
             foreach(var node in nodes){ node.DisconnectFromAll(); }
             foreach(var edge in value){ edge.Item1.ConnectTo(edge.Item2); }
+        }
+    }
+
+    public Dictionary<(VisualNode, VisualNode), int> WeightedEdges 
+    {
+        get{
+            if(edges != null) return edges;
+            edges = new Dictionary<(VisualNode, VisualNode), int>();
+            foreach(VisualArc arc in graphArcsMaster.GetChildren()) edges.Add((arc.Source, arc.Target), arc.weight);
+            return edges;
+        }
+        set
+        {
+            var nodes = Nodes;
+            foreach(var node in nodes){ node.DisconnectFromAll(); }
+            foreach(KeyValuePair<(VisualNode, VisualNode), int> weightedArc in value)
+            {
+                weightedArc.Key.Item1.ConnectTo(weightedArc.Key.Item2).weight = weightedArc.Value; 
+            }
         }
     }
 
@@ -48,9 +67,9 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
         return node;
     }
 
-    public List<int> GetNextNodesOf(VisualNode node)
+    public List<VisualNode> GetNextNodesOf(VisualNode node)
     {
-        return node.arcs.Where(arc => arc.Source == node).Select(arc => arc.Target.Index).ToList();
+        return node.arcs.Where(arc => arc.Source == node).Select(arc => arc.Target).ToList();
     }
 
     public void SetNextNodesOf(VisualNode node, List<VisualNode> nodes)
@@ -59,9 +78,9 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
         nodes.ForEach(otherNode => Connect(node, otherNode));
     }
 
-    public List<int> GetPrevNodesOf(VisualNode node)
+    public List<VisualNode> GetPrevNodesOf(VisualNode node)
     {
-        return node.arcs.Where(arc => arc.Source == node).Select(arc => arc.Source.Index).ToList();
+        return node.arcs.Where(arc => arc.Source == node).Select(arc => arc.Source).ToList();
     }
 
     public void SetPrevNodesOf(VisualNode node, List<VisualNode> nodes)
@@ -121,9 +140,12 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
     }
     public void Add(ICastable castable) => Add(castable, Vector2.Zero);
 
-    public bool Connect(VisualNode sourceNode, VisualNode targetNode)
+    public bool Connect(VisualNode sourceNode, VisualNode targetNode) => Connect(sourceNode, targetNode, 1);
+
+    public bool Connect(VisualNode sourceNode, VisualNode targetNode, int weight)
     {
         var arc = sourceNode.CreateArcTowards(targetNode);
+        arc.weight = weight;
         if(GraphUtil.HasCycle(this, sourceNode)) {
             sourceNode.DestroyArc(arc);
             return false;
@@ -147,6 +169,7 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
     
 
 #endregion SPELLGRAPH_INTERFACE
+
 
     [Export] public Control graphNodeMaster;
     [Export] public Control graphArcsMaster;
@@ -474,6 +497,8 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
     public partial class VisualArc : Line2D
     {
         private VisualNode[] vertices = { null, null };
+
+        public int weight;
         public VisualNode Source
         {
             get => vertices[0];

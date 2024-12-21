@@ -69,39 +69,33 @@ public partial class IncidenceMatrixDigraph<T> : Digraph<T> where T : ISpellGrap
         }
         return false;
     }
-    private int FindIndicatorIndexAtArc(ArcIndicator indicator, int arcIndex)
-    {
-        
-        for(int i = 0; i < nodes.Count; i++)
-        {
-            if(IncMatrix[arcIndex][i] == indicator) return i;
-        }
-        return int.MinValue;
-    }
-    
 
-    public override List<int> GetNextNodesOf(T node)
+    public override List<T> GetNextNodesOf(T node)
     {
-        List<int> nexts = new List<int>();
+        List<T> nexts = new List<T>();
         if(node == null) return nexts;
         for (int i = 0; i < IncMatrix.Count; i++)
         {
             if(IncMatrix[i][node.Index] != ArcIndicator.src) continue;
-            int result = FindIndicatorIndexAtArc(ArcIndicator.trg, i);
-            if(result != int.MinValue) nexts.Add(result);
+            for(int j = 0; j < nodes.Count; j++)
+            {
+                if(IncMatrix[i][j] == ArcIndicator.trg) nexts.Add(Nodes[j]);
+            }
         }
         return nexts;
     }
 
-    public override List<int> GetPrevNodesOf(T node)
+    public override List<T> GetPrevNodesOf(T node)
     {
-        List<int> prevs = new List<int>();
+        List<T> prevs = new List<T>();
         if(node == null) return prevs;
         for (int i = 0; i < IncMatrix.Count; i++)
         {
             if(IncMatrix[i][node.Index] != ArcIndicator.trg) continue;
-            int result = FindIndicatorIndexAtArc(ArcIndicator.src, i);
-            if(result != int.MinValue) prevs.Add(result);
+            for(int j = 0; j < nodes.Count; j++)
+            {
+                if(IncMatrix[i][j] == ArcIndicator.src) prevs.Add(Nodes[j]);
+            }
         }
         return prevs;
     }

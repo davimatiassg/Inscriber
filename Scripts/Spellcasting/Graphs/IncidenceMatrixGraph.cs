@@ -67,15 +67,15 @@ public partial class IncidenceMatrixGraph<T> : Graph<T> where T : ISpellGraphNod
     }
     
 
-    public override List<int> GetNextNodesOf(T node)
+    public override List<T> GetNextNodesOf(T node)
     {
-        List<int> nexts = new List<int>();
+        List<T> nexts = new List<T>();
         if(node == null) return nexts;
         for (int i = 0; i < IncMatrix.Count; i++)
         {
             if(IncMatrix[i][node.Index] != true) continue;
             for(int j = 0; j < nodes.Count; j++)
-            { if(j != node.Index && IncMatrix[i][j]) nexts.Add(j); }
+            { if(j != node.Index && IncMatrix[i][j]) nexts.Add(Nodes[j]); }
         }
         return nexts;
     }

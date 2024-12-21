@@ -73,14 +73,14 @@ public abstract partial class Digraph<T> : ISpellDigraph<T> where T: ISpellGraph
         return allDone; 
     }
 
-    public abstract List<int> GetNextNodesOf(T node);
-    public          List<int> GetNextNodesOf(int idx) => GetNextNodesOf(nodes[idx]);
+    public abstract List<T> GetNextNodesOf(T node);
+    public          List<T> GetNextNodesOf(int idx) => GetNextNodesOf(nodes[idx]);
     public abstract void SetNextNodesOf(T node, List<T> nodes);
     public          void SetNextNodesOf(int idx) => SetNextNodesOf(nodes[idx], nodes);
 
 
-    public abstract List<int> GetPrevNodesOf(T node);
-    public          List<int> GetPrevNodesOf(int idx) => GetPrevNodesOf(nodes[idx]);
+    public abstract List<T> GetPrevNodesOf(T node);
+    public          List<T> GetPrevNodesOf(int idx) => GetPrevNodesOf(nodes[idx]);
     public abstract void SetPrevNodesOf(T node, List<T> nodes);
     public          void SetPrevNodesOf(int idx) => SetPrevNodesOf(nodes[idx], nodes);
     
@@ -105,7 +105,7 @@ public abstract partial class Digraph<T> : ISpellDigraph<T> where T: ISpellGraph
     /// <param name="n1">The first nodes</param>
     /// <param name="n2">The second nodes</param>
     /// <returns></returns>
-    public virtual bool AdjacenceBetween(T n1, T n2) => GetNextNodesOf(n1).Contains(n2.Index);
+    public virtual bool AdjacenceBetween(T n1, T n2) => GetNextNodesOf(n1).Contains(n2);
     public int InwardsDegree(int n) =>  InwardsDegree(nodes[n]);
     public int InwardsDegree(T n) => GetPrevNodesOf(n).Count;
 

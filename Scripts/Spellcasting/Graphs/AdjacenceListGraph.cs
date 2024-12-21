@@ -82,7 +82,7 @@ public partial class AdjacenceListGraph<T> : Graph<T> where T : ISpellGraphNode,
 
 
 
-    public override List<int> GetNextNodesOf(T node) => AdjList[node.Index];
+    public override List<T> GetNextNodesOf(T node) => AdjList[node.Index].Select((n) => Nodes[n]).ToList();
     public override void SetNextNodesOf(T node, List<T> nodes)
     {
         foreach(int n in AdjList[node.Index]) { AdjList[n].Remove(node.Index); }
