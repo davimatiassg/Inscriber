@@ -73,7 +73,6 @@ public partial class RandomTestRune : Rune
         rarity = (ERuneRarity)(randomFactor%9);
         texture = (Texture2D)ResourceLoader.Load<Texture2D>("res://Sprites/Runes/" + names[randomFactor%names.Length] + ".png");
     }
-    private string imgpath;
     private int randomFactor;
     public override CastingResources CastDefaults => new CastingResources();
     public override CastingResources CastRequirements => new CastingResources();

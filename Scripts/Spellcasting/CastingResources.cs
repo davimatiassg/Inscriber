@@ -26,16 +26,16 @@ public class CastParam {
 public class CastParamComparer : Comparer<CastParam> {
   public override int Compare(CastParam? x, CastParam? y) { return string.Compare(x.name, y.name); }
 }
-public class CastingResources : SortedDictionary<CastParam, IntPtr>
+public class CastingResources : SortedDictionary<CastParam, Object>
 {
 
   public CastingResources() : base(new CastParamComparer()) {}
 
-  public CastingResources(IDictionary<CastParam,IntPtr> d) :  base(d, new CastParamComparer()) {}
+  public CastingResources(IDictionary<CastParam,Object> d) :  base(d, new CastParamComparer()) {}
 
   public void Merge(CastingResources r)
   {
-    foreach(KeyValuePair<CastParam, IntPtr> c in r ) 
+    foreach(KeyValuePair<CastParam, Object> c in r ) 
     { 
       if(ContainsKey(c.Key)) continue;
       this.Add(c.Key, c.Value); 
@@ -44,7 +44,7 @@ public class CastingResources : SortedDictionary<CastParam, IntPtr>
 
   public void MergeOverwrite(CastingResources r)
   {
-    foreach(KeyValuePair<CastParam, IntPtr> c in r ) 
+    foreach(KeyValuePair<CastParam, Object> c in r ) 
     {
       if(ContainsKey(c.Key))  this[c.Key] = c.Value;
       else                    Add(c.Key, c.Value); 
@@ -55,26 +55,21 @@ public class CastingResources : SortedDictionary<CastParam, IntPtr>
   {
     CastingResources r = new CastingResources();
     foreach(CastingResources d in datas ) { 
-    foreach(KeyValuePair<CastParam, IntPtr> c in d ) { 
+    foreach(KeyValuePair<CastParam, Object> c in d ) { 
       r.Add(c.Key, c.Value); 
     }
     }
     return r;
   }
 
-  private static unsafe IntPtr ConvertParam<T>(ref T param)
-  {
-    TypedReference refer = __makeref(param);
-    return *(IntPtr*)&refer;
-  }
 
-  public void Add<T>(string paramName, CastParam.ECastParamType type, ref T value)
+  public void Add<T>(string paramName, CastParam.ECastParamType type, Object value)
   {
-    this.Add(new CastParam(paramName, type), ConvertParam<T>(ref value));
+    this.Add(new CastParam(paramName, type), value);
   }
   public void Add(string paramName, CastParam.ECastParamType type)
   {
-    this.Add(new CastParam(paramName, type), IntPtr.Zero);
+    this.Add(new CastParam(paramName, type), null);
   }
   public bool ContainsKey(string n, CastParam.ECastParamType p)
   {
@@ -84,7 +79,7 @@ public class CastingResources : SortedDictionary<CastParam, IntPtr>
   public static CastingResources operator +(CastingResources r1, CastingResources r2)
   {
     CastingResources r = new CastingResources(r1);
-    foreach(KeyValuePair<CastParam, IntPtr> c in r2 )
+    foreach(KeyValuePair<CastParam, Object> c in r2 )
     {
       r.Add(c.Key, c.Value);
     }
@@ -94,7 +89,7 @@ public class CastingResources : SortedDictionary<CastParam, IntPtr>
   public static CastingResources operator -(CastingResources r1, CastingResources r2)
   {
     CastingResources r = new CastingResources(r1);
-    foreach(KeyValuePair<CastParam, IntPtr> c in r2 )
+    foreach(KeyValuePair<CastParam, Object> c in r2 )
     {
       r.Remove(c.Key);
     }
@@ -104,7 +99,7 @@ public class CastingResources : SortedDictionary<CastParam, IntPtr>
   public static bool operator >=(CastingResources r1, CastingResources r2)
   {
     if(r1.Count < r2.Count) return false;
-    foreach(KeyValuePair<CastParam, IntPtr> p in r2)
+    foreach(KeyValuePair<CastParam, Object> p in r2)
     {
       if(!r1.ContainsKey(p.Key)) return false; 
     }

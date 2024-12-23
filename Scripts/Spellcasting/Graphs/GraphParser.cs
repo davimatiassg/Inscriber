@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 
 public class GraphParser
 {
-
+    /// <summary>
+    /// THIS IS A DEBUG CLASS. DO NOT USE.
+    /// </summary>
     public static Node parent;
     private static FileDialog fileDialog;
 

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 
 public interface ISpellGraphNode
@@ -23,6 +24,14 @@ public interface ISpellGraphNode
     /// <summary>
     /// The sigils associated with this T
     /// </summary>
+    
+    public void AddSigil(Sigil sigil);
+
+    public Sigil GetSigil(int index);
+
+    public IEnumerable<Sigil> GetSigils();
+
+    public int GetSigilCount();
 }
 
 public class DefaultSpellGraphNode : ISpellGraphNode
@@ -46,9 +55,14 @@ public class DefaultSpellGraphNode : ISpellGraphNode
         return $"index: {Index}, CastableName: {((Rune)Castable).Name}";
     }
 
+    public void AddSigil(Sigil sigil) => Sigils.Append(sigil);
 
-}
+    public Sigil GetSigil(int index) => Sigils[index];
+    public int GetSigilCount() => Sigils.Count();
 
+    public IEnumerable<Sigil> GetSigils() => Sigils;
+
+} 
 public interface ISpellGraph : ISpellGraph<DefaultSpellGraphNode> {}
 public interface ISpellGraph<T> : ICollection<T> where T : ISpellGraphNode
 {
@@ -100,6 +114,5 @@ public interface ISpellDigraph<T> : ISpellGraph<T> where T : ISpellGraphNode
 public interface IWeighted<T>  where T : ISpellGraphNode
 {
     public Dictionary<(T, T), int> WeightedEdges {get; set;}
-
     public bool Connect(T sourceNode, T targetNode, int weight);
 }

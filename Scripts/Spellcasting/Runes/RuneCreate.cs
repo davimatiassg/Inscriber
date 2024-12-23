@@ -7,7 +7,7 @@ public partial class RuneCreate : Rune
 {
     public override string Name { 
         get { return rarity.ToString() + " Create"; } 
-        set => throw new System.InvalidOperationException("You can not rename a Create rune!"); 
+        set => throw new System.InvalidOperationException("You can not rename the Rune of Creation!"); 
         }
 
     public override CastingResources CastDefaults
@@ -58,24 +58,24 @@ public partial class RuneCreate : Rune
         unsafe {
             CastParam param = new CastParam("OBJECT", CastParam.ECastParamType.NODE2D);
             if(res.ContainsKey(param)){
-                spawn = *(Node2D*)res[param].ToPointer();
+                spawn = (Node2D)res[param];
             }
             else{ 
                 param.Refactor("PACKED_OBJECT", CastParam.ECastParamType.STRING);
-                spawn = (Node2D)ResourceLoader.Load<PackedScene>(*(String*)res[param].ToPointer()).Instantiate();
+                spawn = (Node2D)ResourceLoader.Load<PackedScene>((String)res[param]).Instantiate();
             }
-            MainScene.Node.AddChild(spawn);
-            spawn.Position = *(Vector2*)res[param].ToPointer();
+            MainScene.Node.AddChild((Node2D) spawn);
+            spawn.Position = (Vector2)res[param.Refactor("POSITION", CastParam.ECastParamType.VECTOR2)];
 
             if(res.ContainsKey(param.Refactor("ROTATION", CastParam.ECastParamType.VECTOR2))){
-                spawn.Rotation = *(float*)res[param].ToPointer();
+                spawn.Rotation = (float)res[param];
             }
 
             if(res.ContainsKey(param.Refactor("ANGULAR_", CastParam.ECastParamType.VECTOR2))){
-                spawn.Rotation = *(float*)res[param].ToPointer();
+                spawn.Rotation = (float)res[param];
             }
 
-            res.Add<Node2D>("OBJECT", CastParam.ECastParamType.NODE2D, ref spawn);            
+            res.Add<Node2D>("OBJECT", CastParam.ECastParamType.NODE2D, spawn);            
         }
 
 

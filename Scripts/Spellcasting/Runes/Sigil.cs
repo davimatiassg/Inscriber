@@ -10,6 +10,8 @@ public class Sigil : CastParam, IMagicSymbol
     { get => "Unknown Sigil"; set {}  }
     public Rune.ERuneRarity rarity;
     private Texture2D portrait;
+
+    public Object val;
     public virtual Texture2D Portrait 
     {
         get => portrait; 
@@ -18,9 +20,10 @@ public class Sigil : CastParam, IMagicSymbol
     public virtual string Category { get => "Sigil";  }
     public virtual string Description { get => "No effects"; }
     public Color Color { get => Rune.ColorByRarity(rarity); }
-    public IntPtr val;
+    
     public Sigil(string n, ECastParamType p, IntPtr ptr) : base(n, p)
     { this.val = ptr; }
+    public Sigil(string n, ECastParamType p, string s) : base(n, p, s){}
     public CastingResources AsCastingResource { get => new CastingResources{{ this, val }}; }
 
     public static Texture2D DefaultSigilPortrait(ECastParamType param)

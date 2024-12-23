@@ -345,6 +345,7 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
             }
         }
 
+
         /// <summary>
         /// Adjusts connected sigils positions
         /// </summary>
@@ -492,6 +493,26 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
             }
             arcs.Clear();
         }
+
+        public void AddSigil(Sigil sigil)
+        =>
+            GetChildren().Cast<VisualSigilSlot>().
+            Where((slot) => slot.RepresentedParam == sigil).Single().
+            CurrentSigil = sigil;
+
+        public Sigil GetSigil(int index) 
+        => GetChild<VisualSigilSlot>(index).CurrentSigil;
+
+        public IEnumerable<Sigil> GetSigils() 
+        =>
+            GetChildren().Cast<VisualSigilSlot>().
+            Where((slot) => slot.CurrentSigil != null).
+            Select((slot) => slot.CurrentSigil);
+
+        public int GetSigilCount() => 
+            GetChildren().Cast<VisualSigilSlot>().
+            Where((slot) => slot.CurrentSigil != null).
+            Count();
     }
 
     public partial class VisualArc : Line2D
