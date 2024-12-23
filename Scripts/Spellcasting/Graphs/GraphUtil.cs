@@ -594,6 +594,55 @@ public class GraphUtil
 		return path;
 
 	}
+
+	public static int[,] FloydWarshall<TGraph, TNode>(TGraph spellGraph)
+		where TGraph : ISpellGraph<TNode>, new() 
+		where TNode : ISpellGraphNode, new() 
+	{
+		int size = spellGraph.Count();
+		int[,] distances = new int[size, size];
+		int[,] predecessors = new int[size, size];
+
+		for(int i = 0; i < size; i++){ 
+		for(int j = 0; j < size; j++){
+			distances[i, j] = int.MaxValue;
+			predecessors[i, j] = -1;	
+		}}
+		if(spellGraph is IWeighted<TNode> weightedGraph)
+		{
+			foreach(var edge in weightedGraph.WeightedEdges)
+			{
+				int i = edge.Key.Item1.Index;
+				int j = edge.Key.Item2.Index;
+				distances[i,j] = edge.Value;
+				predecessors[i,j] =  i;
+			}
+		}
+		else
+		{
+			foreach(var edge in spellGraph.Edges)
+			{
+				int i = edge.Item1.Index;
+				int j = edge.Item2.Index;
+				distances[i, j] = 1;
+				predecessors[i,j] =  i;
+			}
+		}
+		
+		for(int i = 0; i < size; i++){ 
+		for(int j = 0; j < size; j++){
+			for(int h = 0; h < size; h++){
+				if(distances[i, j] > distances[i, h] + distances[h,  j])
+				{
+					distances[i, j] = distances[i, h] + distances[h,  j];
+					predecessors[i, j] = predecessors[h, j];
+				}
+		}}}
+
+		return predecessors;
+	}
+
+
 /*
 	/// <summary>
     /// Executes a breadth-first search and finds the shortest path between two nodes of a graph, if it exists, using Dijkstra algorithm.
