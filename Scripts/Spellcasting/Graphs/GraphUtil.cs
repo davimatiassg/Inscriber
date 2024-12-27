@@ -125,7 +125,7 @@ public class GraphUtil
 	/// </summary>
 	/// <param name="graph">The graph to check</param>
 	/// <returns>true if there is only one connected component in the graph, false otherwise.</returns>
-	public static bool IsGraphConnected<T>(Graph<T> graph) 
+	public static bool IsGraphConnected<T>(ISpellGraph<T> graph) 
 	where T : ISpellGraphNode, new()
 		=> ListConnectedComponents(graph).Count == 1;
 
@@ -165,15 +165,14 @@ public class GraphUtil
 	/// </summary>
 	/// <param name="startingNode">The spellGraph's node from where the search will start</param>
 	/// <returns>True if this graph has a cycle</returns>
-	public static bool HasCycle<T>(ISpellDigraph<T> graph, T startingNode)
-	where T : ISpellGraphNode, new()
+	public static bool HasCycle(ISpellDigraph<ISpellGraphNode> graph, ISpellGraphNode startingNode)
 	{
 		bool cycled = false;
 
 		Action<ISpellGraphNode, ISpellGraphNode>  MarkedVisitProcess = (ISpellGraphNode n1, ISpellGraphNode n2) => 
 		{  cycled = true; };
 
-		ForEachNodeByDFSIn((ISpellGraph<ISpellGraphNode>)graph, startingNode, null, null, MarkedVisitProcess);
+		ForEachNodeByDFSIn(graph, startingNode, null, null, MarkedVisitProcess);
 
 		return cycled;
 	}
@@ -302,22 +301,22 @@ public class GraphUtil
 	/// </summary>
 	/// <param name="graph">The graph to get connected components from</param>
 	/// <returns>A List with the connected components of the graph</returns>
-	public static List<List<T>> ListConnectedComponents<T>(Graph<T> graph)
+	public static List<List<T>> ListConnectedComponents<T>(ISpellGraph<T> graph)
 	where T : ISpellGraphNode, new()
 	{
 		List<List<T>> connectedComponents = new List<List<T>>();
 		List<T> currentComponent = new List<T>();
 
-        var remainingNodes = graph.Nodes.ToArray().ToList();
+        var remainingNodes = Enumerable.Range(0, graph.Count).ToList();
 
         Action<ISpellGraphNode> visitedNewNode = (ISpellGraphNode node) => {
-			remainingNodes.Remove((T)node); 
+			remainingNodes.RemoveAt(node.Index);
 			currentComponent.Add((T)node);
 		};
 
         while(remainingNodes.Count > 0)
         {
-           	ForEachNodeByDFSIn((ISpellGraph<ISpellGraphNode>)graph, remainingNodes[0], visitedNewNode);
+           	ForEachNodeByDFSIn((ISpellGraph<ISpellGraphNode>)graph, graph[remainingNodes[0]], visitedNewNode);
 			connectedComponents.Add(currentComponent);
         }
         return connectedComponents;
@@ -339,8 +338,8 @@ public class GraphUtil
 	/// <returns></returns>
 	/// <exception cref="FormatException"></exception>
 	public static TGraph PrufferToTree<TGraph, TNode>(TGraph originalGraph, List<int> pruffer) 
-	where TNode : ISpellGraphNode, new()
-	where TGraph : Graph<TNode>, new()
+		where TNode : ISpellGraphNode, new()
+		where TGraph : Graph<TNode>, new()
 	{
 		if(originalGraph.EdgeAmmount() > 0)   		throw new FormatException("The chosen graph is not void.");
 		if(originalGraph.Count != pruffer.Count+2) 	throw new FormatException("Incongruent graph and pruffer sequence sizes.");
@@ -373,6 +372,79 @@ public class GraphUtil
 		graph.Connect(finalEdge[0], finalEdge[1]);
 
 		return graph;
+	}
+
+
+	/// <summary>
+	/// Auxiliar class to keep track of tree connections. Used to create forests that may eventualy be linked together into a single tree. 
+	/// </summary>
+	private class TreeRank
+	{
+		private TreeRank treeRoot;
+
+
+		/// <summary>
+		/// represents how many nodes are connected to this tree. Unused value if this tree is not the head. 
+		/// </summary>
+		public int rank = 1;
+
+		public TreeRank()
+		{
+			treeRoot = this;
+		}
+		
+		//this WILL break if there is a cycle on the tree (i.e. if its not a tree at all)
+		private void UpdateHead()
+		{
+			while(this.treeRoot.treeRoot != this.treeRoot)
+			{
+				this.treeRoot = this.treeRoot.treeRoot;
+			} 
+		}
+
+		public bool TryMergeTo(TreeRank tree)
+		{
+			UpdateHead();
+			tree.UpdateHead();
+			if(this.treeRoot == tree.treeRoot) return false;
+			treeRoot = tree;
+			treeRoot.rank += this.rank;
+			return true;
+		}
+	}
+
+	/// <summary>
+	/// Runs the Kruskal algorithm to find the Minimum Spanning Tree using a given comparer function
+	/// </summary>
+	/// <typeparam name="TGraph">The type of the graph.</typeparam>
+	/// <typeparam name="TNode">The type of the nodes.</typeparam>
+	/// <typeparam name="TResult">The type of the resulting spanning tree graph.</typeparam>
+	/// <param name="graph">The original graph to get a spanning tree from.</param>
+	/// <param name="comparer">A comparison between the graph's edge's weights.</param>
+	/// <returns></returns>
+	public static TResult Kruskal<TGraph, TNode, TResult>(TGraph graph, Comparison<int> comparer)
+		where TNode : ISpellGraphNode, new()
+		where TGraph : ISpellGraph<TNode>, IWeighted<TNode>,  new()
+		where TResult : ISpellGraph<TNode>, IWeighted<TNode>, new()
+	{
+		TResult mstree = new TResult();
+		foreach( var node in graph.Nodes ) mstree.Add(node);
+
+		Dictionary<int, TreeRank> forest = InitializePairType(Enumerable.Range(0, graph.Count).ToList(),  new TreeRank());
+
+		var edges = graph.WeightedEdges.AsEnumerable().OrderBy(edge => edge.Value).ToList().
+		ConvertAll(edge => (edge.Key.Item1.Index, edge.Key.Item2.Index, edge.Value));
+		
+		foreach(var weightedEdge in edges)
+		{
+			if(forest[weightedEdge.Item1].TryMergeTo(forest[weightedEdge.Item2]))
+			{
+				mstree.Connect(mstree[weightedEdge.Item1], mstree[weightedEdge.Item2], weightedEdge.Item3);
+				if(forest[weightedEdge.Item2].rank == graph.Count) break;
+			}
+
+		}
+		return mstree;
 	}
 
 
