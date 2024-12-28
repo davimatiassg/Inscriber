@@ -16,17 +16,17 @@ public partial class PlayerSpellcasting : Spellcasting
 	}
     public override CastingResources GenerateResources()
     {
-		Vector2 casterPosition = this.Position;
-		Vector2 position = GetViewport().GetMousePosition() + GetCanvasTransform().Origin;
-		Vector2 direction = (position - casterPosition).Normalized();
+		Object casterPosition = this.Position;
+		Object position = GetViewport().GetMousePosition() + GetCanvasTransform().Origin;
+		Object direction = ((Vector2)position - (Vector2)casterPosition).Normalized();
 
-		CastingResources res = new CastingResources();
-
-		res.Add("CASTER", 			CastParam.ECastParamType.NODE2D, 		ref Caster);
-		res.Add("CASTING_POSITION", CastParam.ECastParamType.VECTOR2,		ref casterPosition);
-		res.Add("POSITION", 		CastParam.ECastParamType.VECTOR2, 		ref position);
-		res.Add("DIRECTION", 		CastParam.ECastParamType.VECTOR2, 		ref direction);  
-		
+		CastingResources res = new CastingResources
+        {
+            { "CASTER", CastParam.ECastParamType.NODE2D, Caster },
+            { "CASTING_POSITION", CastParam.ECastParamType.VECTOR2, casterPosition },
+            { "POSITION", CastParam.ECastParamType.VECTOR2, position },
+            { "DIRECTION", CastParam.ECastParamType.VECTOR2, direction }
+        };		
 		return res;
     }
 

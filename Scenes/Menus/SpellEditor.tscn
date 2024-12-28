@@ -1,13 +1,13 @@
 [gd_scene load_steps=9 format=3 uid="uid://dtkx2fb2sunx0"]
 
-[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphEditor.cs" id="1_uog5c"]
-[ext_resource type="PackedScene" uid="uid://bbe1sd5nwqli5" path="res://Scenes/Menus/SpellEditor/DragOverlay.tscn" id="2_35tnf"]
-[ext_resource type="PackedScene" uid="uid://jq7ps350h34u" path="res://Scenes/Menus/SpellEditor/ConnectOverlay.tscn" id="3_gq61j"]
-[ext_resource type="PackedScene" uid="uid://cstn05ab0b735" path="res://Scenes/Menus/SpellEditor/RuneSelector.tscn" id="4_vop10"]
-[ext_resource type="PackedScene" uid="uid://bgjd84fxagq5m" path="res://Scenes/Menus/SpellEditor/FreeOverlay.tscn" id="5_0cnom"]
-[ext_resource type="Texture2D" uid="uid://dg37qmibr4afd" path="res://Sprites/background placeholder.png" id="5_xu1c1"]
-[ext_resource type="PackedScene" uid="uid://crlvvusqaoixg" path="res://Scenes/Menus/SpellEditor/ViewOverlay.tscn" id="6_mf5uq"]
-[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphCamera.cs" id="8_0xter"]
+[ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellGraphEditor.cs" id="1_i23sc"]
+[ext_resource type="Texture2D" uid="uid://dg37qmibr4afd" path="res://Sprites/background placeholder.png" id="2_8rpec"]
+[ext_resource type="PackedScene" uid="uid://bbe1sd5nwqli5" path="res://Scenes/Menus/SpellEditor/DragOverlay.tscn" id="3_a3wjw"]
+[ext_resource type="PackedScene" uid="uid://jq7ps350h34u" path="res://Scenes/Menus/SpellEditor/ConnectOverlay.tscn" id="4_hg6q5"]
+[ext_resource type="PackedScene" uid="uid://cstn05ab0b735" path="res://Scenes/Menus/SpellEditor/RuneSelector.tscn" id="5_i663j"]
+[ext_resource type="PackedScene" uid="uid://bgjd84fxagq5m" path="res://Scenes/Menus/SpellEditor/FreeOverlay.tscn" id="6_2ssi4"]
+[ext_resource type="PackedScene" uid="uid://crlvvusqaoixg" path="res://Scenes/Menus/SpellEditor/ViewOverlay.tscn" id="7_mirhc"]
+[ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellGraphCamera.cs" id="8_5qxpa"]
 
 [node name="SpellEditorStateMachine" type="Control" node_paths=PackedStringArray("runeSelector", "viewOverlay", "freeOverlay", "dragOverlay", "connectOverlay", "graphNodeMaster", "graphArcsMaster", "spellGraphCamera")]
 layout_mode = 3
@@ -17,7 +17,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1, 1.00016)
-script = ExtResource("1_uog5c")
+script = ExtResource("1_i23sc")
 runeSelector = NodePath("Hud/RuneSelector")
 viewOverlay = NodePath("Hud/ViewOverlay")
 freeOverlay = NodePath("Hud/FreeOverlay")
@@ -31,23 +31,23 @@ spellGraphCamera = NodePath("Camera2D")
 modulate = Color(0.201527, 0.201527, 0.201527, 1)
 position = Vector2(320, 180)
 scale = Vector2(4, 4)
-texture = ExtResource("5_xu1c1")
+texture = ExtResource("2_8rpec")
 
 [node name="Hud" type="CanvasLayer" parent="."]
 
-[node name="DragOverlay" parent="Hud" instance=ExtResource("2_35tnf")]
+[node name="DragOverlay" parent="Hud" instance=ExtResource("3_a3wjw")]
 visible = false
 
-[node name="ConnectOverlay" parent="Hud" instance=ExtResource("3_gq61j")]
+[node name="ConnectOverlay" parent="Hud" instance=ExtResource("4_hg6q5")]
 visible = false
 
-[node name="RuneSelector" parent="Hud" instance=ExtResource("4_vop10")]
+[node name="RuneSelector" parent="Hud" instance=ExtResource("5_i663j")]
 visible = false
 
-[node name="FreeOverlay" parent="Hud" instance=ExtResource("5_0cnom")]
+[node name="FreeOverlay" parent="Hud" instance=ExtResource("6_2ssi4")]
 visible = false
 
-[node name="ViewOverlay" parent="Hud" instance=ExtResource("6_mf5uq")]
+[node name="ViewOverlay" parent="Hud" instance=ExtResource("7_mirhc")]
 visible = false
 
 [node name="Nodes" type="Control" parent="."]
@@ -70,4 +70,4 @@ grow_vertical = 2
 zoom = Vector2(4, 4)
 position_smoothing_enabled = true
 position_smoothing_speed = 15.0
-script = ExtResource("8_0xter")
+script = ExtResource("8_5qxpa")

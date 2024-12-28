@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://cstn05ab0b735"]
 
-[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/RuneSelector.cs" id="1_ipvsq"]
+[ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/RuneSelector.cs" id="1_ipvsq"]
 
 [sub_resource type="Gradient" id="Gradient_y02va"]
 offsets = PackedFloat32Array(0.00909091, 0.386364, 0.636364, 1)

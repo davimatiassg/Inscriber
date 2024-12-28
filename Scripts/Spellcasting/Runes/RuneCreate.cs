@@ -55,30 +55,27 @@ public partial class RuneCreate : Rune
         res.Merge(SigilResources);
 
         Node2D spawn;
-        unsafe {
-            CastParam param = new CastParam("OBJECT", CastParam.ECastParamType.NODE2D);
-            if(res.ContainsKey(param)){
-                spawn = (Node2D)res[param];
-            }
-            else{ 
-                param.Refactor("PACKED_OBJECT", CastParam.ECastParamType.STRING);
-                spawn = (Node2D)ResourceLoader.Load<PackedScene>((String)res[param]).Instantiate();
-            }
-            MainScene.Node.AddChild((Node2D) spawn);
-            spawn.Position = (Vector2)res[param.Refactor("POSITION", CastParam.ECastParamType.VECTOR2)];
 
-            if(res.ContainsKey(param.Refactor("ROTATION", CastParam.ECastParamType.VECTOR2))){
-                spawn.Rotation = (float)res[param];
-            }
+        CastParam param = new CastParam("OBJECT", CastParam.ECastParamType.NODE2D);
+        if(res.ContainsKey(param)){
+            spawn = (Node2D)res[param];
+        }
+        else{ 
+            param.Refactor("PACKED_OBJECT", CastParam.ECastParamType.STRING);
+            spawn = (Node2D)ResourceLoader.Load<PackedScene>((String)res[param]).Instantiate();
+        }
+        MainScene.Node.AddChild((Node2D) spawn);
+        spawn.Position = (Vector2)res[param.Refactor("POSITION", CastParam.ECastParamType.VECTOR2)];
 
-            if(res.ContainsKey(param.Refactor("ANGULAR_", CastParam.ECastParamType.VECTOR2))){
-                spawn.Rotation = (float)res[param];
-            }
-
-            res.Add<Node2D>("OBJECT", CastParam.ECastParamType.NODE2D, spawn);            
+        if(res.ContainsKey(param.Refactor("ROTATION", CastParam.ECastParamType.VECTOR2))){
+            spawn.Rotation = (float)res[param];
         }
 
-
+        if(res.ContainsKey(param.Refactor("ANGULAR_", CastParam.ECastParamType.VECTOR2))){
+            spawn.Rotation = (float)res[param];
+        }
+        Object spawnObject = spawn;
+        res.Add("OBJECT", CastParam.ECastParamType.NODE2D, spawnObject);
         
         return res;
     }

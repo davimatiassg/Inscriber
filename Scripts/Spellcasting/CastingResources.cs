@@ -51,7 +51,7 @@ public class CastingResources : SortedDictionary<CastParam, Object>
     }
   }
   
-  public static CastingResources Merge(CastingResources[] datas)
+  public static CastingResources Merge(IEnumerable<CastingResources> datas)
   {
     CastingResources r = new CastingResources();
     foreach(CastingResources d in datas ) { 
@@ -63,7 +63,7 @@ public class CastingResources : SortedDictionary<CastParam, Object>
   }
 
 
-  public void Add<T>(string paramName, CastParam.ECastParamType type, Object value)
+  public void Add(string paramName, CastParam.ECastParamType type, Object value)
   {
     this.Add(new CastParam(paramName, type), value);
   }
@@ -96,18 +96,18 @@ public class CastingResources : SortedDictionary<CastParam, Object>
     return r;
   }
 
-  public static bool operator >=(CastingResources r1, CastingResources r2)
+  public static bool operator <=(CastingResources r1, CastingResources r2)
   {
-    if(r1.Count < r2.Count) return false;
-    foreach(KeyValuePair<CastParam, Object> p in r2)
+    if(r1.Count > r2.Count) return false;
+    foreach(KeyValuePair<CastParam, Object> p in r1)
     {
-      if(!r1.ContainsKey(p.Key)) return false; 
+      if(!r2.ContainsKey(p.Key)) return false; 
     }
     return true;
   }
 
-  public static bool operator <=(CastingResources r1, CastingResources r2)
+  public static bool operator >=(CastingResources r1, CastingResources r2)
   {
-    return r2 >= r1;
+    return r2 <= r1;
   }
 }

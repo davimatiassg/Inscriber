@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://dgxvcv3p67675"]
+
+[node name="SpellSelector" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 0
+offset_right = 640.0
+offset_bottom = 360.0
+
+[node name="SpellList" type="Panel" parent="Panel"]
+layout_mode = 0
+offset_top = 34.0
+offset_right = 640.0
+offset_bottom = 131.0
+
+[node name="SpellDescription" type="Panel" parent="Panel"]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 142.0
+offset_right = 282.0
+offset_bottom = 360.0
+
+[node name="Title" type="RichTextLabel" parent="Panel/SpellDescription"]
+offset_right = 248.0
+offset_bottom = 47.0
+
+[node name="Description" type="RichTextLabel" parent="Panel/SpellDescription"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 47.0
+offset_right = 237.0
+offset_bottom = 218.0
+
+[node name="SpellStats" type="Panel" parent="Panel"]
+offset_left = 404.0
+offset_top = 154.0
+offset_right = 585.0
+offset_bottom = 334.0
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Panel/SpellStats"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 9.0
+offset_right = 171.0
+offset_bottom = 172.0
+
+[node name="Inscribe" type="Button" parent="Panel"]
+layout_mode = 0
+offset_left = 309.0
+offset_top = 189.0
+offset_right = 379.0
+offset_bottom = 220.0
+text = "Inscribe"
+
+[node name="Erase" type="Button" parent="Panel"]
+offset_left = 309.0
+offset_top = 231.0
+offset_right = 379.0
+offset_bottom = 262.0
+text = "Erase"

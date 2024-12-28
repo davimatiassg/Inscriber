@@ -32,7 +32,7 @@ public abstract partial class Rune : Resource, ICastable, SpellEditing.IMagicSym
 
     public CastingResources SigilResources
     {
-        get => CastingResources.Merge(sigils.Select(sigil => sigil.AsCastingResource).ToArray());
+        get => CastingResources.Merge(sigils.Select(sigil => sigil.AsCastingResource));
     }
     public abstract Task<CastingResources> Cast(CastingResources res);
 
@@ -92,16 +92,6 @@ public partial class RandomTestRune : Rune
 
     public override Task<CastingResources> Cast(CastingResources res) => throw new NotImplementedException();
 }
-
-
-
-
-
-
-
-
-
-
 
 public partial class CharacterTextRune : RandomTestRune
 {

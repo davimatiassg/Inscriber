@@ -8,10 +8,40 @@ using System.Xml.Linq;
 using Godot;
 using SpellEditing;
 
-namespace GraphXML
+
+public static class GraphRepository
 {
-public static class GraphXmlManager
-{
+
+    public static bool IsGraphValid(ISpellDigraph<ISpellGraphNode> graph, ref IEnumerable<ISpellGraphNode> faultyNodes)
+    {
+        foreach(var node in graph.Nodes)
+        {
+            CastingResources res = ((Rune)node.Castable).SigilResources;
+            res.Merge( CastingResources.Merge(graph.GetPrevNodesOf(node).Select(n => n.Castable.CastReturns)) );
+
+            if(!(node.Castable.CastRequirements <= res)) 
+            {
+                faultyNodes.Append(node);
+            }
+        }
+        return faultyNodes.Count() == 0;
+    }
+
+    private static bool IsGraphValid(ISpellDigraph<ISpellGraphNode> graph)
+    {
+        foreach(var node in graph.Nodes)
+        {
+            CastingResources res = ((Rune)node.Castable).SigilResources;
+            res.Merge( CastingResources.Merge(graph.GetPrevNodesOf(node).Select(n => n.Castable.CastReturns)) );
+
+            if(!(node.Castable.CastRequirements <= res)) 
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static string ConvertSigilParamToXML(Sigil sigil)
     {
         string xmlStr = "";
@@ -49,9 +79,10 @@ public static class GraphXmlManager
         }
         return xmlStr;
     }
-
-    public static void SaveGraphToXml(ISpellGraph<ISpellGraphNode> graph, string filePath)
+    public static void SaveGraphToXml(ISpellDigraph<ISpellGraphNode> graph, string filePath)
     {
+        if(!IsGraphValid(graph)) return;
+        
         var xmlDoc = new XDocument(
             new XElement("GraphData",
                 new XElement("Specs",
@@ -108,6 +139,7 @@ public static class GraphXmlManager
     }
 
 
+
     public struct GraphStats
     {
         public bool noLoops;
@@ -117,17 +149,13 @@ public static class GraphXmlManager
         public int defaultWeight;
         public bool isValid;
     }
-
-
-
     public static TGraph LoadGraphFromXml<TGraph, TNode>(string filePath)          
-        where TGraph : ISpellGraph<TNode>, new()
+        where TGraph : ISpellDigraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
     {
         var xmlDoc = XDocument.Load(filePath);
         TGraph graph = new TGraph();
 
-/*
         GraphStats stats = new GraphStats{
             noLoops = xmlDoc.Root.Element("Specs")?.Element("NoLoops")?.Value != null,
             isTree = xmlDoc.Root.Element("Specs")?.Element("NoCycles")?.Value != null,
@@ -149,13 +177,18 @@ public static class GraphXmlManager
                 throw new InvalidOperationException("The loaded graph is weighted, but tried to load it on a unweighted graph type.");
             
         }  
-*/
+
         XElement graphData = xmlDoc.Root.Elements("Graph").Single();
 
         LoadNodes<TGraph,TNode>(graphData, ref graph);
 
         LoadArcs<TGraph,TNode>(graphData, ref graph);
 
+
+        if(!IsGraphValid((ISpellDigraph<ISpellGraphNode>)graph))
+        {
+            throw new FileLoadException("The loaded Graph is Invalid");
+        }
         return graph;
     }
 
@@ -284,5 +317,4 @@ public static class GraphXmlManager
         return sigil;
     }
     
-}
 }

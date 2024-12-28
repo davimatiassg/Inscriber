@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://b3iqd5v0ntfk6"]
 
-[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphView.cs" id="1_p27kb"]
-[ext_resource type="Script" path="res://Scripts/Spellcasting/SpellEditing/SpellGraphCamera.cs" id="2_kv6kc"]
+[ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellGraphView.cs" id="1_p27kb"]
+[ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellGraphCamera.cs" id="2_kv6kc"]
 
 [node name="Graph" type="Control" node_paths=PackedStringArray("graphNodeMaster", "graphArcsMaster", "spellGraphCamera")]
 layout_mode = 3
