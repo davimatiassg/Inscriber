@@ -3,45 +3,54 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using System.Xml.Linq;
 using Godot;
 using SpellEditing;
 
 
-public static class GraphRepository
+public static class SpellRepository
 {
+    public const string SpellPaths = "res://Data/Spells/";
 
-    public static bool IsGraphValid(ISpellDigraph<ISpellGraphNode> graph, ref IEnumerable<ISpellGraphNode> faultyNodes)
+#region SPELL
+
+    public static List<string> LoadSpellPaths()
     {
-        foreach(var node in graph.Nodes)
+        List<string> spellPaths = new List<string>();
+        using var spellDir = DirAccess.Open("res://Data/Spells/");
+        spellDir.ListDirBegin();
+        string fileName = spellDir.GetNext();
+        while (fileName != "")
+        {
+            if (spellDir.CurrentIsDir()) continue;
+
+            spellPaths.Add("res://Data/Spells/" + fileName);
+
+            fileName = spellDir.GetNext();
+        }
+        return spellPaths;
+    }
+
+#endregion SPELL
+
+
+#region SPELL_GRAPH
+    public static bool IsGraphValid(IGraph<ISpellGraphNode> graph, ref IEnumerable<ISpellGraphNode>? faultyNodes)
+    {
+        foreach(var node in graph)
         {
             CastingResources res = ((Rune)node.Castable).SigilResources;
-            res.Merge( CastingResources.Merge(graph.GetPrevNodesOf(node).Select(n => n.Castable.CastReturns)) );
-
+            graph.ForeachSourceOf(node, (src, weight) => res.Merge(src.Castable.CastReturns) );
             if(!(node.Castable.CastRequirements <= res)) 
             {
+                if(faultyNodes == null) return false;
                 faultyNodes.Append(node);
             }
         }
         return faultyNodes.Count() == 0;
     }
-
-    private static bool IsGraphValid(ISpellDigraph<ISpellGraphNode> graph)
-    {
-        foreach(var node in graph.Nodes)
-        {
-            CastingResources res = ((Rune)node.Castable).SigilResources;
-            res.Merge( CastingResources.Merge(graph.GetPrevNodesOf(node).Select(n => n.Castable.CastReturns)) );
-
-            if(!(node.Castable.CastRequirements <= res)) 
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static string ConvertSigilParamToXML(Sigil sigil)
     {
         string xmlStr = "";
@@ -79,63 +88,76 @@ public static class GraphRepository
         }
         return xmlStr;
     }
-    public static void SaveGraphToXml(ISpellDigraph<ISpellGraphNode> graph, string filePath)
-    {
-        if(!IsGraphValid(graph)) return;
-        
-        var xmlDoc = new XDocument(
-            new XElement("GraphData",
-                new XElement("Specs",
-                    new XElement("NoLoops", true),
-                    new XElement("NoCycles", false),
-                    new XElement("Directed", graph is ISpellDigraph<ISpellGraphNode>),
-                    new XElement("IsWeighted", new XAttribute("defaultWeight", 1), graph is IWeighted<ISpellGraphNode>)
-                ),
-                new XElement("Graph",
-                    new XElement("Nodes",
-                        graph.Nodes.ConvertAll(nodeData =>
-                            new XElement("Node",
-                                new XAttribute("posX", nodeData.Position.X),
-                                new XAttribute("posX", nodeData.Position.Y),
-                                new XElement("Rune",
-                                    new XAttribute("type", nodeData.Castable.GetType().ToString()),
-                                    new XAttribute("rarity", ((Rune)nodeData.Castable).rarity.ToString())
-                                ),
-                                nodeData.GetSigilCount() > 0 ?
-                                    nodeData.GetSigils().ToList().ConvertAll(sigil =>
-                                    new XElement("Sigil",
-                                        new XAttribute("name", sigil.Name),
-                                        new XAttribute("description", sigil.Description),
-                                        new XAttribute("rarity", sigil.rarity.ToString()),
-                                        new XAttribute("value", ConvertSigilParamToXML(sigil)),
-                                        new XAttribute("type", sigil.paramType.ToString())))
-                                : null
-                            )
-                        )
-                    ),
-                    new XElement("Arcs",
-                        graph is IWeighted<ISpellGraphNode> ?
-                        ((IWeighted<ISpellGraphNode>)graph).WeightedEdges.Select(arc => {
-                            return new XElement("Arc",
-                                new XAttribute("source", arc.Key.Item1),
-                                new XAttribute("target", arc.Key.Item2),
-                                new XAttribute("target", arc.Value)
-                            ); }
-                        )
-                        :
-                        graph.Edges.ConvertAll(arc => {
-                            return new XElement("Arc",
-                                new XAttribute("source", arc.Item1),
-                                new XAttribute("target", arc.Item2)
-                            ); }
-                        )
 
-                    )
-                )
-            )
+    public static void SaveSpell(Spell spell)
+    {
+        if(!IsGraphValid(spell.graphData)) throw new InvalidDataException("Cannot save a invalid spell.");
+        var xmlDoc = new XDocument(
+            SpellStatsToXML(spell),
+            GraphToXML(spell.graphData)
         );
 
-        xmlDoc.Save(filePath);
+    }
+
+    public static XElement SpellStatsToXML(Spell spell, bool hasLoops = false, bool hasCycles = true)
+    {
+        return new XElement("Specs",
+            new XElement("Identity", 
+                new XAttribute("name", spell.Name),
+                new XAttribute("description", spell.Description),
+                new XAttribute("texture", spell.Portrait.ResourcePath)
+            ),
+            new XElement("Parameters", 
+                new XAttribute("HasLoops", spell.graphData.Flags.Contains(GraphFlag.ALLOW_LOOPS)),
+                new XAttribute("HasCycles", spell.graphData.Flags.Contains(GraphFlag.ALLOW_CYCLES)),
+                new XAttribute("Directed", spell.graphData.Flags.Contains(GraphFlag.DIRECTED)),
+                new XAttribute("IsWeighted", spell.graphData.Flags.Contains(GraphFlag.WEIGHTED))
+            )
+        );
+    }
+    
+    public static XElement GraphToXML(IGraph<ISpellGraphNode> graph)
+    {
+        return new XElement("GraphData",
+            new XElement("Nodes",
+                graph.ToList().ConvertAll(nodeData =>
+                    new XElement("Node",
+                        new XAttribute("posX", nodeData.Position.X),
+                        new XAttribute("posX", nodeData.Position.Y),
+                        new XElement("Rune",
+                            new XAttribute("type", nodeData.Castable.GetType().ToString()),
+                            new XAttribute("rarity", ((Rune)nodeData.Castable).rarity.ToString())
+                        ),
+                        nodeData.GetSigilCount() > 0 ?
+                            nodeData.GetSigils().Select(sigil =>
+                            new XElement("Sigil",
+                                new XAttribute("name", sigil.Name),
+                                new XAttribute("description", sigil.Description),
+                                new XAttribute("rarity", sigil.rarity.ToString()),
+                                new XAttribute("value", ConvertSigilParamToXML(sigil)),
+                                new XAttribute("type", sigil.paramType.ToString())))
+                        : null
+                    )
+                )
+            ),
+            new XElement("Arcs",
+                graph.Flags.Contains(GraphFlag.WEIGHTED) ?
+                graph.ForeachEdge((src, trg, weight) => {
+                    return new XElement("Arc",
+                        new XAttribute("source", src.Index),
+                        new XAttribute("target", trg.Index),
+                        new XAttribute("weight", weight)
+                    ); 
+                })
+                :
+                graph.ForeachEdge((src, trg, weight) => {
+                    return new XElement("Arc",
+                        new XAttribute("source", src.Index),
+                        new XAttribute("target", trg.Index)
+                    ); 
+                })
+            )
+        );
     }
 
 
@@ -150,15 +172,15 @@ public static class GraphRepository
         public bool isValid;
     }
     public static TGraph LoadGraphFromXml<TGraph, TNode>(string filePath)          
-        where TGraph : ISpellDigraph<TNode>, new()
+        where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
     {
         var xmlDoc = XDocument.Load(filePath);
         TGraph graph = new TGraph();
 
         GraphStats stats = new GraphStats{
-            noLoops = xmlDoc.Root.Element("Specs")?.Element("NoLoops")?.Value != null,
-            isTree = xmlDoc.Root.Element("Specs")?.Element("NoCycles")?.Value != null,
+            noLoops = xmlDoc.Root.Element("Specs")?.Element("HasLoops")?.Value != null,
+            isTree = xmlDoc.Root.Element("Specs")?.Element("HasCycles")?.Value != null,
             isDirected = xmlDoc.Root.Element("Specs")?.Element("Directed") != null,
             isWeighted = bool.Parse(xmlDoc.Root.Element("Specs")?.Element("IsWeighted")?.Value ?? "false")
         };
@@ -166,14 +188,14 @@ public static class GraphRepository
 
         if(stats.isDirected)
         {
-            if(graph is not ISpellDigraph<TNode>) 
+            if(graph is not IGraph<TNode>) 
                 throw new InvalidOperationException("The loaded graph is directed but you tried to load it on a undirected graph type.");
         }
         
         if(stats.isWeighted) 
         {
             stats.defaultWeight = int.Parse(xmlDoc.Root.Element("Specs")?.Element("IsWeighted")?.Attribute("defaultWeight")?.Value);
-            if(graph is not IWeighted<TNode>) 
+            if(!graph.Flags.Contains(GraphFlag.WEIGHTED)) 
                 throw new InvalidOperationException("The loaded graph is weighted, but tried to load it on a unweighted graph type.");
             
         }  
@@ -184,8 +206,8 @@ public static class GraphRepository
 
         LoadArcs<TGraph,TNode>(graphData, ref graph);
 
-
-        if(!IsGraphValid((ISpellDigraph<ISpellGraphNode>)graph))
+        IEnumerable<ISpellGraphNode> _faultyNodes = null;
+        if(!IsGraphValid((IGraph<ISpellGraphNode>)graph, ref _faultyNodes))
         {
             throw new FileLoadException("The loaded Graph is Invalid");
         }
@@ -193,7 +215,7 @@ public static class GraphRepository
     }
 
     public static void LoadNodes<TGraph,TNode>(XElement root, ref TGraph graph)
-        where TGraph : ISpellGraph<TNode>, new()
+        where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
 
     {
@@ -218,7 +240,7 @@ public static class GraphRepository
     }
 
     public static void LoadArcs<TGraph,TNode>(XElement root, ref TGraph graph)
-        where TGraph : ISpellGraph<TNode>, new()
+        where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
 
     {
@@ -228,11 +250,11 @@ public static class GraphRepository
         {
             int sourceIndex = int.Parse(arcData.Attributes("source").Single().Value);
             int targetIndex = int.Parse(arcData.Attributes("target").Single().Value);
-            if(graph is IWeighted<TNode>)
+            if(graph.Flags.Contains(GraphFlag.WEIGHTED))
             {
                 var w = arcData.Attributes("weight").Single().Value;
                 int weight = w == null ? 1 : int.Parse(arcData.Attributes("weight").Single().Value);
-                ((IWeighted<TNode>)graph).Connect(graph[sourceIndex], graph[targetIndex], weight);
+                graph.Connect(graph[sourceIndex], graph[targetIndex], weight);
                 continue;
             }
             graph.Connect(graph[sourceIndex], graph[targetIndex]);
@@ -317,4 +339,7 @@ public static class GraphRepository
         return sigil;
     }
     
+
+
+#endregion SPELL_GRAPH
 }

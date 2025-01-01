@@ -1,4 +1,7 @@
-[gd_scene format=3 uid="uid://dgxvcv3p67675"]
+[gd_scene load_steps=3 format=3 uid="uid://dgxvcv3p67675"]
+
+[ext_resource type="Texture2D" uid="uid://dgnvrdi0xn30s" path="res://Sprites/Menus/SpellEditor/new-spell-icon.png" id="1_x277u"]
+[ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellIcon.cs" id="2_gkbpf"]
 
 [node name="SpellSelector" type="Control"]
 layout_mode = 3
@@ -18,6 +21,19 @@ layout_mode = 0
 offset_top = 34.0
 offset_right = 640.0
 offset_bottom = 131.0
+focus_neighbor_bottom = NodePath("../Inscribe")
+
+[node name="TextureRect" type="TextureRect" parent="Panel/SpellList"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = -0.053125
+anchor_bottom = -0.350515
+offset_right = 96.0
+offset_bottom = 96.0
+texture = ExtResource("1_x277u")
+expand_mode = 1
+script = ExtResource("2_gkbpf")
+metadata/_edit_use_anchors_ = true
 
 [node name="SpellDescription" type="Panel" parent="Panel"]
 layout_mode = 0
@@ -27,6 +43,7 @@ offset_right = 282.0
 offset_bottom = 360.0
 
 [node name="Title" type="RichTextLabel" parent="Panel/SpellDescription"]
+layout_mode = 0
 offset_right = 248.0
 offset_bottom = 47.0
 
@@ -38,6 +55,7 @@ offset_right = 237.0
 offset_bottom = 218.0
 
 [node name="SpellStats" type="Panel" parent="Panel"]
+layout_mode = 0
 offset_left = 404.0
 offset_top = 154.0
 offset_right = 585.0
@@ -56,11 +74,15 @@ offset_left = 309.0
 offset_top = 189.0
 offset_right = 379.0
 offset_bottom = 220.0
+focus_neighbor_top = NodePath("../SpellList")
+focus_neighbor_bottom = NodePath("../Erase")
 text = "Inscribe"
 
 [node name="Erase" type="Button" parent="Panel"]
+layout_mode = 0
 offset_left = 309.0
 offset_top = 231.0
 offset_right = 379.0
 offset_bottom = 262.0
+focus_neighbor_top = NodePath("../Inscribe")
 text = "Erase"

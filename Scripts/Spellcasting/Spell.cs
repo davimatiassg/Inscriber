@@ -7,7 +7,7 @@ using Godot;
 /// Represents a Spell during Runtime.
 /// Is agnostic to graph's storage strategy.
 /// </summary>
-using GraphType = AdjacenceListGraph<DefaultSpellGraphNode>;
+using GraphType = AdjacenceMatrixDigraph<DefaultSpellGraphNode>;
 using SpellEditing;
 
 [GlobalClass]
@@ -18,7 +18,7 @@ public partial class Spell : Resource, ICastable
 	
 #region SPELL_DATA
 
-	public ISpellGraph<ISpellGraphNode> graphData;
+	public IGraph<ISpellGraphNode> graphData;
 	protected CastingResources castReqs;
 	public CastingResources CastRequirements 
 	{   get
@@ -73,25 +73,30 @@ public partial class Spell : Resource, ICastable
 		}
 	}
 
-    public Texture2D Portrait => throw new NotImplementedException();
+	Texture2D portrait;
+    public Texture2D Portrait { get => portrait; set => portrait = value; }
 
-    public string Category => throw new NotImplementedException();
+    
+	string description;
+    public string Description { get => description; set => description = value; }
 
-    public string Description => throw new NotImplementedException();
+	Color color;
+    public Color Color { get => color; set => color = value; }
 
-    public Color Color => throw new NotImplementedException();
+	string name;
+    public string Name { get => name; set => name = value; }
 
-    string IMagicSymbol.Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
+	public string Category => "Spell";
 
     #endregion SPELL_DATA
 
 
     public Spell()
 	{
-		graphData = (ISpellGraph<ISpellGraphNode>) new GraphType();
+		graphData = (ISpellDigraph<ISpellGraphNode>) new GraphType();
 	}
 	
+	private enum CastingSituation { READY, WAITING, DONE };
 	/// <summary>
 	/// Casts this Spell using the avaliable Casting Resources.
 	/// Each of the spell's nodes will only be cast once its predecessor all finish their own casting.
@@ -100,20 +105,23 @@ public partial class Spell : Resource, ICastable
 	/// <returns>A task that is completed only once the Spell's casting finishes</returns>
 	/// <exception cref="InvalidOperationException"></exception>
 	public async Task<CastingResources> Cast(CastingResources data) 
-	=>  (
-			await Task.WhenAll
-			(
-				graphData.Nodes.Where((n) => graphData.GetNextNodesOf(n).Count == 0).
-				Select(async (n, idx) => await PreviousCastings(data, n))
-			)
-		).Aggregate((CastingResources totalRes, CastingResources newRes) => totalRes+newRes);
-	
-	private async Task<CastingResources> PreviousCastings(CastingResources data, ISpellGraphNode current)
 	{
 		return data;
+		/*
+		var castStatus = GraphUtil.InitializePairType(graphData.Nodes, CastingSituation.READY);
+		Action<ISpellGraphNode> VisitationProcess = async (ISpellGraphNode n) => 
+		{
+			if(castStatus[n] == CastingSituation.READY) {
+				
+			}
+		}; 
+		Action<ISpellGraphNode, ISpellGraphNode>  UnmarkedVisitProcess = null,
+		Action<ISpellGraphNode, ISpellGraphNode>  MarkedVisitProcess = null;
+		
+		GraphUtil.ForEachNodeByBFSIn(graphData)
+		return await Task.WhenAll((
+			graphData.Nodes.Where((n) => graphData.GetNextNodesOf(n).Count == 0).
+			Select(async (n, idx) => await PreviousCastings(data, n))
+		)).Aggregate((CastingResources totalRes, CastingResources newRes) => totalRes+newRes);*/
 	}
-
-
-	
-
 }

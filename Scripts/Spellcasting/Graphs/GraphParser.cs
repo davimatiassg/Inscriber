@@ -28,7 +28,7 @@ public class GraphParser
     }
 
     public static void OpenGraph<TGraph, TNode>() 
-        where TGraph : ISpellGraph<TNode>, new()
+        where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
     {
         if(fileDialog == null) { InitiateDialog(parent); }
@@ -49,7 +49,7 @@ public class GraphParser
     /// <param name="filePath">The path of the file to be read.</param>
     /// <returns>The graph contained in the specified file;</returns>
     public static TGraph ParseGraphFile<TGraph, TNode>(string filePath) 
-        where TGraph : ISpellGraph<TNode>, new()
+        where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
     {
 

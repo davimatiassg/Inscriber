@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,32 +10,25 @@ namespace SpellEditing
 /// Control-inherited class that displays a Rune Graph of a Spell.
 /// </summary>
     
-public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.VisualNode>, IWeighted<SpellGraphView.VisualNode>
+public partial class SpellGraphView : Control, IGraph<SpellGraphView.VisualNode>
 {
+    public const int DEFAULT_WEIGHT = 1;
+    public GraphFlag[] Flags => new GraphFlag[] { GraphFlag.DIRECTED, GraphFlag.ALLOW_LOOPS, GraphFlag.WEIGHTED };
+
 #region SPELLGRAPH_INTERFACE
 
     public VisualNode this[int index] { 
         get => (VisualNode)graphNodeMaster.GetChild(index);
         set => this[index].Castable = value.Castable;
-    }
-    public List<VisualNode> Nodes {
-        get => graphNodeMaster.GetChildren().Cast<VisualNode>().ToList(); 
-        set { Clear(); foreach(var node in value) graphNodeMaster.AddChild(node); }
-    }
-    
+    }    
 
     Dictionary<(VisualNode, VisualNode), int> edges;
-    public List<(VisualNode, VisualNode)> Edges 
+    
+    public TResult ForeachTargetOf<TResult>(VisualNode node, Func<VisualNode, int, TResult> process)
     {
-        get => WeightedEdges.Keys.ToList();
 
-        set
-        {
-            var nodes = Nodes;
-            foreach(var node in nodes){ node.DisconnectFromAll(); }
-            foreach(var edge in value){ edge.Item1.ConnectTo(edge.Item2); }
-        }
     }
+    
 
     public Dictionary<(VisualNode, VisualNode), int> WeightedEdges 
     {
@@ -67,10 +61,6 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
         return node;
     }
 
-    public List<VisualNode> GetNextNodesOf(VisualNode node)
-    {
-        return node.arcs.Where(arc => arc.Source == node).Select(arc => arc.Target).ToList();
-    }
 
     public void SetNextNodesOf(VisualNode node, List<VisualNode> nodes)
     {
@@ -78,16 +68,6 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
         nodes.ForEach(otherNode => Connect(node, otherNode));
     }
 
-    public List<VisualNode> GetPrevNodesOf(VisualNode node)
-    {
-        return node.arcs.Where(arc => arc.Source == node).Select(arc => arc.Source).ToList();
-    }
-
-    public void SetPrevNodesOf(VisualNode node, List<VisualNode> nodes)
-    {
-        node.DisconnectFromAll();
-        nodes.ForEach(otherNode => Connect(otherNode, node));
-    }
 
     public int EdgeAmmount() => graphArcsMaster.GetChildCount();
     public bool AdjacenceBetween(VisualNode n1, VisualNode n2) => n1.arcs.Select(arc => arc.Target).Contains(n2);
@@ -208,21 +188,23 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
 
 
     public virtual void LoadSpellGraph<TGraph, TNode>(TGraph graph)
-        where TGraph : ISpellGraph<TNode>, new()
+        where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
     {
         Clear();
         if(graph.Count == 0) return;
 
-        foreach(var node in graph.Nodes)
+        foreach(var node in graph)
         {
             Add(node.Castable, node.Position);
         }
 
-        foreach((var src, var trg) in graph.Edges)
-        {
-            Connect((VisualNode)graphNodeMaster.GetChild(src.Index), (VisualNode)graphNodeMaster.GetChild(trg.Index));
-        }
+        graph.ForeachEdge((TNode src, TNode trg, int weight) => {
+            Connect(
+                (VisualNode)graphNodeMaster.GetChild(src.Index), 
+                (VisualNode)graphNodeMaster.GetChild(trg.Index)
+            );
+        });
     }
 
         
@@ -275,11 +257,6 @@ public partial class SpellGraphView : Control, ISpellDigraph<SpellGraphView.Visu
                 }
             }
         }
-
-
-
-
-
 
         public VisualNode(ICastable castable)
         {
