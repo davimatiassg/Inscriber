@@ -6,12 +6,14 @@ using System.Linq;
 using Godot;
 
 
-public class GraphUtil
+public class GraphUtil<TGraph, TNode>
+	where TGraph : IGraph<TNode>, new()
+	where TNode : ISpellGraphNode, new()
 {
 
 #region PREPARATIVE_FUNCTIONS
-	public static string TestNodeString(ISpellGraphNode n) => "[color=" + ((Rune)n.Castable).Color.ToHtml() + "]" + n.Index + "[/color]";
-	public static string NodeStringName(ISpellGraphNode n) => "[color=" + ((Rune)n.Castable).Color.ToHtml() + "]" + ((Rune)n.Castable).Name + "[/color]";	
+	public static string TestNodeString(TNode n) => "[color=" + ((Rune)n.Castable).Color.ToHtml() + "]" + n.Index + "[/color]";
+	public static string NodeStringName(TNode n) => "[color=" + ((Rune)n.Castable).Color.ToHtml() + "]" + ((Rune)n.Castable).Name + "[/color]";	
 	public static Dictionary<T1, T2> InitializePairType<T1, T2>(IEnumerable<T1> nodes, T2 defValue)
 	{
 		Dictionary<T1, T2> dict = new Dictionary<T1,T2>();
@@ -21,7 +23,7 @@ public class GraphUtil
 		}
 		return dict;
 	}
-	public static Dictionary<ISpellGraphNode, T> InitializePairType<T>(IEnumerable<ISpellGraphNode> nodes) 
+	public static Dictionary<TNode, T> InitializePairType<T>(IEnumerable<TNode> nodes) 
 		where T : new() 
 	=> InitializePairType(nodes, new T());
 
@@ -37,22 +39,22 @@ public class GraphUtil
 	/// <param name="VisitationProcess">An Action Delegate that operates after a node is visited.</param>
 	/// <param name="UnmarkedVisitProcess">An Action Delegate that operates for each unvisited neighbor of the node being visited.</param>
 	/// <param name="MarkedVisitProcess">An Action Delegate that operates for each visited neighbor of the node being visited.</param>
-	public static void ForEachNodeByBFSIn(IGraph<ISpellGraphNode> spellGraph, ISpellGraphNode startingNode, 
-		Action<ISpellGraphNode>        VisitationProcess = null, 
-		Action<ISpellGraphNode, ISpellGraphNode>  UnmarkedVisitProcess = null,
-		Action<ISpellGraphNode, ISpellGraphNode>  MarkedVisitProcess = null
+	public static void ForEachNodeByBFSIn(TGraph spellGraph, TNode startingNode, 
+		Action<TNode>        VisitationProcess = null, 
+		Action<TNode, TNode>  UnmarkedVisitProcess = null,
+		Action<TNode, TNode>  MarkedVisitProcess = null
 	){
 		if(spellGraph.Count == 0) return;
-		Dictionary<ISpellGraphNode, bool> markedNodes = InitializePairType(spellGraph, false);
-		Queue<ISpellGraphNode> queue = new Queue<ISpellGraphNode>();
+		Dictionary<TNode, bool> markedNodes = InitializePairType(spellGraph, false);
+		Queue<TNode> queue = new Queue<TNode>();
 		queue.Enqueue(startingNode);
 
 		while (queue.Count > 0)
 		{   
-			ISpellGraphNode currNode = queue.Dequeue();
+			TNode currNode = queue.Dequeue();
 			if(markedNodes[currNode]) continue;
 				
-			spellGraph.ForeachTargetOf(currNode, (ISpellGraphNode nextNode, int weight) =>
+			spellGraph.ForeachTargetOf(currNode, (TNode nextNode, int weight) =>
 			{
 				if(markedNodes[nextNode]) { 
 					MarkedVisitProcess?.Invoke(currNode, nextNode);
@@ -66,7 +68,7 @@ public class GraphUtil
 			markedNodes[currNode] = true;
 		}
 	}
-    public static void ForEachNodeByBFSIn(IGraph<ISpellGraphNode> spellGraph) => ForEachNodeByBFSIn(spellGraph, spellGraph[0]);
+    public static void ForEachNodeByBFSIn(TGraph spellGraph) => ForEachNodeByBFSIn(spellGraph, spellGraph[0]);
 	
 	/// <summary>
 	/// Runs a full Depth First Search trought the graph's nodes and executes a choosen expression at each node.
@@ -76,23 +78,23 @@ public class GraphUtil
 	/// <param name="VisitationProcess">An Action Delegate that operates after a node is visited.</param>
 	/// <param name="UnmarkedVisitProcess">An Action Delegate that operates for each unvisited neighbor of the node being visited.</param>
 	/// <param name="MarkedVisitProcess">An Action Delegate that operates for each visited neighbor of the node being visited.</param>
-	public static void ForEachNodeByDFSIn(IGraph<ISpellGraphNode> spellGraph, ISpellGraphNode startingNode, 
-		Action<ISpellGraphNode>        VisitationProcess = null, 
-		Action<ISpellGraphNode, ISpellGraphNode>  UnmarkedVisitProcess = null,
-		Action<ISpellGraphNode, ISpellGraphNode>  MarkedVisitProcess = null
+	public static void ForEachNodeByDFSIn(TGraph spellGraph, TNode startingNode, 
+		Action<TNode>        VisitationProcess = null, 
+		Action<TNode, TNode>  UnmarkedVisitProcess = null,
+		Action<TNode, TNode>  MarkedVisitProcess = null
 	) 
 	{
 		if(spellGraph.Count == 0) return;
-		Dictionary<ISpellGraphNode, bool> markedNodes = InitializePairType(spellGraph, false);
-		Stack<ISpellGraphNode> stack = new Stack<ISpellGraphNode>();
+		Dictionary<TNode, bool> markedNodes = InitializePairType(spellGraph, false);
+		Stack<TNode> stack = new Stack<TNode>();
 		stack.Push(startingNode);
 
 		while (stack.Count > 0)
 		{   
-			ISpellGraphNode currNode = stack.Pop();
+			TNode currNode = stack.Pop();
 			if(markedNodes[currNode]) continue;
 
-			spellGraph.ForeachTargetOf(currNode, (ISpellGraphNode nextNode, int weight) =>
+			spellGraph.ForeachTargetOf(currNode, (TNode nextNode, int weight) =>
 			{
 				if(markedNodes[nextNode]) { 
 					MarkedVisitProcess?.Invoke(currNode, nextNode);
@@ -105,15 +107,15 @@ public class GraphUtil
 			markedNodes[currNode] = true;
 		}
 	}
-	public static void ForEachNodeByDFSIn(IGraph<ISpellGraphNode> spellGraph) => ForEachNodeByDFSIn(spellGraph, spellGraph[0]);
+	public static void ForEachNodeByDFSIn(TGraph spellGraph) => ForEachNodeByDFSIn(spellGraph, spellGraph[0]);
 
 	/// <summary>
 	/// Runs a choosen expression at each node of a graph.
 	/// </summary>
 	/// <param name="spellGraph">The graph used </param>
 	/// <param name="Process">An Action Delegate that executes with each node as parameter.</param>
-	public static void ForEachNodeIn(IGraph<ISpellGraphNode> spellGraph, Action<ISpellGraphNode> Process) {
-		foreach(ISpellGraphNode node in spellGraph) Process(node);
+	public static void ForEachNodeIn(TGraph spellGraph, Action<TNode> Process) {
+		foreach(TNode node in spellGraph) Process(node);
 	}
 #endregion SEARCHES_ITERATIONS
 
@@ -125,7 +127,7 @@ public class GraphUtil
 	/// <param name="graph">The graph to check</param>
 	/// <returns>true if there is only one connected component in the graph, false otherwise.</returns>
 	public static bool IsGraphConnected<T>(IGraph<T> graph) 
-	where T : ISpellGraphNode, new()
+	where T : TNode, new()
 		=> ListConnectedComponents(graph).Count == 1;
 
 	/// <summary>
@@ -134,7 +136,7 @@ public class GraphUtil
 	/// <param name="graph">The graph to check</param>
 	/// <returns>true the graph is bipartite, false otherwise.</returns>
 	public static bool IsGraphBipartite<T>(IGraph<T> graph)
-		where T : ISpellGraphNode, new()
+		where T : TNode, new()
 	{
 		int brand = 1;
 		if(graph.Count < 3) return true;
@@ -163,16 +165,14 @@ public class GraphUtil
 		return true;
 	}
 
-	/// <summary>
-	/// Uses a DFS algorithm to verify if the graph has a cycle.
-	/// </summary>
-	/// <param name="startingNode">The spellGraph's node from where the search will start</param>
-	/// <returns>True if this graph has a cycle</returns>
-	public static bool HasCycle(IGraph<ISpellGraphNode> graph, ISpellGraphNode startingNode)
+/*
+REVIEW: The need of this function.
+REVIEW: This version works for directed graphs only. The version below this works for every graph, I think;
+	public static bool HasCycle(TGraph graph, TNode startingNode)
 	{
 		bool cycled = false;
 
-		Action<ISpellGraphNode, ISpellGraphNode>  MarkedVisitProcess = (ISpellGraphNode n1, ISpellGraphNode n2) => 
+		Action<TNode, TNode>  MarkedVisitProcess = (TNode n1, TNode n2) => 
 		{  cycled = true; };
 
 		ForEachNodeByDFSIn(graph, startingNode, null, null, MarkedVisitProcess);
@@ -181,24 +181,33 @@ public class GraphUtil
 	}
 
 
-	public static bool HasCycle<T>(IGraph<T> graph, T startingNode)
-	where T : ISpellGraphNode, new()
+*/
+
+
+	/// <summary>
+	/// Uses a DFS algorithm to verify if the graph has a cycle.
+	/// </summary>
+	/// <param name="startingNode">The spellGraph's node from where the search will start</param>
+	/// <returns>True if this graph has a cycle</returns>
+
+
+	public static bool HasCycle(TGraph graph, TNode startingNode)
 	{
 		bool cycled = false;
-		Dictionary<ISpellGraphNode, ISpellGraphNode> Predecessors = new Dictionary<ISpellGraphNode, ISpellGraphNode>
+		Dictionary<TNode, TNode> Predecessors = new Dictionary<TNode, TNode>
         {
             { startingNode, startingNode }
         };
 
-		Action<ISpellGraphNode, ISpellGraphNode>  UnmarkedVisitProcess = (ISpellGraphNode n1, ISpellGraphNode n2) => 
+		Action<TNode, TNode>  UnmarkedVisitProcess = (TNode n1, TNode n2) => 
 		{ 
 			if(!Predecessors.Keys.Contains(n2)) Predecessors.Add(n2, n1); 
 		};
 
-		Action<ISpellGraphNode, ISpellGraphNode>  MarkedVisitProcess = (ISpellGraphNode n1, ISpellGraphNode n2) => 
+		Action<TNode, TNode>  MarkedVisitProcess = (TNode n1, TNode n2) => 
 		{ if(! Predecessors[n1].Equals(n1) && Predecessors[n1].Equals(n2)) cycled = true; };
 
-		ForEachNodeByDFSIn((IGraph<ISpellGraphNode>)graph, startingNode, null, UnmarkedVisitProcess, MarkedVisitProcess);
+		ForEachNodeByDFSIn(graph, startingNode, null, UnmarkedVisitProcess, MarkedVisitProcess);
 
 		return cycled;
 	}
@@ -211,7 +220,7 @@ public class GraphUtil
 	/// 
 	/*
 	FIXME: public static List<int> TreeToPruffer<T>(IGraph<T> originalGraph)
-	where T : ISpellGraphNode, new()
+	where T : TNode, new()
 	{
 		if(ListConnectedComponents(originalGraph).Count != 1)   	{GD.Print("The chosen graph is not connected."); return null;}
 		if(HasCycle(originalGraph, originalGraph[0]))           	{GD.Print("The chosen graph has cycles."); return null;}
@@ -251,29 +260,29 @@ public class GraphUtil
 	/// </summary>
 	/// <param name="graph"></param>
 	/// <returns></returns>
-	public static List<ISpellGraphNode> ListArticulations(IGraph<ISpellGraphNode> graph, ISpellGraphNode root)
+	public static List<TNode> ListArticulations(TGraph graph, TNode root)
 	{
-		List<ISpellGraphNode> articulations = new List<ISpellGraphNode>();
+		List<TNode> articulations = new List<TNode>();
 
-		List<(ISpellGraphNode, ISpellGraphNode)> treeEdges = new List<(ISpellGraphNode, ISpellGraphNode)>();
-		Dictionary<ISpellGraphNode, int> depths = new Dictionary<ISpellGraphNode, int> { { root, 0 }};
-		Dictionary<ISpellGraphNode, ISpellGraphNode> lowpts = new Dictionary<ISpellGraphNode, ISpellGraphNode> { { root, root }};
+		List<(TNode, TNode)> treeEdges = new List<(TNode, TNode)>();
+		Dictionary<TNode, int> depths = new Dictionary<TNode, int> { { root, 0 }};
+		Dictionary<TNode, TNode> lowpts = new Dictionary<TNode, TNode> { { root, root }};
 		
-		void UpdateLowPT(ISpellGraphNode node, ISpellGraphNode newLowPT)
+		void UpdateLowPT(TNode node, TNode newLowPT)
 		{
-			(ISpellGraphNode, ISpellGraphNode)[] currEdges;
-			ISpellGraphNode curr_node = node;
+			(TNode, TNode)[] currEdges;
+			TNode curr_node = node;
 			do
 			{
 				if(depths[lowpts[curr_node]] > depths[newLowPT]) lowpts[curr_node] = newLowPT;
 				else break;
 				
-				currEdges = treeEdges.Where(((ISpellGraphNode, ISpellGraphNode) n) => n.Item2.Equals(curr_node)).ToArray();
+				currEdges = treeEdges.Where(((TNode, TNode) n) => n.Item2.Equals(curr_node)).ToArray();
 				curr_node = currEdges[0].Item1;
 			} while(currEdges.Length > 0);
 		}
 				
-		Action<ISpellGraphNode, ISpellGraphNode>  UnmarkedVisitProcess = (ISpellGraphNode current, ISpellGraphNode next) =>
+		Action<TNode, TNode>  UnmarkedVisitProcess = (TNode current, TNode next) =>
 		{
 			treeEdges.Add((current, next));
 			if(depths.Keys.Contains(next)) return;
@@ -283,23 +292,23 @@ public class GraphUtil
 			
 		};
 
-		Action<ISpellGraphNode, ISpellGraphNode>  MarkedVisitProcess = (ISpellGraphNode current, ISpellGraphNode next) =>
+		Action<TNode, TNode>  MarkedVisitProcess = (TNode current, TNode next) =>
 		{
 			if(depths[lowpts[current]] > depths[next]) UpdateLowPT(current, next);
 		};
 
         ForEachNodeByBFSIn(graph, root, null, UnmarkedVisitProcess, MarkedVisitProcess);
 		
-		foreach(ISpellGraphNode node in graph)
+		foreach(TNode node in graph)
 		{
 			if(node.Equals(root)) continue;
-			graph.ForeachTargetOf(node, (ISpellGraphNode next, int weight) =>
+			graph.ForeachTargetOf(node, (TNode next, int weight) =>
 			{
 				if(lowpts[next].Equals(next) || lowpts[next].Equals(node)) 
 				if(!articulations.Contains(node)) articulations.Add(node);
 			});
 		}
-		if(treeEdges.Where(((ISpellGraphNode, ISpellGraphNode) n) => n.Item1.Equals(root) || n.Item2.Equals(root)).Count() > 1) articulations.Add(root);
+		if(treeEdges.Where(((TNode, TNode) n) => n.Item1.Equals(root) || n.Item2.Equals(root)).Count() > 1) articulations.Add(root);
 		return articulations;
 	}
 
@@ -309,21 +318,21 @@ public class GraphUtil
 	/// <param name="graph">The graph to get connected components from</param>
 	/// <returns>A List with the connected components of the graph</returns>
 	public static List<List<T>> ListConnectedComponents<T>(IGraph<T> graph)
-	where T : ISpellGraphNode, new()
+	where T : TNode, new()
 	{
 		List<List<T>> connectedComponents = new List<List<T>>();
 		List<T> currentComponent = new List<T>();
 
         var remainingNodes = Enumerable.Range(0, graph.Count).ToList();
 
-        Action<ISpellGraphNode> visitedNewNode = (ISpellGraphNode node) => {
+        Action<TNode> visitedNewNode = (TNode node) => {
 			remainingNodes.RemoveAt(node.Index);
 			currentComponent.Add((T)node);
 		};
 
         while(remainingNodes.Count > 0)
         {
-           	ForEachNodeByDFSIn((IGraph<ISpellGraphNode>)graph, graph[remainingNodes[0]], visitedNewNode);
+           	ForEachNodeByDFSIn((TGraph)graph, graph[remainingNodes[0]], visitedNewNode);
 			connectedComponents.Add(currentComponent);
         }
         return connectedComponents;
@@ -346,7 +355,7 @@ public class GraphUtil
 	/// <exception cref="FormatException"></exception>
 	/*
 	FIXME: public static TGraph PrufferToTree<TGraph, TNode>(TGraph originalGraph, List<int> pruffer) 
-		where TNode : ISpellGraphNode, new()
+		where TNode : TNode, new()
 		where TGraph : IGraph<TNode>, new()
 	{
 		if(originalGraph.EdgeAmmount() > 0)   		throw new FormatException("The chosen graph is not void.");
@@ -430,9 +439,7 @@ public class GraphUtil
 	/// <param name="graph">The original graph to get a spanning tree from.</param>
 	/// <param name="comparer">A comparison between the graph's edge's weights.</param>
 	/// <returns>A minimum spanning tree from the graph</returns>
-		public static TResult Kruskal<TGraph, TNode, TResult>(TGraph graph, Comparison<int> comparer)
-		where TNode : ISpellGraphNode, new()
-		where TGraph : IGraph<TNode>,  new()
+	public static TResult Kruskal<TResult>(TGraph graph, Comparison<int> comparer)
 		where TResult : IGraph<TNode>, new()
 	{
 		TResult mstree = new TResult();
@@ -467,7 +474,7 @@ public class GraphUtil
 
 /*
 	public static void UpdateNodeTopSorting<T>(IGraph<T> digraph)
-	where T: ISpellGraphNode, new()
+	where T: TNode, new()
 	 => digraph = TopSortNodes(digraph);
 
 	/// <summary>
@@ -476,11 +483,11 @@ public class GraphUtil
 	/// <param name="spellGraph">The IDigraph to be sorted</param>
 	/// <returns>The IGraph's nodes sorted by topology.</returns>
 	public static List<T> TopSortNodes<T>(IDigraph<T> spellGraph)
-	where T: ISpellGraphNode, new()
+	where T: TNode, new()
 	{
 
 		Dictionary<T, bool> markedNodes = InitializePairType(spellGraph, false);
-		void TopologicalSortUtil(T node, ref Stack<ISpellGraphNode> stack)
+		void TopologicalSortUtil(T node, ref Stack<TNode> stack)
 		{
 			markedNodes[node] = true;
 			spellGraph.ForeachTargetOf(node, (T n, int i) =>
@@ -490,7 +497,7 @@ public class GraphUtil
 			stack.Push(node);
 		}
 		
-		Stack<ISpellGraphNode> stack = new Stack<ISpellGraphNode>();
+		Stack<TNode> stack = new Stack<TNode>();
 		foreach (T node in spellGraph) {
 			if (!markedNodes[node] && (spellGraph.OutwardsDegree(node) + spellGraph.InwardsDegree(node) > 0)) 
 				TopologicalSortUtil(node, ref stack);
@@ -508,7 +515,7 @@ public class GraphUtil
 	/*
 	FIXME:
 	public static TResult ConvertGraphTo<TResult, TNode>(IGraph<TNode> originalGraph)
-		where TNode : ISpellGraphNode, new()
+		where TNode : TNode, new()
 		where TResult : IGraph<TNode>, new()
 	{
 		TResult result = new TResult();
@@ -531,9 +538,7 @@ public class GraphUtil
     /// <param name="endingNode">The spellGraph's node where the path ends</param>
 
     /// <returns> A List of nodes forming the path </returns>
-	public static Path BellmanFord<TGraph>(TGraph spellGraph, ISpellGraphNode startingNode, ISpellGraphNode endingNode
-	)
-		where TGraph : IGraph<ISpellGraphNode>, new() 
+	public static Path BellmanFord(TGraph spellGraph, TNode startingNode, TNode endingNode)
 	{		
 		if(!spellGraph.Contains(startingNode) || !spellGraph.Contains(endingNode)) 
 			throw new InvalidOperationException("The starting or ending nodes are not contained in the graph");
@@ -541,27 +546,27 @@ public class GraphUtil
 		if(spellGraph.Count <= 1)
 		{
 			Path p = new Path();
-			p.AddRange(spellGraph);
+			p.AddRange(spellGraph.AsEnumerable().Cast<ISpellGraphNode>());
 			return p;
 		}
 
 		var distances = new List<int>();
-		var predecessors = new List<ISpellGraphNode>();
+		var predecessors = new List<TNode>();
 		
 		foreach(var node in spellGraph)
 		{
 			distances.Add(int.MaxValue);
-			predecessors.Add(null);
+			predecessors.Add(default(TNode));
 		}
 
 		distances[startingNode.Index] = 0;
 		
-		var queue = new PriorityQueue<ISpellGraphNode, int>();
+		var queue = new PriorityQueue<TNode, int>();
 		queue.Enqueue(startingNode, 0);
 	
 		foreach(var current in spellGraph)
 		{
-			spellGraph.ForeachTargetOf(current, (ISpellGraphNode next, int weight) => 
+			spellGraph.ForeachTargetOf(current, (TNode next, int weight) => 
 			{
 				if(distances[next.Index] > distances[current.Index] + weight)
 				{
@@ -594,8 +599,7 @@ public class GraphUtil
     /// <param name="startingNode">The spellGraph's node where the path starts</param>
     /// <param name="endingNode">The spellGraph's node where the path ends</param>
     /// <returns> A List of nodes forming the path </returns>
-	public static Path Dijkstra<TGraph>(TGraph spellGraph, ISpellGraphNode startingNode, ISpellGraphNode endingNode)
-		where TGraph : IGraph<ISpellGraphNode>, new() 
+	public static Path Dijkstra(TGraph spellGraph, TNode startingNode, TNode endingNode)
 	{
 		
 		if(!spellGraph.Contains(startingNode) || !spellGraph.Contains(endingNode)) 
@@ -604,29 +608,29 @@ public class GraphUtil
 		if(spellGraph.Count <= 1) 
 		{
 			Path p = new Path();
-			p.AddRange(spellGraph);
+			p.AddRange(spellGraph.AsEnumerable().Cast<ISpellGraphNode>());
 			return p;
 		}
 
 		var distances = new List<int>();
-		var predecessors = new List<ISpellGraphNode>();
+		var predecessors = new List<TNode>();
 
 		foreach(var node in spellGraph)
 		{
 			distances.Add(int.MaxValue);
-			predecessors.Add(null);
+			predecessors.Add(default(TNode));
 		}
 
 		distances[startingNode.Index] = 0;
 		
-		var queue = new PriorityQueue<ISpellGraphNode, int>();
+		var queue = new PriorityQueue<TNode, int>();
 		queue.Enqueue(startingNode, 0);
 	
 		do
 		{
-			ISpellGraphNode current = queue.Dequeue();
+			TNode current = queue.Dequeue();
 			
-			spellGraph.ForeachTargetOf(current, (ISpellGraphNode next, int weight) => 
+			spellGraph.ForeachTargetOf(current, (TNode next, int weight) => 
 			{
 				if(weight < 0) throw new InvalidOperationException("IGraph contains negative edges.");
 
@@ -661,9 +665,7 @@ public class GraphUtil
 	/// <typeparam name="TNode"></typeparam>
 	/// <param name="spellGraph"></param>
 	/// <returns></returns>
-	public static int[,] FloydWarshall<TGraph, TNode>(TGraph spellGraph)
-		where TGraph : IGraph<TNode>, new() 
-		where TNode : ISpellGraphNode, new() 
+	public static int[,] FloydWarshall(TGraph spellGraph)
 	{
 		int size = spellGraph.Count();
 		int[,] distances = new int[size, size];
@@ -721,35 +723,35 @@ public class GraphUtil
     /// <param name="MarkedVisitProcess">An Action Delegate that operates for each visited neighbor of the node being visited.</param>
     /// <returns> A List of nodes forming the path </returns>
 
-    public static Path Dijkstra<TGraph>(TGraph spellGraph, ISpellGraphNode startingNode, ISpellGraphNode endingNode, 
-        Action<ISpellGraphNode>           			VisitationProcess = null, 
-        Action<ISpellGraphNode, ISpellGraphNode>    UnmarkedVisitProcess = null,
-        Action<ISpellGraphNode, ISpellGraphNode>    MarkedVisitProcess = null
+    public static Path Dijkstra<TGraph>(TGraph spellGraph, TNode startingNode, TNode endingNode, 
+        Action<TNode>           			VisitationProcess = null, 
+        Action<TNode, TNode>    UnmarkedVisitProcess = null,
+        Action<TNode, TNode>    MarkedVisitProcess = null
 	)	
-		where TGraph : IGraph<ISpellGraphNode>, new() 
+		where TGraph : TGraph, new() 
     {
 		
 
         if(spellGraph.Count == 0) return new Path();
-        Dictionary<ISpellGraphNode, PathNode> nodeStats = InitializePairType(spellGraph.Cast<ISpellGraphNode>().ToList(), new PathNode());
+        Dictionary<TNode, PathNode> nodeStats = InitializePairType(spellGraph.Cast<TNode>().ToList(), new PathNode());
         		
-		var edgeWeight = ((ISpellGraphNode, ISpellGraphNode) edge) => { return 1;};
-		if(spellGraph is IWeighted<ISpellGraphNode>)
+		var edgeWeight = ((TNode, TNode) edge) => { return 1;};
+		if(spellGraph is IWeighted<TNode>)
 		{
-			Dictionary<(ISpellGraphNode, ISpellGraphNode), int> weightedEdges = ((IWeighted<ISpellGraphNode>)spellGraph).WeightedEdges;
-			edgeWeight = ((ISpellGraphNode, ISpellGraphNode) edge) => { return weightedEdges[edge]; };
+			Dictionary<(TNode, TNode), int> weightedEdges = ((IWeighted<TNode>)spellGraph).WeightedEdges;
+			edgeWeight = ((TNode, TNode) edge) => { return weightedEdges[edge]; };
 		}
 		
 
         nodeStats[startingNode].Distance = 0;
         
-        UnmarkedVisitProcess += (ISpellGraphNode current, ISpellGraphNode next) => 
+        UnmarkedVisitProcess += (TNode current, TNode next) => 
 		{
 			nodeStats[next].Distance = edgeWeight((current, next)) + nodeStats[current].Distance;
 			nodeStats[next].Parent = current;
 		};
 
-        MarkedVisitProcess += (ISpellGraphNode current, ISpellGraphNode next) => 
+        MarkedVisitProcess += (TNode current, TNode next) => 
         {
             if(nodeStats[next].Distance > edgeWeight((current, next)) + nodeStats[current].Distance)
             {
@@ -764,7 +766,7 @@ public class GraphUtil
 	
         if(nodeStats[endingNode].Distance < int.MaxValue) 
         { 
-            for(ISpellGraphNode current = endingNode; !current.Equals(endingNode); current = nodeStats[current].Parent) path.Add(current); 
+            for(TNode current = endingNode; !current.Equals(endingNode); current = nodeStats[current].Parent) path.Add(current); 
         }
         path.Reverse();
 	

@@ -200,6 +200,7 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
     /// Stablishes the node-relevant spell data changes from a connection. 
     /// </summary>
     /// <param name="arc">The arc representing the connection</param>
+    /// TODO:
     public void AssembleConnetion(VisualArc arc)
     {
         System.Diagnostics.Debug.Assert(arc != null);

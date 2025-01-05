@@ -9,6 +9,8 @@ using Godot;
 /// </summary>
 
 using SpellEditing;
+
+using SpellUtil = GraphUtil<SpellGraph<DefaultSpellGraphNode>, DefaultSpellGraphNode>;
 public class Spell : SpellGraph<DefaultSpellGraphNode>, ICastable
 {
 	public bool isValid = true;
@@ -21,7 +23,7 @@ public class Spell : SpellGraph<DefaultSpellGraphNode>, ICastable
 	{   get
 		{
 			castReqs = new CastingResources();
-			GraphUtil.ForEachNodeByBFSIn((IGraph<ISpellGraphNode>)this, this[0], (currNode) => castRets.Merge(currNode.Castable.CastRequirements));
+			SpellUtil.ForEachNodeByBFSIn(this, this[0], (currNode) => castRets.Merge(currNode.Castable.CastRequirements));
 			return castReqs;
 		}
 	}
@@ -30,7 +32,7 @@ public class Spell : SpellGraph<DefaultSpellGraphNode>, ICastable
 	{   
 		get{
 			castRets = new CastingResources();
-			GraphUtil.ForEachNodeByBFSIn((IGraph<ISpellGraphNode>)this, this[0], (currNode) => castRets.Merge(currNode.Castable.CastReturns));
+			SpellUtil.ForEachNodeByBFSIn(this, this[0], (currNode) => castRets.Merge(currNode.Castable.CastReturns));
 			return castRets;
 		}
 	}
@@ -40,7 +42,7 @@ public class Spell : SpellGraph<DefaultSpellGraphNode>, ICastable
 	{   
 		get{
 			castDefs = new CastingResources();
-			GraphUtil.ForEachNodeByBFSIn((IGraph<ISpellGraphNode>)this, this[0], (currNode) => castRets.Merge(currNode.Castable.CastDefaults));
+			SpellUtil.ForEachNodeByBFSIn(this, this[0], (currNode) => castRets.Merge(currNode.Castable.CastDefaults));
 			return castDefs;
 		}
 	}
@@ -49,14 +51,14 @@ public class Spell : SpellGraph<DefaultSpellGraphNode>, ICastable
 		get  
 		{ 
 			uint cd = 0;
-			GraphUtil.ForEachNodeIn((IGraph<ISpellGraphNode>)this, (node) => cd += node.Castable.Cooldown );
+			SpellUtil.ForEachNodeIn(this, (node) => cd += node.Castable.Cooldown );
 			return cd;
 		}
 	}
 	public int Mana { 
 		get{
 			int mana = 0;
-			GraphUtil.ForEachNodeIn((IGraph<ISpellGraphNode>)this, (node) => mana += node.Castable.Mana );
+			SpellUtil.ForEachNodeIn(this, (node) => mana += node.Castable.Mana );
 			return mana;
 		}  
 	}
@@ -65,7 +67,7 @@ public class Spell : SpellGraph<DefaultSpellGraphNode>, ICastable
 		get  
 		{ 
 			uint ct = 0;
-			GraphUtil.ForEachNodeIn((IGraph<ISpellGraphNode>)this, (node) => ct += node.Castable.CastingTime );
+			SpellUtil.ForEachNodeIn(this, (node) => ct += node.Castable.CastingTime );
 			return ct;
 		}
 	}
@@ -99,7 +101,7 @@ public class Spell : SpellGraph<DefaultSpellGraphNode>, ICastable
 	{
 		return data;
 		/*
-		var castStatus = GraphUtil.InitializePairType(this.Nodes, CastingSituation.READY);
+		var castStatus = SpellUtil.InitializePairType(this.Nodes, CastingSituation.READY);
 		Action<ISpellGraphNode> VisitationProcess = async (ISpellGraphNode n) => 
 		{
 			if(castStatus[n] == CastingSituation.READY) {
@@ -109,7 +111,7 @@ public class Spell : SpellGraph<DefaultSpellGraphNode>, ICastable
 		Action<ISpellGraphNode, ISpellGraphNode>  UnmarkedVisitProcess = null,
 		Action<ISpellGraphNode, ISpellGraphNode>  MarkedVisitProcess = null;
 		
-		GraphUtil.ForEachNodeByBFSIn(this)
+		SpellUtil.ForEachNodeByBFSIn(this)
 		return await Task.WhenAll((
 			this.Nodes.Where((n) => this.GetNextNodesOf(n).Count == 0).
 			Select(async (n, idx) => await PreviousCastings(data, n))

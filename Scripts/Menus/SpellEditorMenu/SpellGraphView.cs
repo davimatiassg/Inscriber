@@ -114,12 +114,14 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
     {
         var arc = sourceNode.CreateArcTowards(targetNode);
         arc.weight = weight;
-        if(GraphUtil.HasCycle(this, sourceNode)) {
+        if(GraphUtil<SpellGraphView, VisualNode>.HasCycle(this, sourceNode)) {
             sourceNode.DestroyArc(arc);
             return false;
         }
-        sourceNode.AssembleConnetion(arc);        
+        sourceNode.AssembleConnetion(arc);      
+        graphArcsMaster.AddChild(arc);  
         return true;
+        throw new InvalidOperationException("Graph does not support connections");
     }
 
     public bool Disconnect(VisualNode sourceNode, VisualNode targetNode)

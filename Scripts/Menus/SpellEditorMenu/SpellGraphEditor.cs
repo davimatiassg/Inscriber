@@ -13,7 +13,7 @@ namespace SpellEditing
 /// <summary>
 /// Control that handles Spell Editor Inputs & UI Behavior.
 /// </summary>
-public partial class SpellGraphEditor : SpellGraphView
+public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
 {
 
    

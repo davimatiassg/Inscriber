@@ -1,10 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://c8kmluortlwhv"]
+[gd_scene load_steps=4 format=3 uid="uid://c8kmluortlwhv"]
 
 [ext_resource type="Script" path="res://Scripts/SceneManager.cs" id="1_xoc2m"]
 [ext_resource type="PackedScene" uid="uid://ukgd70ee2jex" path="res://Scenes/Menus/SpellEditor/SpellEditor.tscn" id="2_npyue"]
+[ext_resource type="PackedScene" uid="uid://bsj6h0de6osr6" path="res://Scenes/Menus/SpellSelector/SpellSelector.tscn" id="3_udyhn"]
 
 [node name="SceneManagerNode" type="Node"]
 script = ExtResource("1_xoc2m")
 scenes = {
-"SpellEditor": ExtResource("2_npyue")
+"SpellEditor": ExtResource("2_npyue"),
+"SpellSelector": ExtResource("3_udyhn")
 }
