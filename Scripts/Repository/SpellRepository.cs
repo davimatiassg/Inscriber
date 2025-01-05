@@ -2,219 +2,66 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
-using System.Xml;
 using System.Xml.Linq;
 using Godot;
-using SpellEditing;
+
 
 
 public static class SpellRepository
 {
-    public const string SpellPaths = "res://Data/Spells/";
+#region DECLARATIONS
+    public const string SPELL_DIRECTORY_PATH = "res://Data/Spells/";
 
-#region SPELL
+#endregion
 
-    public static List<string> LoadSpellPaths()
+
+#region LOADING
+
+    public static IEnumerable<SpellResource> LoadSpellResources()
     {
-        List<string> spellPaths = new List<string>();
-        using var spellDir = DirAccess.Open("res://Data/Spells/");
+        IEnumerable<SpellResource> spellResources = new List<SpellResource>();
+
+        using var spellDir = DirAccess.Open(SPELL_DIRECTORY_PATH);
         spellDir.ListDirBegin();
         string fileName = spellDir.GetNext();
         while (fileName != "")
         {
             if (spellDir.CurrentIsDir()) continue;
-
-            spellPaths.Add("res://Data/Spells/" + fileName);
-
+            spellResources.Append(ResourceLoader.Load(SPELL_DIRECTORY_PATH + fileName));
             fileName = spellDir.GetNext();
         }
-        return spellPaths;
+        return spellResources;
     }
-
-#endregion SPELL
-
-
-#region SPELL_GRAPH
-    public static bool IsGraphValid(IGraph<ISpellGraphNode> graph, ref IEnumerable<ISpellGraphNode>? faultyNodes)
+    //REVIEW: REPLACE THIS FUNCTION WITH ONE THAT LOADS INSIDE THE SPELL MANAGER FOR THE PLAYER
+    //
+    public static Spell LoadSpell(SpellResource resource)
     {
-        foreach(var node in graph)
+        Spell spell = new Spell()
         {
-            CastingResources res = ((Rune)node.Castable).SigilResources;
-            graph.ForeachSourceOf(node, (src, weight) => res.Merge(src.Castable.CastReturns) );
-            if(!(node.Castable.CastRequirements <= res)) 
-            {
-                if(faultyNodes == null) return false;
-                faultyNodes.Append(node);
-            }
-        }
-        return faultyNodes.Count() == 0;
+            Name = resource.Name,
+            Description = resource.Description,
+            Portrait = resource.Portrait,
+        };
+        LoadGraphFromResource<Spell, DefaultSpellGraphNode>(resource, spell);
+        return spell;
     }
-    public static string ConvertSigilParamToXML(Sigil sigil)
-    {
-        string xmlStr = "";
-        switch (sigil.paramType)
-        {
-            case CastParam.ECastParamType.BOOL:
-                xmlStr = ((bool)sigil.val).ToString();
-                break;
-            case CastParam.ECastParamType.INT:
-                xmlStr = ((int)sigil.val).ToString();
-                break;
-            case CastParam.ECastParamType.FLOAT:
-                xmlStr = ((float)sigil.val).ToString();
-                break;
-            case CastParam.ECastParamType.VECTOR2: 
-                xmlStr = $"{((Vector2)sigil.val).X}-{((Vector2)sigil.val).Y}";
-                break;
-            case CastParam.ECastParamType.VECTOR3:
-                xmlStr = $"{((Vector3)sigil.val).X}-{((Vector3)sigil.val).Y}-{((Vector3)sigil.val).Z}";
-                break;
-            case CastParam.ECastParamType.COLOR:
-                xmlStr = ((Color)sigil.val).ToHtml();
-                break;
-            case CastParam.ECastParamType.STRING:
-                xmlStr = (string)sigil.val;
-                break;
-            case CastParam.ECastParamType.NODE2D:
-                xmlStr = ((PackedScene)sigil.val).ResourcePath;
-                break;
-            case CastParam.ECastParamType.PHYSICAL_BEHAVIOR:
-                xmlStr = ((PackedScene)sigil.val).ResourcePath;
-                break;
-            default:
-            break;
-        }
-        return xmlStr;
-    }
-
-    public static void SaveSpell(Spell spell)
-    {
-        if(!IsGraphValid(spell.graphData)) throw new InvalidDataException("Cannot save a invalid spell.");
-        var xmlDoc = new XDocument(
-            SpellStatsToXML(spell),
-            GraphToXML(spell.graphData)
-        );
-
-    }
-
-    public static XElement SpellStatsToXML(Spell spell, bool hasLoops = false, bool hasCycles = true)
-    {
-        return new XElement("Specs",
-            new XElement("Identity", 
-                new XAttribute("name", spell.Name),
-                new XAttribute("description", spell.Description),
-                new XAttribute("texture", spell.Portrait.ResourcePath)
-            ),
-            new XElement("Parameters", 
-                new XAttribute("HasLoops", spell.graphData.Flags.Contains(GraphFlag.ALLOW_LOOPS)),
-                new XAttribute("HasCycles", spell.graphData.Flags.Contains(GraphFlag.ALLOW_CYCLES)),
-                new XAttribute("Directed", spell.graphData.Flags.Contains(GraphFlag.DIRECTED)),
-                new XAttribute("IsWeighted", spell.graphData.Flags.Contains(GraphFlag.WEIGHTED))
-            )
-        );
-    }
-    
-    public static XElement GraphToXML(IGraph<ISpellGraphNode> graph)
-    {
-        return new XElement("GraphData",
-            new XElement("Nodes",
-                graph.ToList().ConvertAll(nodeData =>
-                    new XElement("Node",
-                        new XAttribute("posX", nodeData.Position.X),
-                        new XAttribute("posX", nodeData.Position.Y),
-                        new XElement("Rune",
-                            new XAttribute("type", nodeData.Castable.GetType().ToString()),
-                            new XAttribute("rarity", ((Rune)nodeData.Castable).rarity.ToString())
-                        ),
-                        nodeData.GetSigilCount() > 0 ?
-                            nodeData.GetSigils().Select(sigil =>
-                            new XElement("Sigil",
-                                new XAttribute("name", sigil.Name),
-                                new XAttribute("description", sigil.Description),
-                                new XAttribute("rarity", sigil.rarity.ToString()),
-                                new XAttribute("value", ConvertSigilParamToXML(sigil)),
-                                new XAttribute("type", sigil.paramType.ToString())))
-                        : null
-                    )
-                )
-            ),
-            new XElement("Arcs",
-                graph.Flags.Contains(GraphFlag.WEIGHTED) ?
-                graph.ForeachEdge((src, trg, weight) => {
-                    return new XElement("Arc",
-                        new XAttribute("source", src.Index),
-                        new XAttribute("target", trg.Index),
-                        new XAttribute("weight", weight)
-                    ); 
-                })
-                :
-                graph.ForeachEdge((src, trg, weight) => {
-                    return new XElement("Arc",
-                        new XAttribute("source", src.Index),
-                        new XAttribute("target", trg.Index)
-                    ); 
-                })
-            )
-        );
-    }
-
-
-
-    public struct GraphStats
-    {
-        public bool noLoops;
-        public bool isTree;
-        public bool isDirected;
-        public bool isWeighted;
-        public int defaultWeight;
-        public bool isValid;
-    }
-    public static TGraph LoadGraphFromXml<TGraph, TNode>(string filePath)          
+    public static TGraph LoadGraphFromResource<TGraph, TNode>(SpellResource resource, TGraph graph)          
         where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
     {
-        var xmlDoc = XDocument.Load(filePath);
-        TGraph graph = new TGraph();
 
-        GraphStats stats = new GraphStats{
-            noLoops = xmlDoc.Root.Element("Specs")?.Element("HasLoops")?.Value != null,
-            isTree = xmlDoc.Root.Element("Specs")?.Element("HasCycles")?.Value != null,
-            isDirected = xmlDoc.Root.Element("Specs")?.Element("Directed") != null,
-            isWeighted = bool.Parse(xmlDoc.Root.Element("Specs")?.Element("IsWeighted")?.Value ?? "false")
-        };
-        
+        if(graph == null) graph = new TGraph();
 
-        if(stats.isDirected)
-        {
-            if(graph is not IGraph<TNode>) 
-                throw new InvalidOperationException("The loaded graph is directed but you tried to load it on a undirected graph type.");
-        }
-        
-        if(stats.isWeighted) 
-        {
-            stats.defaultWeight = int.Parse(xmlDoc.Root.Element("Specs")?.Element("IsWeighted")?.Attribute("defaultWeight")?.Value);
-            if(!graph.Flags.Contains(GraphFlag.WEIGHTED)) 
-                throw new InvalidOperationException("The loaded graph is weighted, but tried to load it on a unweighted graph type.");
-            
-        }  
+        XElement graphData = XDocument.Parse(resource.XMLGraphData).Root.Elements("Graph").Single();
 
-        XElement graphData = xmlDoc.Root.Elements("Graph").Single();
+        LoadNodes<TGraph,TNode>(graphData, graph);
 
-        LoadNodes<TGraph,TNode>(graphData, ref graph);
+        LoadArcs<TGraph,TNode>(graphData, graph);
 
-        LoadArcs<TGraph,TNode>(graphData, ref graph);
-
-        IEnumerable<ISpellGraphNode> _faultyNodes = null;
-        if(!IsGraphValid((IGraph<ISpellGraphNode>)graph, ref _faultyNodes))
-        {
-            throw new FileLoadException("The loaded Graph is Invalid");
-        }
         return graph;
     }
 
-    public static void LoadNodes<TGraph,TNode>(XElement root, ref TGraph graph)
+    public static void LoadNodes<TGraph,TNode>(XElement root, TGraph graph)
         where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
 
@@ -230,7 +77,7 @@ public static class SpellRepository
                 Y = float.Parse(nodeData.Attribute("posY").Value)
             };
 
-            LoadRuneOnNode(nodeData.Elements("Rune").Single(), ref node);
+            LoadRuneOnNode(nodeData.Elements("Rune").Single(), node);
 
             foreach (var paramElement in nodeData.Elements("Sigil"))
                 node.AddSigil(LoadSigil(paramElement));
@@ -239,7 +86,7 @@ public static class SpellRepository
         }
     }
 
-    public static void LoadArcs<TGraph,TNode>(XElement root, ref TGraph graph)
+    public static void LoadArcs<TGraph,TNode>(XElement root, TGraph graph)
         where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
 
@@ -261,7 +108,7 @@ public static class SpellRepository
         }
     }
 
-    public static void LoadRuneOnNode<TNode>(XElement runeElement, ref TNode node) 
+    public static void LoadRuneOnNode<TNode>(XElement runeElement, TNode node) 
         where TNode :  ISpellGraphNode, new() 
     {
         ICastable castable;
@@ -338,8 +185,148 @@ public static class SpellRepository
 
         return sigil;
     }
-    
+
+#endregion LOADING
 
 
-#endregion SPELL_GRAPH
+#region SAVING
+    public static bool IsSpellValid(Spell spell, IEnumerable<ISpellGraphNode>? faultyNodes)
+    {
+        foreach(var node in spell)
+        {
+            CastingResources res = ((Rune)node.Castable).SigilResources;
+            spell.ForeachSourceOf(node, (src, weight) => res.Merge(src.Castable.CastReturns) );
+            if(!(node.Castable.CastRequirements <= res)) 
+            {
+                if(faultyNodes == null) return false;
+                faultyNodes.Append(node);
+            }
+        }
+        return faultyNodes.Count() == 0;
+    }
+    public static IEnumerable<ISpellGraphNode>? SaveSpell(Spell spell)
+    {
+        IEnumerable<ISpellGraphNode> faultyNodes = new List<ISpellGraphNode>();
+        
+        if(!IsSpellValid(spell, faultyNodes)) return faultyNodes;
+
+        SpellResource spellResource = new SpellResource
+        {
+            Name = spell.Name,
+            Description = spell.Description,
+            Portrait = spell.Portrait,
+            XMLGraphData =  new XDocument(GraphToXML((IGraph<ISpellGraphNode>)spell)).ToString()
+        };
+
+        ResourceSaver.Save(spellResource, SPELL_DIRECTORY_PATH + spellResource.GetRid().ToString());
+
+        return null;
+    }
+
+    public static XElement GraphToXML(IGraph<ISpellGraphNode> graph)
+    {
+        return new XElement("Graph",
+            NodesToXML(graph),
+            ArcsToXML(graph)
+        );
+    }
+
+    public static XElement ArcsToXML(IGraph<ISpellGraphNode> graph)
+    {   
+        XElement arcsElement = new XElement("Arcs");
+        if( graph.Flags.Contains(GraphFlag.WEIGHTED))
+        {
+            graph.ForeachEdge(
+                (src, trg, weight) => {
+                    arcsElement.Add(
+                        new XElement("Arc",
+                            new XAttribute("source", src.Index),
+                            new XAttribute("target", trg.Index),
+                            new XAttribute("weight", weight)
+                        )
+                    ); 
+                }
+            );
+        }
+        else
+        {
+            graph.ForeachEdge(
+                (src, trg, weight) => {
+                    arcsElement.Add(
+                        new XElement("Arc",
+                            new XAttribute("source", src.Index),
+                            new XAttribute("target", trg.Index)
+                        )
+                    ); 
+                }
+            );
+        }
+        return arcsElement;
+    }
+
+    public static XElement NodesToXML(IGraph<ISpellGraphNode> graph)
+    {
+        return new XElement("Nodes",
+            graph.ToList().ConvertAll(nodeData =>
+                new XElement("Node",
+                    new XAttribute("index", nodeData.Index),
+                    new XAttribute("posX", nodeData.Position.X),
+                    new XAttribute("posX", nodeData.Position.Y),
+                    new XElement("Rune",
+                        new XAttribute("type", nodeData.Castable.GetType().ToString()),
+                        new XAttribute("rarity", ((Rune)nodeData.Castable).rarity.ToString())
+                    ),
+                    nodeData.GetSigilCount() > 0 ?
+                        nodeData.GetSigils().Select(sigil =>
+                        new XElement("Sigil",
+                            new XAttribute("name", sigil.Name),
+                            new XAttribute("description", sigil.Description),
+                            new XAttribute("rarity", sigil.rarity.ToString()),
+                            new XAttribute("value", SigilToXML(sigil)),
+                            new XAttribute("type", sigil.paramType.ToString())))
+                    : null
+                )
+            )
+        );
+    }
+
+    public static string SigilToXML(Sigil sigil)
+    {
+        string xmlStr = "";
+        switch (sigil.paramType)
+        {
+            case CastParam.ECastParamType.BOOL:
+                xmlStr = ((bool)sigil.val).ToString();
+                break;
+            case CastParam.ECastParamType.INT:
+                xmlStr = ((int)sigil.val).ToString();
+                break;
+            case CastParam.ECastParamType.FLOAT:
+                xmlStr = ((float)sigil.val).ToString();
+                break;
+            case CastParam.ECastParamType.VECTOR2: 
+                xmlStr = $"{((Vector2)sigil.val).X}-{((Vector2)sigil.val).Y}";
+                break;
+            case CastParam.ECastParamType.VECTOR3:
+                xmlStr = $"{((Vector3)sigil.val).X}-{((Vector3)sigil.val).Y}-{((Vector3)sigil.val).Z}";
+                break;
+            case CastParam.ECastParamType.COLOR:
+                xmlStr = ((Color)sigil.val).ToHtml();
+                break;
+            case CastParam.ECastParamType.STRING:
+                xmlStr = (string)sigil.val;
+                break;
+            case CastParam.ECastParamType.NODE2D:
+                xmlStr = ((PackedScene)sigil.val).ResourcePath;
+                break;
+            case CastParam.ECastParamType.PHYSICAL_BEHAVIOR:
+                xmlStr = ((PackedScene)sigil.val).ResourcePath;
+                break;
+            default:
+            break;
+        }
+        return xmlStr;
+    }
+
+#endregion SAVING
 }

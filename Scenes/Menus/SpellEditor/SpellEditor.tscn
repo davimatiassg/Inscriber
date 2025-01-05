@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dtkx2fb2sunx0"]
+[gd_scene load_steps=9 format=3 uid="uid://ukgd70ee2jex"]
 
 [ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellGraphEditor.cs" id="1_i23sc"]
 [ext_resource type="Texture2D" uid="uid://dg37qmibr4afd" path="res://Sprites/background placeholder.png" id="2_8rpec"]

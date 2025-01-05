@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 public class GraphParser
 {
+    /*
     /// <summary>
     /// THIS IS A DEBUG CLASS. DO NOT USE.
     /// </summary>
@@ -83,5 +84,5 @@ public class GraphParser
 
         return graph;
     }
-
+    */
 }

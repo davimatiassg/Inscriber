@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddpi5w07lpo2v"]
+
+[ext_resource type="Script" path="res://Scripts/Menus/SpellSelectorMenu/SpellIcon.cs" id="1_0ni7c"]
+
+[node name="SpellIcon" type="TextureRect"]
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = -48.0
+offset_top = -48.0
+offset_right = 48.0
+offset_bottom = -312.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 3
+script = ExtResource("1_0ni7c")

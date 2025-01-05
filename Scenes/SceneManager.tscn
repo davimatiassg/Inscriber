@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8kmluortlwhv"]
+
+[ext_resource type="Script" path="res://Scripts/SceneManager.cs" id="1_xoc2m"]
+[ext_resource type="PackedScene" uid="uid://ukgd70ee2jex" path="res://Scenes/Menus/SpellEditor/SpellEditor.tscn" id="2_npyue"]
+
+[node name="SceneManagerNode" type="Node"]
+script = ExtResource("1_xoc2m")
+scenes = {
+"SpellEditor": ExtResource("2_npyue")
+}

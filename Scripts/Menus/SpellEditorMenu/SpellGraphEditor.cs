@@ -23,7 +23,7 @@ public partial class SpellGraphEditor : SpellGraphView
     public static Action<VisualNode>    OnGrabNode;
     public static Action<VisualNode>    OnAddNode;
     public static Action<VisualNode>    OnSelectNode;
-    public static Action                               OnUnselectNode;
+    public static Action                OnUnselectNode;
     
 
     private EEditorState state = EEditorState.FREE_MODE;
@@ -61,6 +61,8 @@ public partial class SpellGraphEditor : SpellGraphView
 
 
     public VisualNode selectedNode;
+
+    public SpellResource currentSpell;
     
 
     public override void _Ready()
@@ -76,6 +78,9 @@ public partial class SpellGraphEditor : SpellGraphView
 
         EditorState = freeMode;
         
+
+        currentSpell = SceneManager.ConsumeData<SpellResource>("SELECTED_SPELL");
+        if(currentSpell != null) SpellRepository.LoadGraphFromResource<SpellGraphView, VisualNode>(currentSpell, this);
     }
 
     public override void _Input(InputEvent @event)
@@ -89,10 +94,6 @@ public partial class SpellGraphEditor : SpellGraphView
         base._Process(@delta);
         EditorState._Process(@delta);
     }
-
-    
-    private class SpellEditorAnimator
-    {}
 
 }
 }

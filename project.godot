@@ -11,9 +11,17 @@ config_version=5
 [application]
 
 config/name="Inscriber"
-run/main_scene="res://Scenes/Menus/SpellEditor.tscn"
+run/main_scene="res://Scenes/Menus/SpellEditor/SpellEditor.tscn"
 config/features=PackedStringArray("4.3", "C#", "Forward Plus")
+boot_splash/bg_color=Color(0.0814919, 0.136204, 0.249104, 1)
+boot_splash/show_image=false
+boot_splash/fullsize=false
+boot_splash/use_filter=false
 config/icon="res://Inscriber/icon.svg"
+
+[autoload]
+
+SceneManagerNode="*res://Scenes/SceneManager.tscn"
 
 [display]
 

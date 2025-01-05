@@ -1,15 +1,30 @@
-[gd_scene load_steps=3 format=3 uid="uid://dgxvcv3p67675"]
+[gd_scene load_steps=6 format=3 uid="uid://bsj6h0de6osr6"]
 
+[ext_resource type="Script" path="res://Scripts/Menus/SpellSelectorMenu/SpellSelectorMenu.cs" id="1_aki1f"]
+[ext_resource type="Script" path="res://Scripts/SceneManager.cs" id="1_m7muo"]
+[ext_resource type="PackedScene" uid="uid://ddpi5w07lpo2v" path="res://Scenes/Menus/SpellSelector/SpellIcon.tscn" id="1_x3wso"]
 [ext_resource type="Texture2D" uid="uid://dgnvrdi0xn30s" path="res://Sprites/Menus/SpellEditor/new-spell-icon.png" id="1_x277u"]
-[ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellIcon.cs" id="2_gkbpf"]
+[ext_resource type="PackedScene" uid="uid://ukgd70ee2jex" path="res://Scenes/Menus/SpellEditor/SpellEditor.tscn" id="2_x0l0a"]
 
-[node name="SpellSelector" type="Control"]
+[node name="SpellSelector" type="Control" node_paths=PackedStringArray("spellIconList", "descriptionLabel", "titleLabel", "statsLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_aki1f")
+spellIconScene = ExtResource("1_x3wso")
+spellIconList = NodePath("Panel/SpellList")
+descriptionLabel = NodePath("Panel/SpellDescription/Description")
+titleLabel = NodePath("Panel/SpellDescription/Title")
+statsLabel = NodePath("Panel/SpellStats/RichTextLabel")
+
+[node name="SceneManager" type="Node" parent="."]
+script = ExtResource("1_m7muo")
+scenes = {
+"SpellEditor": ExtResource("2_x0l0a")
+}
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 0
@@ -17,23 +32,24 @@ offset_right = 640.0
 offset_bottom = 360.0
 
 [node name="SpellList" type="Panel" parent="Panel"]
+clip_contents = true
 layout_mode = 0
 offset_top = 34.0
 offset_right = 640.0
 offset_bottom = 131.0
 focus_neighbor_bottom = NodePath("../Inscribe")
 
-[node name="TextureRect" type="TextureRect" parent="Panel/SpellList"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = -0.053125
-anchor_bottom = -0.350515
-offset_right = 96.0
+[node name="SpellIcon" parent="Panel/SpellList" instance=ExtResource("1_x3wso")]
+layout_mode = 0
+anchors_preset = 0
+anchor_bottom = 0.0
+offset_left = 282.0
+offset_top = 0.0
+offset_right = 378.0
 offset_bottom = 96.0
+grow_horizontal = 1
+grow_vertical = 1
 texture = ExtResource("1_x277u")
-expand_mode = 1
-script = ExtResource("2_gkbpf")
-metadata/_edit_use_anchors_ = true
 
 [node name="SpellDescription" type="Panel" parent="Panel"]
 layout_mode = 0

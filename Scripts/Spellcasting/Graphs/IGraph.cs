@@ -105,4 +105,5 @@ public interface IGraph<T> : ICollection<T> where T : ISpellGraphNode
     public int InwardsDegree(T n);
     public int OutwardsDegree(T n);
     public int GetEdgeWeight(T src, T trg);
+    public void SetEdgeWeight(T src, T trg, int weight);
 }

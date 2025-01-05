@@ -12,6 +12,7 @@ using System.Linq;
 public partial class SpellGraph<T> : IGraph<T>
     where T : ISpellGraphNode, new()
 {
+
     public const int DEFAULT_WEIGHT = 1;
     public GraphFlag[] Flags => new GraphFlag[] { GraphFlag.DIRECTED, GraphFlag.ALLOW_LOOPS, GraphFlag.WEIGHTED };
     
@@ -113,41 +114,104 @@ public partial class SpellGraph<T> : IGraph<T>
 
     public bool Disconnect(T sourceNode, T targetNode)
     {
+        if(sourceNode.Index == targetNode.Index) return false;
         if(EdgeMatrix[sourceNode.Index][targetNode.Index] == int.MaxValue) return false;
         EdgeMatrix[sourceNode.Index][targetNode.Index] = int.MaxValue;
         return true;
     }
-    public int Degree(T node) => InwardsDegree(node) - OutwardsDegree(node);
-
-
+    
     public int EdgeAmmount()
     {
-        throw new NotImplementedException();
+        int k = 0;
+
+        foreach(var row in EdgeMatrix) {foreach(int weight in row){
+            k += weight == int.MaxValue ? 0 : 1;
+        }}
+
+        return k;
     }
 
-    public TResult ForeachSourceOf<TResult>(T Node, Func<T, int, TResult> process)
+    public void ForeachSourceOf(T node, Action<T, int> process)
     {
-        throw new NotImplementedException();
+        var count = Nodes.Count;
+        var column = node.Index;
+        for (int row = 0; row < count; row++) {
+            var weight = EdgeMatrix[row][column];
+            if(weight == int.MaxValue) continue;
+            process.Invoke(Nodes[row], weight);
+        }
     }
 
-    public TResult ForeachTargetOf<TResult>(T node, Func<T, int, TResult> process)
+    public void ForeachTargetOf(T node, Action<T, int> process)
     {
-        throw new NotImplementedException();
+        var count = Nodes.Count;
+        var row = node.Index;
+        for (int column = 0; column < count; column++) {
+            var weight = EdgeMatrix[row][column];
+            if(weight == int.MaxValue) continue;
+            process.Invoke(Nodes[column], weight);
+        }
     }
 
-    public int InwardsDegree(T n)
+    public void ForeachEdge(Action<T, T, int> process)
     {
-        throw new NotImplementedException();
+        int range = Nodes.Count;
+        for(int row = 0; row < range; row++) {
+        for(int column = 0; column < range; column++) {
+            int weight = EdgeMatrix[row][column];
+            if(weight == int.MaxValue) continue;
+            process.Invoke(Nodes[row], Nodes[column], weight);
+        }}
     }
 
-    public int OutwardsDegree(T n)
+    public void SetEdgeWeight(T src, T trg, int weight)
     {
-        throw new NotImplementedException();
+        if (EdgeMatrix[src.Index][trg.Index] == int.MaxValue) 
+            throw new InvalidOperationException("No Edge found between provided nodes");
+        EdgeMatrix[src.Index][trg.Index] = weight;
+        
+    }
+
+    public int GetEdgeWeight(T src, T trg)
+    {
+        var w = EdgeMatrix[src.Index][trg.Index];
+        if(w != int.MaxValue) return w;
+        throw new InvalidOperationException("No Edge found between provided nodes");
+    }
+
+    public int InwardsDegree(T node)
+    {
+        int degree = 0;
+        var count = Nodes.Count;
+        var column = node.Index;
+        for (int row = 0; row < count; row++) {
+            var weight = EdgeMatrix[row][column];
+            if(weight == int.MaxValue) continue;
+            degree++;
+        }
+        return degree;
+    }
+
+    public int Degree(T node) => InwardsDegree(node) - OutwardsDegree(node);
+
+    public int OutwardsDegree(T node)
+    {
+        int degree = 0;
+        var count = Nodes.Count;
+        var row = node.Index;
+        for (int column = 0; column < count; column++) {
+            var weight = EdgeMatrix[row][column];
+            if(weight == int.MaxValue) continue;
+            degree++;
+        }
+        return degree;
     }
 
     public bool ReplaceNode(T node, ICastable castable)
     {
-        throw new NotImplementedException();
+        if(!Nodes.Contains(node)) return false;
+        node.Castable = castable;
+        return true;
     }
 
 #endregion GRAPH_FIELDS

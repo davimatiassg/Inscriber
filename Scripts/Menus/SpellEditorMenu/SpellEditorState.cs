@@ -11,7 +11,7 @@ public abstract class SpellEditorState
     public Control overlay;
 
     public SpellGraphEditor editor;
-    public SpellGraphView.VisualNode tempSelection;
+    public VisualNode tempSelection;
     protected SpellGraphCamera graphCamera;
     public virtual void EnterModeFrom(SpellEditorState mode) 
     {
@@ -220,7 +220,7 @@ public class FreeMode : SpellEditorState
     }
     protected virtual void FocusNode(Control selection)
     {
-        tempSelection = (SpellGraphView.VisualNode) selection;
+        tempSelection = (VisualNode) selection;
         graphCamera.Position = tempSelection.Position;
     }
     protected virtual void UnFocusNode(Control selection)
@@ -271,7 +271,7 @@ public class DragMode : SpellEditorState
 }
 public class ConnectMode : SpellEditorState
 {
-    private SpellGraphView.VisualArc tryingArc = null;
+    private VisualArc tryingArc = null;
     private Vector2 targetPosition = Vector2.Zero;
     public override void EnterModeFrom(SpellEditorState prevMode)
     {
@@ -282,7 +282,7 @@ public class ConnectMode : SpellEditorState
         targetPosition = tempSelection.Position;
         graphCamera.ZoomToFitGraph(editor);
 
-        tryingArc = new SpellGraphView.VisualArc{ Source = editor.selectedNode };
+        tryingArc = new VisualArc{ Source = editor.selectedNode };
         editor.graphArcsMaster.AddChild(tryingArc);
         
         tryingArc.MoveSource();
@@ -298,7 +298,7 @@ public class ConnectMode : SpellEditorState
             nodeView.FocusMode = Control.FocusModeEnum.All;
 
             Action enter = () => { 
-                tempSelection = (SpellGraphView.VisualNode) nodeView;
+                tempSelection = (VisualNode) nodeView;
                 targetPosition = tempSelection.Position;
                 tryingArc.MoveTarget(targetPosition);
             };

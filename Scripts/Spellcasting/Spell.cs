@@ -7,24 +7,21 @@ using Godot;
 /// Represents a Spell during Runtime.
 /// Is agnostic to graph's storage strategy.
 /// </summary>
-using GraphType = AdjacenceMatrixDigraph<DefaultSpellGraphNode>;
-using SpellEditing;
 
-[GlobalClass]
-public partial class Spell : Resource, ICastable
+using SpellEditing;
+public class Spell : SpellGraph<DefaultSpellGraphNode>, ICastable
 {
 	public bool isValid = true;
 	
 	
 #region SPELL_DATA
 
-	public IGraph<ISpellGraphNode> graphData;
 	protected CastingResources castReqs;
 	public CastingResources CastRequirements 
 	{   get
 		{
 			castReqs = new CastingResources();
-			GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (currNode) => castRets.Merge(currNode.Castable.CastRequirements));
+			GraphUtil.ForEachNodeByBFSIn((IGraph<ISpellGraphNode>)this, this[0], (currNode) => castRets.Merge(currNode.Castable.CastRequirements));
 			return castReqs;
 		}
 	}
@@ -33,7 +30,7 @@ public partial class Spell : Resource, ICastable
 	{   
 		get{
 			castRets = new CastingResources();
-			GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (currNode) => castRets.Merge(currNode.Castable.CastReturns));
+			GraphUtil.ForEachNodeByBFSIn((IGraph<ISpellGraphNode>)this, this[0], (currNode) => castRets.Merge(currNode.Castable.CastReturns));
 			return castRets;
 		}
 	}
@@ -43,7 +40,7 @@ public partial class Spell : Resource, ICastable
 	{   
 		get{
 			castDefs = new CastingResources();
-			GraphUtil.ForEachNodeByBFSIn(graphData, graphData[0], (currNode) => castRets.Merge(currNode.Castable.CastDefaults));
+			GraphUtil.ForEachNodeByBFSIn((IGraph<ISpellGraphNode>)this, this[0], (currNode) => castRets.Merge(currNode.Castable.CastDefaults));
 			return castDefs;
 		}
 	}
@@ -52,14 +49,14 @@ public partial class Spell : Resource, ICastable
 		get  
 		{ 
 			uint cd = 0;
-			GraphUtil.ForEachNodeIn(graphData, (node) => cd += node.Castable.Cooldown );
+			GraphUtil.ForEachNodeIn((IGraph<ISpellGraphNode>)this, (node) => cd += node.Castable.Cooldown );
 			return cd;
 		}
 	}
 	public int Mana { 
 		get{
 			int mana = 0;
-			GraphUtil.ForEachNodeIn(graphData, (node) => mana += node.Castable.Mana );
+			GraphUtil.ForEachNodeIn((IGraph<ISpellGraphNode>)this, (node) => mana += node.Castable.Mana );
 			return mana;
 		}  
 	}
@@ -68,14 +65,13 @@ public partial class Spell : Resource, ICastable
 		get  
 		{ 
 			uint ct = 0;
-			GraphUtil.ForEachNodeIn(graphData, (node) => ct += node.Castable.CastingTime );
+			GraphUtil.ForEachNodeIn((IGraph<ISpellGraphNode>)this, (node) => ct += node.Castable.CastingTime );
 			return ct;
 		}
 	}
 
 	Texture2D portrait;
     public Texture2D Portrait { get => portrait; set => portrait = value; }
-
     
 	string description;
     public string Description { get => description; set => description = value; }
@@ -90,11 +86,6 @@ public partial class Spell : Resource, ICastable
 
     #endregion SPELL_DATA
 
-
-    public Spell()
-	{
-		graphData = (ISpellDigraph<ISpellGraphNode>) new GraphType();
-	}
 	
 	private enum CastingSituation { READY, WAITING, DONE };
 	/// <summary>
@@ -108,7 +99,7 @@ public partial class Spell : Resource, ICastable
 	{
 		return data;
 		/*
-		var castStatus = GraphUtil.InitializePairType(graphData.Nodes, CastingSituation.READY);
+		var castStatus = GraphUtil.InitializePairType(this.Nodes, CastingSituation.READY);
 		Action<ISpellGraphNode> VisitationProcess = async (ISpellGraphNode n) => 
 		{
 			if(castStatus[n] == CastingSituation.READY) {
@@ -118,9 +109,9 @@ public partial class Spell : Resource, ICastable
 		Action<ISpellGraphNode, ISpellGraphNode>  UnmarkedVisitProcess = null,
 		Action<ISpellGraphNode, ISpellGraphNode>  MarkedVisitProcess = null;
 		
-		GraphUtil.ForEachNodeByBFSIn(graphData)
+		GraphUtil.ForEachNodeByBFSIn(this)
 		return await Task.WhenAll((
-			graphData.Nodes.Where((n) => graphData.GetNextNodesOf(n).Count == 0).
+			this.Nodes.Where((n) => this.GetNextNodesOf(n).Count == 0).
 			Select(async (n, idx) => await PreviousCastings(data, n))
 		)).Aggregate((CastingResources totalRes, CastingResources newRes) => totalRes+newRes);*/
 	}
