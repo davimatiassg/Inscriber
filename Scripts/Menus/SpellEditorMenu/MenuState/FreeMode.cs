@@ -67,11 +67,14 @@ public class FreeMode : SpellEditorState
         graphCamera.PositionSmoothingSpeed = CAMERA_SMOOTH_SPEED;
         graphCamera.Zoom = Vector2.One * CAMERA_ZOOM;
 
-        if( tempSelection != null && tempSelection.IsNodeReady()) 
-        { 
-            graphCamera.Position = tempSelection.Position; 
-            tempSelection.CallDeferred(Control.MethodName.GrabFocus);
-        }      
+
+        if(tempSelection == null && editor.graphNodeMaster.GetChildCount() > 0)
+        {
+            tempSelection = (VisualNode)editor.graphNodeMaster.GetChild(0);
+        }
+
+        
+        tempSelection?.CallDeferred(Control.MethodName.GrabFocus);
     }
 
     private Dictionary<Control, Action> stashedEnterActions = new Dictionary<Control, Action>();

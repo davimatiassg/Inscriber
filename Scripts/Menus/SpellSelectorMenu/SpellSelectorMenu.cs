@@ -13,10 +13,15 @@ public partial class SpellSelectorMenu : Control
 	public PackedScene spellIconScene;
 	public PackedScene spellEditorScene;
 	
-	[Export] public Panel spellIconList;
+	[Export] public HBoxContainer spellIconList;
 	[Export] public RichTextLabel descriptionLabel;
 	[Export] public RichTextLabel titleLabel;
 	[Export] public RichTextLabel statsLabel;
+
+
+	[Export] public Button inscribeButton;
+	[Export] public Button deleteButton;
+	[Export] public Button exitButton;
 
 
 	float portraitSize;
@@ -26,35 +31,44 @@ public partial class SpellSelectorMenu : Control
         base._Ready();
 		selected = spellIconList.GetChildCount()/2;
 		portraitSize = spellIconList.GetChild<TextureRect>(0).Size.X;
-
+		
 		maxPortraitsOnScreen = (int)(Size.X/portraitSize*1.2f);
 		LoadSpells();
-		 UpdateSpellPreview();
+		
+		UpdateSpellPreview();
+	
+		MoveRight();
+
+		inscribeButton.Pressed += LaunchSpellEditor;
+		
     }
 
 	public override void _Input(InputEvent @event)
     {
         base._Input(@event);
-		if(@event.IsAction("game_left", true)) 
+		if(@event.IsActionPressed("game_left", true)) 
 		{ 
+			
+			MoveLeft();
 			UpdateSpellPreview();
-			MoveLeft(); 
 		}
-		else if(@event.IsAction("game_right", true)) 
+		else if(@event.IsActionPressed("game_right", true)) 
 		{ 
+			
+			MoveRight();
 			UpdateSpellPreview();
-			MoveRight(); 
 		}
 		
-
 		if(@event.IsAction("ui_accept", true)) { LaunchSpellEditor(); }
     }
 
 	public override void _Process(double delta)
     {
         base._Process(delta);
-		translateProcess?.Invoke(delta);
-
+		//translateProcess?.Invoke(delta);
+		//STUB:
+		
+		
     }
 
 	public void LoadSpells()
@@ -63,16 +77,18 @@ public partial class SpellSelectorMenu : Control
 		{
 			SpellIcon icon = spellIconScene.Instantiate<SpellIcon>();
 			icon.resource = resource;
+			icon.Texture = resource.Portrait;
 			InsertIcon(icon);
 		}
 	}
 
 	private void InsertIcon(SpellIcon icon)
 	{
-		AddChild(icon);
-		icon.Position = icon.GetChild<SpellIcon>(spellIconList.GetChildCount()-2).Position + Vector2.Right*portraitSize*1.2f;
-		if(spellIconList.GetChildCount() % 2 == 0) MoveRight();
-
+		Debug.Assert(icon != null);
+		spellIconList.AddChild(icon);
+		icon.Position = spellIconList.GetChild<SpellIcon>(spellIconList.GetChildCount()-2).Position 
+		+ Vector2.Right*portraitSize*1.2f;
+		if(spellIconList.GetChildCount() % 2 == 0) MoveLeft();
 	}
 
 
@@ -81,58 +97,42 @@ public partial class SpellSelectorMenu : Control
 	private Action<double> translateProcess = null;
 	[Export] float transitionSpeed = 6.0f;
 
-	public void MoveRight()
-	{
-		if(spellIconList.GetChildCount() < 2) return;
-		bool looped = false;
-		selected++;
-		if(selected >= spellIconList.GetChildCount()) {selected = 0; looped = true;}
-		
-		List<SpellIcon> icons =  spellIconList.GetChildren().Cast<SpellIcon>().ToList();
-
-		List<Vector2> newPositions = spellIconList.GetChildren().Select
-		(
-			childNode => ((Control)childNode).Position + 
-			(
-				looped ?
-				Vector2.Left*portraitSize*1.2f*icons.Count() :
-				Vector2.Right*portraitSize*1.2f	
-			)
-		).ToList();
-
-		translateProcess = (double delta) => 
-		{
-			bool endThisFrame = false;
-			for(int i = 0; i < icons.Count(); i++)
-			{
-				var currentPosition = icons[i].Position.MoveToward(newPositions[i], transitionSpeed*(float)delta);
-				icons[i].Position = currentPosition;
-				if(currentPosition.IsEqualApprox(newPositions[i])) endThisFrame = true;
-			}
-			if(endThisFrame) translateProcess = null;
-		};
-	}
 	public void MoveLeft()
 	{
 		if(spellIconList.GetChildCount() < 2) return;
-		bool looped = false;
+		selected++;
+		if(selected >= spellIconList.GetChildCount()) selected = 0;
+
+		SetupTranslation();
+	}
+
+	public void MoveRight()
+	{
+		if(spellIconList.GetChildCount() < 2) return;
 		selected--;
-		if(selected < 0 ) {selected = spellIconList.GetChildCount()-1; looped = true;}
+		if(selected < 0) selected = spellIconList.GetChildCount()-1;
 		
-		List<SpellIcon> icons =  spellIconList.GetChildren().Cast<SpellIcon>().ToList();
+		SetupTranslation();
+	}
+	public void SetupTranslation()
+	{
+		Vector2 originalPos = spellIconList.Position;
 
-		List<Vector2> newPositions = spellIconList.GetChildren().Select
-		(
-			childNode =>	((Control)childNode).Position - 
-			(
-				looped ?
-				Vector2.Left*portraitSize*1.2f*icons.Count() :
-				Vector2.Right*portraitSize*1.2f	
-			)
-		).ToList();
+		Vector2 finalPos = originalPos 
+		- Vector2.Right * ((spellIconList.GetChild<SpellIcon>(selected).GlobalPosition.X 
+			- spellIconList.GetParent<Control>().GetGlobalRect().GetCenter().X)
+		+ spellIconList.GetChild<SpellIcon>(selected).Size.X/2);
 
+		//STUB:
+			spellIconList.Position = finalPos;
+
+	/*
 		translateProcess = (double delta) => 
 		{
+			
+			translateProcess = null;
+			/*
+			
 			bool endThisFrame = false;
 			for(int i = 0; i < icons.Count(); i++)
 			{
@@ -141,10 +141,9 @@ public partial class SpellSelectorMenu : Control
 				if(currentPosition.IsEqualApprox(newPositions[i])) endThisFrame = true;
 			}
 			if(endThisFrame) translateProcess = null;
-		};
-
+		};*/
 	}
-
+	
 
 #endregion
 

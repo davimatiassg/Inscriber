@@ -19,7 +19,7 @@ public static class SpellRepository
 
     public static IEnumerable<SpellResource> LoadSpellResources()
     {
-        IEnumerable<SpellResource> spellResources = new List<SpellResource>();
+        List<SpellResource> spellResources = new List<SpellResource>();
 
         using var spellDir = DirAccess.Open(SPELL_DIRECTORY_PATH);
         spellDir.ListDirBegin();
@@ -27,7 +27,7 @@ public static class SpellRepository
         while (fileName != "")
         {
             if (spellDir.CurrentIsDir()) continue;
-            spellResources.Append(ResourceLoader.Load(SPELL_DIRECTORY_PATH + fileName));
+            spellResources.Add(ResourceLoader.Load<SpellResource>(SPELL_DIRECTORY_PATH + fileName));
             fileName = spellDir.GetNext();
         }
         return spellResources;
@@ -52,7 +52,7 @@ public static class SpellRepository
 
         if(graph == null) graph = new TGraph();
 
-        XElement graphData = XDocument.Parse(resource.XMLGraphData).Root.Elements("Graph").Single();
+        XElement graphData = XElement.Parse(resource.XMLGraphData);
 
         LoadNodes<TGraph,TNode>(graphData, graph);
 
@@ -61,14 +61,13 @@ public static class SpellRepository
         return graph;
     }
 
-    public static void LoadNodes<TGraph,TNode>(XElement root, TGraph graph)
+    public static void LoadNodes<TGraph,TNode>(XElement elementData, TGraph graph)
         where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
 
     {
-        if(root == null) throw new ArgumentNullException();
-        
-        foreach (XElement nodeData in root.Elements("Node"))
+        if(elementData == null) throw new ArgumentNullException();
+        foreach (XElement nodeData in elementData.Element("Nodes").Elements("Node"))
         {
             var node = new TNode();
 
@@ -86,14 +85,14 @@ public static class SpellRepository
         }
     }
 
-    public static void LoadArcs<TGraph,TNode>(XElement root, TGraph graph)
+    public static void LoadArcs<TGraph,TNode>(XElement elementData, TGraph graph)
         where TGraph : IGraph<TNode>, new()
         where TNode :  ISpellGraphNode, new()
 
     {
-        if(root == null) throw new ArgumentNullException();
+        if(elementData == null) throw new ArgumentNullException();
         
-        foreach (XElement arcData in root.Elements("Node"))
+        foreach (XElement arcData in elementData.Element("Arcs").Elements("Arc"))
         {
             int sourceIndex = int.Parse(arcData.Attributes("source").Single().Value);
             int targetIndex = int.Parse(arcData.Attributes("target").Single().Value);
@@ -112,7 +111,7 @@ public static class SpellRepository
         where TNode :  ISpellGraphNode, new() 
     {
         ICastable castable;
-        String runeType = runeElement.Attributes().Single().Value;
+        String runeType = runeElement.Attributes("type").Single().Value;
         var rarity = (Rune.ERuneRarity) Enum.Parse(typeof(Rune.ERuneRarity), runeElement.Attribute("rarity").Value.AsSpan());
         if(runeType == typeof(RuneCreate).ToString())
         {
@@ -190,48 +189,57 @@ public static class SpellRepository
 
 
 #region SAVING
-    public static bool IsSpellValid(Spell spell, IEnumerable<ISpellGraphNode>? faultyNodes)
+    public static bool IsSpellGraphValid<TGraph, TNode>(TGraph graph)
+        where TGraph : IGraph<TNode>
+        where TNode : ISpellGraphNode
     {
-        foreach(var node in spell)
+        foreach(var node in graph)
         {
             CastingResources res = ((Rune)node.Castable).SigilResources;
-            spell.ForeachSourceOf(node, (src, weight) => res.Merge(src.Castable.CastReturns) );
+            graph.ForeachSourceOf(node, (src, weight) => res.Merge(src.Castable.CastReturns) );
             if(!(node.Castable.CastRequirements <= res)) 
             {
-                if(faultyNodes == null) return false;
-                faultyNodes.Append(node);
+                return false;
             }
         }
-        return faultyNodes.Count() == 0;
+        return true;
     }
-    public static IEnumerable<ISpellGraphNode>? SaveSpell(Spell spell)
+
+    public static void SaveSpell<TGraph, TNode>(TGraph spellgraph, string name, string description, Texture2D portrait)
+        where TGraph : IGraph<TNode>
+        where TNode : ISpellGraphNode
     {
-        IEnumerable<ISpellGraphNode> faultyNodes = new List<ISpellGraphNode>();
-        
-        if(!IsSpellValid(spell, faultyNodes)) return faultyNodes;
+              
+        //FIXME: if(!IsSpellGraphValid<TGraph, TNode>(spellgraph)) return;
 
         SpellResource spellResource = new SpellResource
         {
-            Name = spell.Name,
-            Description = spell.Description,
-            Portrait = spell.Portrait,
-            XMLGraphData =  new XDocument(GraphToXML((IGraph<ISpellGraphNode>)spell)).ToString()
+            Name = name,
+            Description = description,
+            Portrait = portrait,
+            XMLGraphData = new XDocument(GraphToXML<TGraph, TNode>(spellgraph)).ToString()
         };
 
-        ResourceSaver.Save(spellResource, SPELL_DIRECTORY_PATH + spellResource.GetRid().ToString());
+        ResourceSaver.Save(spellResource, SPELL_DIRECTORY_PATH + spellResource.Name + ".tres");
 
-        return null;
     }
+    public static void SaveSpell(Spell spell) => SaveSpell<Spell, DefaultSpellGraphNode>(spell, spell.Name, spell.Description, spell.Portrait);
 
-    public static XElement GraphToXML(IGraph<ISpellGraphNode> graph)
+
+    public static XElement GraphToXML<TGraph, TNode>(TGraph graph)
+        where TGraph : IGraph<TNode>
+        where TNode : ISpellGraphNode
     {
         return new XElement("Graph",
-            NodesToXML(graph),
-            ArcsToXML(graph)
+        
+            NodesToXML<TGraph, TNode>(graph),
+            ArcsToXML<TGraph, TNode>(graph)
         );
     }
 
-    public static XElement ArcsToXML(IGraph<ISpellGraphNode> graph)
+    public static XElement ArcsToXML<TGraph, TNode>(TGraph graph)
+        where TGraph : IGraph<TNode>
+        where TNode : ISpellGraphNode
     {   
         XElement arcsElement = new XElement("Arcs");
         if( graph.Flags.Contains(GraphFlag.WEIGHTED))
@@ -264,14 +272,16 @@ public static class SpellRepository
         return arcsElement;
     }
 
-    public static XElement NodesToXML(IGraph<ISpellGraphNode> graph)
+    public static XElement NodesToXML<TGraph, TNode>(TGraph graph)
+        where TGraph : IGraph<TNode>
+        where TNode : ISpellGraphNode
     {
         return new XElement("Nodes",
             graph.ToList().ConvertAll(nodeData =>
                 new XElement("Node",
                     new XAttribute("index", nodeData.Index),
                     new XAttribute("posX", nodeData.Position.X),
-                    new XAttribute("posX", nodeData.Position.Y),
+                    new XAttribute("posY", nodeData.Position.Y),
                     new XElement("Rune",
                         new XAttribute("type", nodeData.Castable.GetType().ToString()),
                         new XAttribute("rarity", ((Rune)nodeData.Castable).rarity.ToString())

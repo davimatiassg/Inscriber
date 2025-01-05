@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://ukgd70ee2jex"]
+[gd_scene load_steps=10 format=3 uid="uid://ukgd70ee2jex"]
 
 [ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellGraphEditor.cs" id="1_i23sc"]
 [ext_resource type="Texture2D" uid="uid://dg37qmibr4afd" path="res://Sprites/background placeholder.png" id="2_8rpec"]
@@ -8,12 +8,15 @@
 [ext_resource type="PackedScene" uid="uid://bgjd84fxagq5m" path="res://Scenes/Menus/SpellEditor/FreeOverlay.tscn" id="6_2ssi4"]
 [ext_resource type="PackedScene" uid="uid://crlvvusqaoixg" path="res://Scenes/Menus/SpellEditor/ViewOverlay.tscn" id="7_mirhc"]
 [ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellGraphCamera.cs" id="8_5qxpa"]
+[ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellEditorMetaMenu.cs" id="9_upcj2"]
 
-[node name="SpellEditorStateMachine" type="Control" node_paths=PackedStringArray("runeSelector", "viewOverlay", "freeOverlay", "dragOverlay", "connectOverlay", "graphNodeMaster", "graphArcsMaster", "spellGraphCamera")]
+[node name="SpellEditorStateMachine" type="Control" node_paths=PackedStringArray("runeSelector", "viewOverlay", "freeOverlay", "dragOverlay", "connectOverlay", "metaMenu", "graphNodeMaster", "graphArcsMaster", "spellGraphCamera")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 1.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1, 1.00016)
@@ -23,9 +26,16 @@ viewOverlay = NodePath("Hud/ViewOverlay")
 freeOverlay = NodePath("Hud/FreeOverlay")
 dragOverlay = NodePath("Hud/DragOverlay")
 connectOverlay = NodePath("Hud/ConnectOverlay")
+metaMenu = NodePath("Hud/Panel")
 graphNodeMaster = NodePath("Nodes")
 graphArcsMaster = NodePath("Arcs")
 spellGraphCamera = NodePath("Camera2D")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(4, 4)
+position_smoothing_enabled = true
+position_smoothing_speed = 15.0
+script = ExtResource("8_5qxpa")
 
 [node name="BackgroundPlaceholder" type="Sprite2D" parent="."]
 modulate = Color(0.201527, 0.201527, 0.201527, 1)
@@ -50,6 +60,87 @@ visible = false
 [node name="ViewOverlay" parent="Hud" instance=ExtResource("7_mirhc")]
 visible = false
 
+[node name="Panel" type="Panel" parent="Hud" node_paths=PackedStringArray("saveButton", "returnButton", "exitButton", "titleField", "descriptionField")]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 1.0
+offset_right = -429.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("9_upcj2")
+saveButton = NodePath("save")
+returnButton = NodePath("return")
+exitButton = NodePath("exit")
+titleField = NodePath("Title")
+descriptionField = NodePath("Description")
+
+[node name="save" type="Button" parent="Hud/Panel"]
+modulate = Color(0.0509804, 1, 0.0156863, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 237.962
+offset_bottom = -87.0381
+grow_horizontal = 2
+grow_vertical = 2
+text = "Save"
+
+[node name="return" type="Button" parent="Hud/Panel"]
+modulate = Color(1, 1, 0.0156863, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 272.956
+offset_bottom = -52.0436
+grow_horizontal = 2
+grow_vertical = 2
+text = "Return"
+
+[node name="exit" type="Button" parent="Hud/Panel"]
+modulate = Color(1, 0, 0.0117647, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 306.951
+offset_bottom = -18.0491
+grow_horizontal = 2
+grow_vertical = 2
+text = "Exit"
+
+[node name="Title" type="TextEdit" parent="Hud/Panel"]
+modulate = Color(0.622234, 0.161429, 0.883213, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 25.9958
+offset_bottom = -290.004
+grow_horizontal = 2
+grow_vertical = 2
+placeholder_text = "New Spell"
+
+[node name="Description" type="TextEdit" parent="Hud/Panel"]
+modulate = Color(0.622234, 0.161429, 0.883213, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 17.0
+offset_top = 73.9882
+offset_right = -8.0
+offset_bottom = -138.012
+grow_horizontal = 2
+grow_vertical = 2
+placeholder_text = "New Spell's description"
+wrap_mode = 1
+indent_wrapped_lines = true
+
 [node name="Nodes" type="Control" parent="."]
 z_index = 6
 layout_mode = 3
@@ -65,9 +156,3 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(4, 4)
-position_smoothing_enabled = true
-position_smoothing_speed = 15.0
-script = ExtResource("8_5qxpa")

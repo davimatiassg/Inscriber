@@ -31,6 +31,9 @@ public class GraphUtil<TGraph, TNode>
 #endregion PREPARATIVE_FUNCTIONS
 
 #region SEARCHES_ITERATIONS
+//REVIEW: Os chamadores das buscas DFS e BFS podem fazer bom uso da recém adicionada condição de parada.
+
+
 /// <summary>
 	/// Runs a full Breadth First Search trought the graph's nodes and executes a choosen expression at each node.
 	/// </summary>
@@ -39,10 +42,12 @@ public class GraphUtil<TGraph, TNode>
 	/// <param name="VisitationProcess">An Action Delegate that operates after a node is visited.</param>
 	/// <param name="UnmarkedVisitProcess">An Action Delegate that operates for each unvisited neighbor of the node being visited.</param>
 	/// <param name="MarkedVisitProcess">An Action Delegate that operates for each visited neighbor of the node being visited.</param>
+		/// <param name="BreakCondition"> A function that interrupts the search if it ever returns true. </param>
 	public static void ForEachNodeByBFSIn(TGraph spellGraph, TNode startingNode, 
-		Action<TNode>        VisitationProcess = null, 
-		Action<TNode, TNode>  UnmarkedVisitProcess = null,
-		Action<TNode, TNode>  MarkedVisitProcess = null
+		Action<TNode>        	VisitationProcess = null, 
+		Action<TNode, TNode>  	UnmarkedVisitProcess = null,
+		Action<TNode, TNode>  	MarkedVisitProcess = null,
+		Func<bool>			  	BreakCondition = null
 	){
 		if(spellGraph.Count == 0) return;
 		Dictionary<TNode, bool> markedNodes = InitializePairType(spellGraph, false);
@@ -66,6 +71,8 @@ public class GraphUtil<TGraph, TNode>
 
 			VisitationProcess?.Invoke(currNode);
 			markedNodes[currNode] = true;
+
+			if(BreakCondition !=null && BreakCondition()) return;
 		}
 	}
     public static void ForEachNodeByBFSIn(TGraph spellGraph) => ForEachNodeByBFSIn(spellGraph, spellGraph[0]);
@@ -78,10 +85,12 @@ public class GraphUtil<TGraph, TNode>
 	/// <param name="VisitationProcess">An Action Delegate that operates after a node is visited.</param>
 	/// <param name="UnmarkedVisitProcess">An Action Delegate that operates for each unvisited neighbor of the node being visited.</param>
 	/// <param name="MarkedVisitProcess">An Action Delegate that operates for each visited neighbor of the node being visited.</param>
+	/// <param name="BreakCondition"> A function that interrupts the search if it ever returns true. </param> 
 	public static void ForEachNodeByDFSIn(TGraph spellGraph, TNode startingNode, 
-		Action<TNode>        VisitationProcess = null, 
-		Action<TNode, TNode>  UnmarkedVisitProcess = null,
-		Action<TNode, TNode>  MarkedVisitProcess = null
+		Action<TNode>        	VisitationProcess = null, 
+		Action<TNode, TNode>  	UnmarkedVisitProcess = null,
+		Action<TNode, TNode>  	MarkedVisitProcess = null,
+		Func<bool>			  	BreakCondition = null
 	) 
 	{
 		if(spellGraph.Count == 0) return;
@@ -105,6 +114,7 @@ public class GraphUtil<TGraph, TNode>
 			});
 			VisitationProcess?.Invoke(currNode);
 			markedNodes[currNode] = true;
+			if(BreakCondition !=null && BreakCondition()) return;
 		}
 	}
 	public static void ForEachNodeByDFSIn(TGraph spellGraph) => ForEachNodeByDFSIn(spellGraph, spellGraph[0]);
@@ -183,14 +193,12 @@ REVIEW: This version works for directed graphs only. The version below this work
 
 */
 
-
+	// REVIEW: THIS IS NOT WORKING!!!!!!
 	/// <summary>
 	/// Uses a DFS algorithm to verify if the graph has a cycle.
 	/// </summary>
 	/// <param name="startingNode">The spellGraph's node from where the search will start</param>
 	/// <returns>True if this graph has a cycle</returns>
-
-
 	public static bool HasCycle(TGraph graph, TNode startingNode)
 	{
 		bool cycled = false;
@@ -205,9 +213,13 @@ REVIEW: This version works for directed graphs only. The version below this work
 		};
 
 		Action<TNode, TNode>  MarkedVisitProcess = (TNode n1, TNode n2) => 
-		{ if(! Predecessors[n1].Equals(n1) && Predecessors[n1].Equals(n2)) cycled = true; };
+		{ 
+			if(! Predecessors[n1].Equals(n1) && Predecessors[n1].Equals(n2)) cycled = true; 
+		};
 
-		ForEachNodeByDFSIn(graph, startingNode, null, UnmarkedVisitProcess, MarkedVisitProcess);
+		Func<bool> breakCondition = () => cycled;
+
+		ForEachNodeByDFSIn(graph, startingNode, null, UnmarkedVisitProcess, MarkedVisitProcess, breakCondition);
 
 		return cycled;
 	}

@@ -13,7 +13,7 @@ public abstract class SpellEditorState
     public SpellGraphEditor editor;
     public VisualNode tempSelection;
     protected SpellGraphCamera graphCamera;
-    public virtual void EnterModeFrom(SpellEditorState mode) 
+    public virtual void EnterModeFrom(SpellEditorState? mode) 
     {
         prevMode = mode;
         graphCamera = editor.spellGraphCamera;

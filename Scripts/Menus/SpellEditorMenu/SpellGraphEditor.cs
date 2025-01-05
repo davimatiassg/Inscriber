@@ -15,7 +15,7 @@ namespace SpellEditing
 /// </summary>
 public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
 {
-
+#region DECLARATIONS
    
     private enum EEditorState { SPELL_SELECTOR, VIEW_MODE, FREE_MODE, DRAG_MODE, CONNECT_MODE, RUNE_SELECTOR, META_MENU }
     public static Action<VisualNode>    OnStartConnectionAtNode;
@@ -43,6 +43,9 @@ public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
     [Export] public Control connectOverlay;
     [Export] public Control selectOverlay;
 
+
+    [Export] public SpellEditorMetaMenu metaMenu;
+
     //MODES REFERENCES
     public ViewMode viewMode;
     public FreeMode freeMode;
@@ -50,7 +53,6 @@ public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
     public ConnectMode connectMode;
     public NodeFocusMode selectionMode;
     public RuneSelectorMode runeSelectorMode;
-    
 
     public SpellEditorState editorMode;
     public SpellEditorState EditorState 
@@ -59,12 +61,15 @@ public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
         set { editorMode = value; }
     }
 
-
     public VisualNode selectedNode;
 
     public SpellResource currentSpell;
     
 
+
+#endregion
+
+#region GODOT_METHODS
     public override void _Ready()
     {
         base._Ready();
@@ -76,24 +81,59 @@ public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
         selectionMode = new NodeFocusMode       { overlay = selectOverlay, editor = this };
         runeSelectorMode = new RuneSelectorMode { overlay = runeSelector, selector = runeSelector, editor = this };
 
-        EditorState = freeMode;
-        
+        currentSpell = SceneManager.ConsumeData<SpellResource>("SELECTED_SPELL"); 
+        if(currentSpell != null) {
+            SpellRepository.LoadGraphFromResource<SpellGraphView, VisualNode>(currentSpell, this);
+            metaMenu.descriptionField.Text = currentSpell.Description;
+            metaMenu.titleField.Text = currentSpell.Name;
+        }
 
-        currentSpell = SceneManager.ConsumeData<SpellResource>("SELECTED_SPELL");
-        if(currentSpell != null) SpellRepository.LoadGraphFromResource<SpellGraphView, VisualNode>(currentSpell, this);
+        metaMenu.SetupButtons(this);
+
+        freeMode.EnterModeFrom(null);
     }
 
     public override void _Input(InputEvent @event)
     {
+        
         base._Input(@event);
+        if(menuOpened) return;
         EditorState._Input(@event);
+        if(@event.IsActionPressed("ui_text_clear_carets_and_selection", false))
+        {
+            OpenMetaMenu();
+        }
     }
 
     public override void _Process(double delta)
     {
         base._Process(@delta);
-        EditorState._Process(@delta);
+        EditorState?._Process(@delta);
+        
     }
 
+
+    bool menuOpened;
+    public void OpenMetaMenu()
+    {
+        menuOpened = true;
+        //STUB:
+        metaMenu.Visible = true;
+    }
+
+    public void CloseMetaMenu()
+    {
+        menuOpened = false;
+         //STUB:
+        metaMenu.Visible = false;
+         
+    }
+    
+    public void LaunchSpellSelector()
+	{
+		SceneManager.LoadScene("SpellSelector");
+	}
 }
+
+#endregion
 }

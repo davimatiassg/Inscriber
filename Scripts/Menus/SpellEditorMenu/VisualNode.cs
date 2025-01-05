@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 
@@ -226,12 +227,14 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
     /// <returns></returns>
     public bool DestroyArc(VisualArc arc)
     {
-        System.Diagnostics.Debug.Assert(arc != null);   
+        Debug.Assert(arc != null);   
+
+        arc.Source.arcs.Remove(arc);
+        arc.Target.arcs.Remove(arc);
 
         arc.Source = null;
         arc.Target = null;
-        arc.Source.arcs.Remove(arc);
-        arc.Target.arcs.Remove(arc);
+        
         arc.QueueFree();
 
         return true;

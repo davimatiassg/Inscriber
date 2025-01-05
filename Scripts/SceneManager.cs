@@ -11,23 +11,21 @@ public partial class SceneManager : Node
     public Godot.Collections.Dictionary<string, PackedScene> scenes = new Godot.Collections.Dictionary<string, PackedScene>();
 
     public static Dictionary<string, object> persistentData = new Dictionary<string, object>();
-
+    
+    public static SceneTree CurrentTree;
     public static SceneManager Instance;
 
     public override void _Ready()
     {
         base._Ready();
-        if(Instance == null) Instance = this;
-        else if (Instance != this) QueueFree();
+        if(Instance == null) Instance = this; 
+        CurrentTree = GetTree();
     }
  
-    public static async void LoadScene(string sceneName)
+    public static void LoadScene(string sceneName)
     {
-        SceneTree tree = Instance.GetTree();
-
-        Instance.GetParent().RemoveChild(Instance);
         
-        tree.ChangeSceneToPacked(Instance.scenes[sceneName]);
+        CurrentTree.ChangeSceneToPacked(Instance.scenes[sceneName]);
 
     }
 
@@ -43,8 +41,9 @@ public partial class SceneManager : Node
 
     public static T ConsumeData<T>(string name)
     {
-        T data = (T)persistentData[name];
+        object data;
+        persistentData.TryGetValue(name, out data);
         persistentData.Remove(name);
-        return data;
+        return (T)data;
     }
 }
