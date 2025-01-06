@@ -9,7 +9,7 @@ namespace SpellEditing
 public class FreeMode : SpellEditorState 
 {
     private const float CAMERA_SMOOTH_SPEED = 10f;
-    private const float CAMERA_ZOOM = 1f;
+    private const float CAMERA_ZOOM = 0.5f;
     protected virtual void ConfirmationInput(InputEvent @event)
     {
         if(@event.IsActionPressed("game_act_1", false)) 

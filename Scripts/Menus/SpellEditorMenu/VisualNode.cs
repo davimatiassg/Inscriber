@@ -81,11 +81,23 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
     public new Vector2 Position
     {
         get => base.Position + GetRect().Size/2;
-        set => base.Position = value - GetRect().Size/2;
+        set {
+            base.Position = value - GetRect().Size/2;
+            
+        }
         
     }
 
-    public VisualNode() {}
+    private RichTextLabel label;
+    public VisualNode() {
+        //STUB:
+        label = new RichTextLabel();
+        label.Modulate = Colors.DarkRed;
+        label.Size = Vector2.One*250;
+        this.AddChild(label);
+        label.Position = Vector2.Down*50;
+        
+    }
 
     private void InitNameLabel()
     {	
@@ -118,6 +130,7 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
             if(nameLabel == null) InitNameLabel();
             nameLabel.Text = ((Rune)castable).Name; 
         }
+        this.label.Text =  GetIndex().ToString();
     }
 
 
@@ -194,6 +207,8 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
             node.arcs.Add(arc);
             arc.UpdatePosition();
         }
+
+        this.label.Text = GetIndex().ToString();
         return arc;
     }
     

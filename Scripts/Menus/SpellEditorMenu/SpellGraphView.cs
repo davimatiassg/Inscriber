@@ -62,7 +62,8 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
         catch(InvalidOperationException) { throw new InvalidOperationException("No Edge found between provided nodes"); }
     }
     public int EdgeAmmount() => graphArcsMaster.GetChildCount();
-    public bool AdjacenceBetween(VisualNode n1, VisualNode n2) => n1.arcs.Select(arc => arc.Target).Contains(n2);
+    public bool AdjacenceBetween(VisualNode n1, VisualNode n2) => 
+        n1.arcs.Where(arc => arc.Source == n1).Select(arc => arc.Target).Contains(n2);
     public int InwardsDegree(VisualNode n) => n.arcs.Where(arc => arc.Source==n).Count();
     public int OutwardsDegree(VisualNode n) => n.arcs.Where(arc => arc.Target==n).Count();
     public int Degree(VisualNode n) => InwardsDegree(n) - OutwardsDegree(n);

@@ -538,15 +538,15 @@ public class GraphUtil<TGraph, TNode>
     /// <param name="endingNode">The spellGraph's node where the path ends</param>
 
     /// <returns> A List of nodes forming the path </returns>
-	public static Path BellmanFord(TGraph spellGraph, TNode startingNode, TNode endingNode)
+	public static Path<TNode> BellmanFord(TGraph spellGraph, TNode startingNode, TNode endingNode)
 	{		
 		if(!spellGraph.Contains(startingNode) || !spellGraph.Contains(endingNode)) 
 			throw new InvalidOperationException("The starting or ending nodes are not contained in the graph");
 
 		if(spellGraph.Count <= 1)
 		{
-			Path p = new Path();
-			p.AddRange(spellGraph.AsEnumerable().Cast<ISpellGraphNode>());
+			Path<TNode> p = new Path<TNode>();
+			p.AddRange(spellGraph.AsEnumerable().Cast<TNode>());
 			return p;
 		}
 
@@ -577,7 +577,7 @@ public class GraphUtil<TGraph, TNode>
 			});
 		}
 
-		Path path = new Path();
+		Path<TNode> path = new Path<TNode>();
 		if(predecessors[endingNode.Index] == null)
 			return path;
 
@@ -599,7 +599,7 @@ public class GraphUtil<TGraph, TNode>
     /// <param name="startingNode">The spellGraph's node where the path starts</param>
     /// <param name="endingNode">The spellGraph's node where the path ends</param>
     /// <returns> A List of nodes forming the path </returns>
-	public static Path Dijkstra(TGraph spellGraph, TNode startingNode, TNode endingNode)
+	public static Path<TNode> Dijkstra(TGraph spellGraph, TNode startingNode, TNode endingNode)
 	{
 		
 		if(!spellGraph.Contains(startingNode) || !spellGraph.Contains(endingNode)) 
@@ -607,44 +607,35 @@ public class GraphUtil<TGraph, TNode>
 
 		if(spellGraph.Count <= 1) 
 		{
-			Path p = new Path();
-			p.AddRange(spellGraph.AsEnumerable().Cast<ISpellGraphNode>());
+			Path<TNode> p = new Path<TNode>();
+			p.AddRange(spellGraph.AsEnumerable().Cast<TNode>());
 			return p;
 		}
 
-		var distances = new List<int>();
-		var predecessors = new List<TNode>();
-
-		foreach(var node in spellGraph)
-		{
-			distances.Add(int.MaxValue);
-			predecessors.Add(default(TNode));
-		}
+		var distances = Enumerable.Repeat(int.MaxValue, spellGraph.Count).ToList();
+		var predecessors = Enumerable.Repeat<TNode>(default, spellGraph.Count).ToList();
+		var unvisited = spellGraph.ToList();
 
 		distances[startingNode.Index] = 0;
 		
-		var queue = new PriorityQueue<TNode, int>();
-		queue.Enqueue(startingNode, 0);
-	
 		do
 		{
-			TNode current = queue.Dequeue();
+			TNode current = unvisited.MinBy((TNode n) => distances[n.Index]);
+			unvisited.Remove(current);
+			 
 			
 			spellGraph.ForeachTargetOf(current, (TNode next, int weight) => 
 			{
-				if(weight < 0) throw new InvalidOperationException("IGraph contains negative edges.");
-
-				if(distances[next.Index] > distances[current.Index] + weight)
+				if(distances[current.Index] + weight < distances[next.Index])
 				{
 					distances[next.Index] = distances[current.Index] + weight;
 					predecessors[next.Index] = current;
-					queue.Enqueue(spellGraph[next.Index], distances[next.Index]);
 				}
 			});
 		}
-		while (queue.Count > 0);
+		while (unvisited.Count > 0);
 
-		Path path = new Path();
+		Path<TNode> path = new Path<TNode>();
 		if(predecessors[endingNode.Index] == null)
 			return path;
 
@@ -652,8 +643,7 @@ public class GraphUtil<TGraph, TNode>
 
 		while(predecessors[path.Last().Index] != null)
 			path.Add(predecessors[path.Last().Index]);
-
-		path.Reverse();
+			
 		return path;
 
 	}
@@ -778,4 +768,6 @@ public class GraphUtil<TGraph, TNode>
 
 }
 
-public class Path : List<ISpellGraphNode> {}
+public class Path<T> : List<T> 
+	where T : ISpellGraphNode
+{}

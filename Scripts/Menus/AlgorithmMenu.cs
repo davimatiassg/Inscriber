@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 
 public partial class AlgorithmMenu : Control
@@ -29,10 +30,10 @@ public partial class AlgorithmMenu : Control
         
         
     }
-
-
     public void SetupButtons(SpellGraphEditor graphView)
 	{
+
+#region SPANNING_TREE
 		kruskalButton.Pressed += async () => 
         {
             var result = GraphUtil<SpellGraphView, VisualNode>.Kruskal<SpellGraph<VisualNode>>(graphView, null);
@@ -48,5 +49,50 @@ public partial class AlgorithmMenu : Control
 		    SceneManager.LoadScene("SpellEditor");
         };
         kruskalButton.Disabled = false;
+
+#endregion
+
+#region SHORTEST_PATH
+        dijkstraButton.Pressed += async () => 
+        {
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphUtil<SpellGraphView, VisualNode>.Dijkstra(graphView, graphView[0], graphView[graphView.Count-1]);
+            
+            if(result.Count < 2) 
+                return;
+            
+
+            for(int i = 1; i < result.Count; i++)
+            {
+                var n1 = graphView[i-1];
+                var n2 = graphView[i];
+                await Task.Delay(250);
+                foreach(VisualArc arc in n2.arcs)
+                {
+                    if(arc.Target != n1) continue;
+                    arc.Modulate = Colors.Green; 
+                    break;
+                }
+            }
+
+            await Task.Delay(5000);
+
+            for(int i = 1; i < result.Count; i++)
+            {
+                var n1 = graphView[i-1];
+                var n2 = graphView[i];
+                await Task.Delay(250);
+                foreach(VisualArc arc in n2.arcs)
+                {
+                    if(arc.Source != n1) continue;
+                    arc.Modulate = Colors.White; 
+                    break;
+                }
+            }
+
+        };
+        dijkstraButton.Disabled = false;
+
+#endregion
 	}
 }

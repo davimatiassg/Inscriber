@@ -98,18 +98,24 @@ public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
 
     public override void _Input(InputEvent @event)
     {
-        
-        base._Input(@event);
         if(menuOpened) return;
-        EditorState._Input(@event);
+        
         if(@event.IsActionPressed("ui_text_clear_carets_and_selection", false))
         {
             OpenMetaMenu();
+            return;
         }
         if(@event.IsActionPressed("ui_text_completion_query", false))
         {
             OpenAlgMenu();
+            return;
         }
+        
+        
+        base._Input(@event);
+        
+
+        EditorState._Input(@event);
     }
 
     public override void _Process(double delta)
