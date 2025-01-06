@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://ukgd70ee2jex"]
+[gd_scene load_steps=11 format=3 uid="uid://ukgd70ee2jex"]
 
 [ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellGraphEditor.cs" id="1_i23sc"]
 [ext_resource type="Texture2D" uid="uid://dg37qmibr4afd" path="res://Sprites/background placeholder.png" id="2_8rpec"]
+[ext_resource type="PackedScene" uid="uid://c6nops4065rqx" path="res://Scenes/Menus/AlgorithmMenu.tscn" id="2_xd22k"]
 [ext_resource type="PackedScene" uid="uid://bbe1sd5nwqli5" path="res://Scenes/Menus/SpellEditor/DragOverlay.tscn" id="3_a3wjw"]
 [ext_resource type="PackedScene" uid="uid://jq7ps350h34u" path="res://Scenes/Menus/SpellEditor/ConnectOverlay.tscn" id="4_hg6q5"]
 [ext_resource type="PackedScene" uid="uid://cstn05ab0b735" path="res://Scenes/Menus/SpellEditor/RuneSelector.tscn" id="5_i663j"]
@@ -10,7 +11,7 @@
 [ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellGraphCamera.cs" id="8_5qxpa"]
 [ext_resource type="Script" path="res://Scripts/Menus/SpellEditorMenu/SpellEditorMetaMenu.cs" id="9_upcj2"]
 
-[node name="SpellEditorStateMachine" type="Control" node_paths=PackedStringArray("runeSelector", "viewOverlay", "freeOverlay", "dragOverlay", "connectOverlay", "metaMenu", "graphNodeMaster", "graphArcsMaster", "spellGraphCamera")]
+[node name="SpellEditorStateMachine" type="Control" node_paths=PackedStringArray("runeSelector", "viewOverlay", "freeOverlay", "dragOverlay", "connectOverlay", "metaMenu", "algMenu", "graphNodeMaster", "graphArcsMaster", "spellGraphCamera")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -27,6 +28,7 @@ freeOverlay = NodePath("Hud/FreeOverlay")
 dragOverlay = NodePath("Hud/DragOverlay")
 connectOverlay = NodePath("Hud/ConnectOverlay")
 metaMenu = NodePath("Hud/Panel")
+algMenu = NodePath("Hud/AlgorithmMenu")
 graphNodeMaster = NodePath("Nodes")
 graphArcsMaster = NodePath("Arcs")
 spellGraphCamera = NodePath("Camera2D")
@@ -140,6 +142,17 @@ grow_vertical = 2
 placeholder_text = "New Spell's description"
 wrap_mode = 1
 indent_wrapped_lines = true
+
+[node name="AlgorithmMenu" parent="Hud" instance=ExtResource("2_xd22k")]
+visible = false
+anchors_preset = -1
+anchor_bottom = 0.988
+offset_left = 195.0
+offset_top = 1.0
+offset_right = 5.0
+offset_bottom = 1.31998
+grow_horizontal = 1
+grow_vertical = 1
 
 [node name="Nodes" type="Control" parent="."]
 z_index = 6

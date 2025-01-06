@@ -42,7 +42,7 @@ public class GraphUtil<TGraph, TNode>
 	/// <param name="VisitationProcess">An Action Delegate that operates after a node is visited.</param>
 	/// <param name="UnmarkedVisitProcess">An Action Delegate that operates for each unvisited neighbor of the node being visited.</param>
 	/// <param name="MarkedVisitProcess">An Action Delegate that operates for each visited neighbor of the node being visited.</param>
-		/// <param name="BreakCondition"> A function that interrupts the search if it ever returns true. </param>
+	/// <param name="BreakCondition"> A function that interrupts the search if it ever returns true. </param>
 	public static void ForEachNodeByBFSIn(TGraph spellGraph, TNode startingNode, 
 		Action<TNode>        	VisitationProcess = null, 
 		Action<TNode, TNode>  	UnmarkedVisitProcess = null,
@@ -64,9 +64,12 @@ public class GraphUtil<TGraph, TNode>
 				if(markedNodes[nextNode]) { 
 					MarkedVisitProcess?.Invoke(currNode, nextNode);
 				}
+				else 
+				{
+					UnmarkedVisitProcess?.Invoke(currNode, nextNode);
+					queue.Enqueue(nextNode);
+				}
 				
-				UnmarkedVisitProcess?.Invoke(currNode, nextNode);
-				queue.Enqueue(nextNode);
 			});
 
 			VisitationProcess?.Invoke(currNode);
@@ -108,9 +111,11 @@ public class GraphUtil<TGraph, TNode>
 				if(markedNodes[nextNode]) { 
 					MarkedVisitProcess?.Invoke(currNode, nextNode);
 				}
-				
-				UnmarkedVisitProcess?.Invoke(currNode, nextNode);
-				stack.Push(nextNode);
+				else
+				{
+					UnmarkedVisitProcess?.Invoke(currNode, nextNode);
+					stack.Push(nextNode);
+				}
 			});
 			VisitationProcess?.Invoke(currNode);
 			markedNodes[currNode] = true;
@@ -175,25 +180,6 @@ public class GraphUtil<TGraph, TNode>
 		return true;
 	}
 
-/*
-REVIEW: The need of this function.
-REVIEW: This version works for directed graphs only. The version below this works for every graph, I think;
-	public static bool HasCycle(TGraph graph, TNode startingNode)
-	{
-		bool cycled = false;
-
-		Action<TNode, TNode>  MarkedVisitProcess = (TNode n1, TNode n2) => 
-		{  cycled = true; };
-
-		ForEachNodeByDFSIn(graph, startingNode, null, null, MarkedVisitProcess);
-
-		return cycled;
-	}
-
-
-*/
-
-	// REVIEW: THIS IS NOT WORKING!!!!!!
 	/// <summary>
 	/// Uses a DFS algorithm to verify if the graph has a cycle.
 	/// </summary>
@@ -202,19 +188,18 @@ REVIEW: This version works for directed graphs only. The version below this work
 	public static bool HasCycle(TGraph graph, TNode startingNode)
 	{
 		bool cycled = false;
-		Dictionary<TNode, TNode> Predecessors = new Dictionary<TNode, TNode>
-        {
-            { startingNode, startingNode }
-        };
+
+		List<int> predecessors = Enumerable.Repeat(-1, graph.Count).ToList();
+
 
 		Action<TNode, TNode>  UnmarkedVisitProcess = (TNode n1, TNode n2) => 
-		{ 
-			if(!Predecessors.Keys.Contains(n2)) Predecessors.Add(n2, n1); 
+		{
+			predecessors[n2.Index] = n1.Index;
 		};
 
 		Action<TNode, TNode>  MarkedVisitProcess = (TNode n1, TNode n2) => 
 		{ 
-			if(! Predecessors[n1].Equals(n1) && Predecessors[n1].Equals(n2)) cycled = true; 
+			if(graph.Flags.Contains(GraphFlag.DIRECTED) || predecessors[n1.Index] != n2.Index) cycled = true; 
 		};
 
 		Func<bool> breakCondition = () => cycled;
@@ -409,35 +394,36 @@ REVIEW: This version works for directed graphs only. The version below this work
 	/// </summary>
 	private class TreeRank
 	{
-		private TreeRank treeRoot;
+		private TreeRank treeHead;
 
 
 		/// <summary>
 		/// represents how many nodes are connected to this tree. Unused value if this tree is not the head. 
 		/// </summary>
 		public int rank = 1;
-
-		public TreeRank()
+		public TreeRank(int idx)
 		{
-			treeRoot = this;
+			treeHead = this;
 		}
 		
 		//this WILL break if there is a cycle on the tree (i.e. if its not a tree at all)
 		private void UpdateHead()
 		{
-			while(this.treeRoot.treeRoot != this.treeRoot)
+			while(treeHead != treeHead.treeHead)
 			{
-				this.treeRoot = this.treeRoot.treeRoot;
+				treeHead = treeHead.treeHead;
 			} 
 		}
 
 		public bool TryMergeTo(TreeRank tree)
 		{
 			UpdateHead();
-			tree.UpdateHead();
-			if(this.treeRoot == tree.treeRoot) return false;
-			treeRoot = tree;
-			treeRoot.rank += this.rank;
+			tree.UpdateHead(); 
+			
+			if(tree.treeHead == treeHead) 
+				return false;
+			tree.treeHead.rank += treeHead.rank;
+			treeHead.treeHead = tree.treeHead;
 			return true;
 		}
 	}
@@ -457,20 +443,22 @@ REVIEW: This version works for directed graphs only. The version below this work
 		TResult mstree = new TResult();
 		foreach(var node in graph ) mstree.Add(node);
 
-		Dictionary<int, TreeRank> forest = InitializePairType(Enumerable.Range(0, graph.Count).ToList(), new TreeRank());
-
+		List<TreeRank> forest = new List<TreeRank>();
+		for(int i = 0; i < graph.Count; i++) forest.Add( new TreeRank(i) ); 
+		
 		List<(int, int, int)> edges = new List<(int, int, int)>();
 
 		graph.ForeachEdge( (TNode src, TNode trg, int weight) => edges.Add((src.Index, trg.Index, weight)) );
 		
-		edges.AsEnumerable().OrderBy(edge => edge.Item3).ToList();		
+		edges = edges.AsEnumerable().OrderBy(edge => edge.Item3).ToList();		
 		
 		foreach(var weightedEdge in edges)
 		{
 			if(forest[weightedEdge.Item1].TryMergeTo(forest[weightedEdge.Item2]))
 			{
 				mstree.Connect(mstree[weightedEdge.Item1], mstree[weightedEdge.Item2], weightedEdge.Item3);
-				if(forest[weightedEdge.Item2].rank == graph.Count) break;
+				if(Mathf.Max(forest[weightedEdge.Item1].rank, forest[weightedEdge.Item2].rank) >= graph.Count) 
+					break;
 			}
 
 		}

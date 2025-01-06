@@ -45,6 +45,7 @@ public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
 
 
     [Export] public SpellEditorMetaMenu metaMenu;
+    [Export] public AlgorithmMenu algMenu;
 
     //MODES REFERENCES
     public ViewMode viewMode;
@@ -86,11 +87,13 @@ public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
             SpellRepository.LoadGraphFromResource<SpellGraphView, VisualNode>(currentSpell, this);
             metaMenu.descriptionField.Text = currentSpell.Description;
             metaMenu.titleField.Text = currentSpell.Name;
-        }
-
-        metaMenu.SetupButtons(this);
+        }       
 
         freeMode.EnterModeFrom(null);
+
+        metaMenu.SetupButtons(this);
+        
+        algMenu.SetupButtons(this);
     }
 
     public override void _Input(InputEvent @event)
@@ -102,6 +105,10 @@ public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
         if(@event.IsActionPressed("ui_text_clear_carets_and_selection", false))
         {
             OpenMetaMenu();
+        }
+        if(@event.IsActionPressed("ui_text_completion_query", false))
+        {
+            OpenAlgMenu();
         }
     }
 
@@ -126,6 +133,20 @@ public partial class SpellGraphEditor : SpellGraphView, IGraph<VisualNode>
         menuOpened = false;
          //STUB:
         metaMenu.Visible = false;
+         
+    }
+    public void OpenAlgMenu()
+    {
+        menuOpened = true;
+        //STUB:
+        algMenu.Visible = true;
+    }
+
+    public void CloseAlgMenu()
+    {
+        menuOpened = false;
+         //STUB:
+        algMenu.Visible = false;
          
     }
     

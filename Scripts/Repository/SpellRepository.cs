@@ -205,7 +205,7 @@ public static class SpellRepository
         return true;
     }
 
-    public static void SaveSpell<TGraph, TNode>(TGraph spellgraph, string name, string description, Texture2D portrait)
+    public static SpellResource SaveSpell<TGraph, TNode>(TGraph spellgraph, string name, string description, Texture2D portrait)
         where TGraph : IGraph<TNode>
         where TNode : ISpellGraphNode
     {
@@ -222,8 +222,10 @@ public static class SpellRepository
 
         ResourceSaver.Save(spellResource, SPELL_DIRECTORY_PATH + spellResource.Name + ".tres");
 
+        return spellResource;
+
     }
-    public static void SaveSpell(Spell spell) => SaveSpell<Spell, DefaultSpellGraphNode>(spell, spell.Name, spell.Description, spell.Portrait);
+    public static SpellResource SaveSpell(Spell spell) => SaveSpell<Spell, DefaultSpellGraphNode>(spell, spell.Name, spell.Description, spell.Portrait);
 
 
     public static XElement GraphToXML<TGraph, TNode>(TGraph graph)

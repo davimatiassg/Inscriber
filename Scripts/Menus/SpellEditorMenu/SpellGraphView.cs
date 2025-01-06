@@ -26,19 +26,19 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
     {
         foreach(VisualArc arc in node.arcs)
             if(arc.Target == node) 
-                process(arc.Source, arc.weight);
+                process(arc.Source, arc.Weight);
     }
     public void ForeachTargetOf(VisualNode node, Action<VisualNode, int> process)
     {
         foreach(VisualArc arc in node.arcs)
             if(arc.Source == node) 
-                process(arc.Target, arc.weight);
+                process(arc.Target, arc.Weight);
         
     }
     public void ForeachEdge(Action<VisualNode, VisualNode, int> process)
     {
         foreach(VisualArc arc in graphArcsMaster.GetChildren())
-            process(arc.Source, arc.Target, arc.weight);
+            process(arc.Source, arc.Target, arc.Weight);
     }
 
     public int Count =>  graphNodeMaster.GetChildCount();
@@ -54,11 +54,11 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
     }
     public int GetEdgeWeight(VisualNode src, VisualNode trg)
     {
-        try { return src.arcs.Where(arc => arc.Target == trg).Single().weight; }
+        try { return src.arcs.Where(arc => arc.Target == trg).Single().Weight; }
         catch(InvalidOperationException) { throw new InvalidOperationException("No Edge found between provided nodes"); }
     } 
     public void SetEdgeWeight(VisualNode src, VisualNode trg, int weight){
-        try { src.arcs.Where(arc => arc.Target == trg).Single().weight = weight; }
+        try { src.arcs.Where(arc => arc.Target == trg).Single().Weight = weight; }
         catch(InvalidOperationException) { throw new InvalidOperationException("No Edge found between provided nodes"); }
     }
     public int EdgeAmmount() => graphArcsMaster.GetChildCount();
@@ -93,7 +93,7 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
     }
 
     public IEnumerator<VisualNode> GetEnumerator() 
-    => graphNodeMaster.GetChildren().Cast<VisualNode>().GetEnumerator();
+    => graphNodeMaster.GetChildren().Cast<VisualNode>().ToList().GetEnumerator();
     
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -113,11 +113,11 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
     public bool Connect(VisualNode sourceNode, VisualNode targetNode, int weight)
     {
         var arc = sourceNode.CreateArcTowards(targetNode);
-        arc.weight = weight;
-        if(GraphUtil<SpellGraphView, VisualNode>.HasCycle(this, sourceNode)) {
+        arc.Weight = weight;
+        /*if(GraphUtil<SpellGraphView, VisualNode>.HasCycle(this, sourceNode)) {
             sourceNode.DestroyArc(arc);
             return false;
-        }
+        }*/
         sourceNode.AssembleConnetion(arc);      
         graphArcsMaster.AddChild(arc);  
         return true;
