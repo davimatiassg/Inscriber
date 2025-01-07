@@ -466,6 +466,29 @@ public class GraphUtil<TGraph, TNode>
 	}
 
 
+	public static TResult Prim<TResult>(TGraph graph, Comparison<int> comparer)
+		where TResult : IGraph<TNode>, new()
+	{
+		TResult mstree = new TResult();
+
+		List<bool> addedToTree = Enumerable.Repeat(false, graph.Count).ToList();
+		List<TNode> notAdded = graph.ToList();
+
+
+		mstree.Add(graph[0]);
+		notAdded.Remove(graph[0]);
+
+
+		while(notAdded.Count > 0)
+		{
+			///TODO:
+		}
+		
+
+
+		return mstree;
+	}
+
 
 #endregion TREES
 
@@ -764,6 +787,101 @@ public class GraphUtil<TGraph, TNode>
     }
 
 */
+#endregion
+
+
+#region  EULER_PATHS
+
+
+	private static (List<int> inwards, List<int> outwards, List<int> total) GetGraphDegrees(TGraph graph)
+	{
+		List<int> inwards = Enumerable.Repeat(0, graph.Count).ToList();
+		List<int> outwards = Enumerable.Repeat(0, graph.Count).ToList();
+		List<int> total = Enumerable.Repeat(0, graph.Count).ToList();
+		
+		graph.ForeachEdge(
+			
+			(TNode src, TNode trg, int weight) => 
+			
+			{
+				outwards[src.Index] ++;
+				inwards[trg.Index] ++;
+				total[trg.Index] ++;
+				total[src.Index] --;
+			}
+		);
+
+		return (inwards, outwards, total);
+	}
+
+	private static bool CheckEuler(TGraph graph)
+	{
+		if(graph.Count <= 1) return true;
+		var degrees =  GetGraphDegrees(graph);
+		
+		for(int i = 0; i < graph.Count; i++)
+		{
+			if(degrees.inwards[i] != degrees.outwards[i]) return false;
+		}
+
+		return true;
+	}
+
+
+	/// <summary>
+	/// Runs the Hierholzer Algorithm to find a Eulerian Cycle on a directed graph
+	/// </summary>
+	/// <param name="graph">The graph to find the cycle on</param>
+	/// <returns>A path containing a Eulerian Cycle.</returns>
+	public static Path<TNode> HierholzerDigraphCycles(TGraph graph)
+	{
+		Path<TNode> circuit = new();
+		if(!CheckEuler(graph)) throw new InvalidOperationException("The provided graph is not Eulerian.");
+		if(graph.Count <= 1) return (Path<TNode>)graph.ToList();
+		
+		//Ao invés de tirar as arestas do grafo, marcar quais já foram visitadas para facilitar o processo
+		int unmarkedEdges = 0;
+		Dictionary<(int, int), bool> edgeMarking = new();
+		graph.ForeachEdge( (TNode src, TNode trg, int weight) => 
+			{
+				unmarkedEdges ++;
+				edgeMarking.Add((src.Index, trg.Index), false);
+			}
+		);
+
+		//cycle.Add();
+		Stack<TNode> nodes = new();
+		TNode currNode = graph[0];
+		do
+		{
+
+			bool gotEdge = false;
+			graph.ForeachTargetOf(currNode, 
+				(TNode nextNode, int weight) =>
+				{
+					if(gotEdge) return;
+					var edge = (currNode.Index, nextNode.Index);
+					if(!edgeMarking[edge])
+					{
+						gotEdge = true;
+						edgeMarking[edge] = true;
+						unmarkedEdges --;
+						nodes.Push(nextNode);
+					}
+				}
+			);
+
+			if(!gotEdge)
+			{
+				circuit.Add(nodes.Pop()); 
+			}
+
+		} while(nodes.TryPeek(out currNode));
+
+		circuit.Add(graph[0]);
+		return circuit;
+	}
+
 #endregion
 
 }

@@ -62,37 +62,56 @@ public partial class AlgorithmMenu : Control
                 return;
             
 
-            for(int i = 1; i < result.Count; i++)
-            {
-                var n1 = result[i-1];
-                var n2 = result[i];
-                await Task.Delay(250);
-                foreach(VisualArc arc in n2.arcs)
-                {
-                    if(arc.Target != n1) continue;
-                    arc.Modulate = Colors.Green; 
-                    break;
-                }
-            }
+            await HighLightPath(result, Colors.Green, 250);
 
             await Task.Delay(10000);
 
-            for(int i = 1; i < result.Count; i++)
-            {
-                var n1 = result[i-1];
-                var n2 = result[i];
-                await Task.Delay(250);
-                foreach(VisualArc arc in n2.arcs)
-                {
-                    if(arc.Target != n1) continue;
-                    arc.Modulate = Colors.White; 
-                    break;
-                }
-            }
-
+            await HighLightPath(result, Colors.White, 250);
         };
         dijkstraButton.Disabled = false;
 
 #endregion
-	}
+	
+#region EULERIAN_CYCLES
+
+        hierholzerCyclesButton.Pressed += async () => 
+        {
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphUtil<SpellGraphView, VisualNode>.HierholzerDigraphCycles(graphView);
+            GD.Print(result);
+            
+            if(result.Count < 2) 
+                return;
+            
+
+            await HighLightPath(result, Colors.Green, 100);
+
+            
+            await Task.Delay(10000);
+
+            await HighLightPath(result, Colors.White, 50);
+            
+        };
+        hierholzerCyclesButton.Disabled = false;
+
+#endregion
+    }
+
+
+
+    public async Task HighLightPath(Path<VisualNode> path, Color color, int betweenDelay = 250)
+    {
+        for(int i = 1; i < path.Count; i++)
+        {
+            var n1 = path[i-1];
+            var n2 = path[i];     
+            foreach(VisualArc arc in n2.arcs)
+            {
+                if(arc.Target != n1) continue;
+                arc.Modulate = color; 
+                break;
+            }
+            await Task.Delay(betweenDelay);
+        }
+    }
 }
