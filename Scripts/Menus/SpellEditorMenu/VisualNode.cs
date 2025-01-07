@@ -64,9 +64,13 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
     public List<VisualArc> arcs = new List<VisualArc>();
     [Export] public Label nameLabel; 
 
+    int index = -1;
     public int Index { 
-        get => GetIndex(); 
-        set {}
+        get { 
+            if(index == -1) index = GetIndex(); 
+            return index;
+        }
+        set => index = value; 
     }
 
     private ICastable castable;
@@ -88,14 +92,7 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
         
     }
 
-    private RichTextLabel label;
     public VisualNode() {
-        //STUB:
-        label = new RichTextLabel();
-        label.Modulate = Colors.DarkRed;
-        label.Size = Vector2.One*250;
-        this.AddChild(label);
-        label.Position = Vector2.Down*50;
         
     }
 
@@ -130,7 +127,6 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
             if(nameLabel == null) InitNameLabel();
             nameLabel.Text = ((Rune)castable).Name; 
         }
-        this.label.Text =  GetIndex().ToString();
     }
 
 
@@ -208,7 +204,6 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
             arc.UpdatePosition();
         }
 
-        this.label.Text = GetIndex().ToString();
         return arc;
     }
     
@@ -298,12 +293,12 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
 
     public IEnumerable<Sigil> GetSigils() 
     =>
-        GetChildren().Cast<VisualSigilSlot>().
+        GetChildren().Where(child => child is VisualSigilSlot).Cast<VisualSigilSlot>().
         Where((slot) => slot.CurrentSigil != null).
         Select((slot) => slot.CurrentSigil);
 
     public int GetSigilCount() => 
-        GetChildren().Cast<VisualSigilSlot>().
+        GetChildren().Where(child => child is VisualSigilSlot).Cast<VisualSigilSlot>().
         Where((slot) => slot.CurrentSigil != null).
         Count();
 }

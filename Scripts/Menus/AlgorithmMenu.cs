@@ -50,6 +50,22 @@ public partial class AlgorithmMenu : Control
         };
         kruskalButton.Disabled = false;
 
+        primButton.Pressed += async () => 
+        {
+            var result = GraphUtil<SpellGraphView, VisualNode>.Prim<SpellGraph<VisualNode>>(graphView, null);
+
+            var resource = SpellRepository.SaveSpell<SpellGraph<VisualNode>, VisualNode>(
+                result, 
+                graphView.metaMenu.titleField.Text + "-> prim result", 
+                "result of prim minimun spanning tree",
+                await graphView.metaMenu.GetPhoto()
+            );
+
+            SceneManager.SaveData("SELECTED_SPELL", resource);
+		    SceneManager.LoadScene("SpellEditor");
+        };
+        primButton.Disabled = false;
+
 #endregion
 
 #region SHORTEST_PATH

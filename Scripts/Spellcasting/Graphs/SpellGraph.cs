@@ -30,8 +30,8 @@ public partial class SpellGraph<T> : IGraph<T>
     public void Add(T item)
     {
         if(item == null) return;
-        item.Index = Count;
         
+        item.Index = Count;
         Nodes.Add(item);
 
         EdgeMatrix.Add(Enumerable.Repeat(int.MaxValue, Count-1).ToList());

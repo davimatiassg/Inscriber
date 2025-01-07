@@ -470,21 +470,44 @@ public class GraphUtil<TGraph, TNode>
 		where TResult : IGraph<TNode>, new()
 	{
 		TResult mstree = new TResult();
-
-		List<bool> addedToTree = Enumerable.Repeat(false, graph.Count).ToList();
-		List<TNode> notAdded = graph.ToList();
-
-
-		mstree.Add(graph[0]);
-		notAdded.Remove(graph[0]);
-
-
-		while(notAdded.Count > 0)
-		{
-			///TODO:
-		}
+		foreach(var node in graph) mstree.Add(node);
 		
+		int unlinkedNodes = graph.Count;
+		List<bool> linked = Enumerable.Repeat(false, unlinkedNodes).ToList();
+		
+		
+		List<(int src, int trg, int weight)> viableEdges = new();
+		graph.ForeachEdge( (TNode src, TNode trg, int weight) => 
+			{
+				viableEdges.Add((src.Index, trg.Index, weight));
+			}
+		);
+		viableEdges = viableEdges.OrderBy(edge => edge.weight).ToList();
 
+		//Avoid inconsistences in reference-type TNode's Connection
+		foreach(TNode src in graph) foreach(TNode trg in graph) graph.Disconnect(src, trg);
+
+
+		unlinkedNodes--;
+		linked[0] = true;
+
+		while(unlinkedNodes > 0 && viableEdges.Count > 0)
+		{
+			//Find the correct Edge
+
+			for(int i = 0; i < viableEdges.Count; i++)
+			{
+				var currEdge = viableEdges[i];
+				if(linked[currEdge.src] && !linked[currEdge.trg])
+				{
+					viableEdges.RemoveAll(edge => edge.trg == currEdge.trg);
+					linked[currEdge.trg] = true;
+					unlinkedNodes--;
+					mstree.Connect(mstree[currEdge.src], mstree[currEdge.trg], currEdge.weight);
+					break;
+				}	
+			}
+		}
 
 		return mstree;
 	}
