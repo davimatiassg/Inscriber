@@ -64,8 +64,8 @@ public partial class AlgorithmMenu : Control
 
             for(int i = 1; i < result.Count; i++)
             {
-                var n1 = graphView[i-1];
-                var n2 = graphView[i];
+                var n1 = result[i-1];
+                var n2 = result[i];
                 await Task.Delay(250);
                 foreach(VisualArc arc in n2.arcs)
                 {
@@ -75,16 +75,16 @@ public partial class AlgorithmMenu : Control
                 }
             }
 
-            await Task.Delay(5000);
+            await Task.Delay(10000);
 
             for(int i = 1; i < result.Count; i++)
             {
-                var n1 = graphView[i-1];
-                var n2 = graphView[i];
+                var n1 = result[i-1];
+                var n2 = result[i];
                 await Task.Delay(250);
                 foreach(VisualArc arc in n2.arcs)
                 {
-                    if(arc.Source != n1) continue;
+                    if(arc.Target != n1) continue;
                     arc.Modulate = Colors.White; 
                     break;
                 }
