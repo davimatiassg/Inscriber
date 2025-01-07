@@ -86,6 +86,24 @@ public partial class AlgorithmMenu : Control
         };
         dijkstraButton.Disabled = false;
 
+
+        bellmanFordButton.Pressed += async () => 
+        {
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphUtil<SpellGraphView, VisualNode>.BellmanFord(graphView, graphView[0], graphView[graphView.Count-1]);
+            
+            if(result.Count < 2) 
+                return;
+            
+
+            await HighLightPath(result, Colors.Green, 250);
+
+            await Task.Delay(10000);
+
+            await HighLightPath(result, Colors.White, 250);
+        };
+        bellmanFordButton.Disabled = false;
+
 #endregion
 	
 #region EULERIAN_CYCLES

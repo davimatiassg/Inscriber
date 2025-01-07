@@ -113,6 +113,7 @@ XMLGraphData = "<Graph>
     <Arc source=\"11\" target=\"16\" weight=\"1\" />
     <Arc source=\"17\" target=\"16\" weight=\"20\" />
     <Arc source=\"12\" target=\"17\" weight=\"4\" />
+    <Arc source=\"13\" target=\"18\" weight=\"18\" />
     <Arc source=\"17\" target=\"18\" weight=\"5\" />
   </Arcs>
 </Graph>"

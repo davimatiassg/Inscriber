@@ -606,25 +606,23 @@ public class GraphUtil<TGraph, TNode>
 		}
 
 		distances[startingNode.Index] = 0;
-		
-		var queue = new PriorityQueue<TNode, int>();
-		queue.Enqueue(startingNode, 0);
-	
-		foreach(var current in spellGraph)
+
+		bool negativeCycleFound = false;
+		for(int i = 0; i < spellGraph.Count; i++)
 		{
-			spellGraph.ForeachTargetOf(current, (TNode next, int weight) => 
+			spellGraph.ForeachEdge((TNode src, TNode trg, int weight) => 
 			{
-				if(distances[next.Index] > distances[current.Index] + weight)
+				if(distances[src.Index] != int.MaxValue && distances[src.Index] + weight < distances[trg.Index])
 				{
-					distances[next.Index] = distances[current.Index] + weight;
-					predecessors[next.Index] = current;
-					queue.Enqueue(spellGraph[next.Index], distances[next.Index]);
+					if(i == spellGraph.Count) negativeCycleFound = true;
+					distances[trg.Index] = distances[src.Index]  + weight;
+					predecessors[trg.Index] = src;
 				}
 			});
 		}
 
 		Path<TNode> path = new Path<TNode>();
-		if(predecessors[endingNode.Index] == null)
+		if(predecessors[endingNode.Index] == null || negativeCycleFound)
 			return path;
 
 		path.Add(endingNode);
@@ -632,7 +630,6 @@ public class GraphUtil<TGraph, TNode>
 		while(predecessors[path.Last().Index] != null)
 			path.Add(predecessors[path.Last().Index]);
 
-		path.Reverse();
 		return path;
 	
 	}
