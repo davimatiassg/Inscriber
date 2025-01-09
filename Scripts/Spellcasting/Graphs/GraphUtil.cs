@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Godot;
 
@@ -513,6 +514,176 @@ public class GraphUtil<TGraph, TNode>
 	}
 
 
+    
+	public static TResult ChuliuEdmonds<TResult>(TGraph graph, Comparison<int> comparer)
+		where TResult : IGraph<TNode>, new()
+	{
+		TResult mstree = new TResult();
+
+		foreach(var node in graph) mstree.Add(node.Castable);
+
+		if(graph.Count < 2) 
+			return mstree;
+
+
+		int rootIndex = 0;
+
+		foreach(var node in graph)
+		{
+			int visitedCount = 0;
+
+			ForEachNodeByDFSIn(graph, graph[rootIndex], (TNode _) => visitedCount++);
+
+			if(visitedCount == graph.Count) {break;}
+			else {rootIndex ++;}
+		}
+
+		if(rootIndex == graph.Count) 
+			throw new InvalidOperationException("The chosen directed graph does not have a spanning arborescence.");
+
+
+		var spellgraph = ChuliuEdmondsRecursive(graph, comparer, mstree[rootIndex]);
+	
+		spellgraph.ForeachEdge((TNode src, TNode trg, int weight) => {
+			mstree.Connect(mstree[src.Index], mstree[trg.Index], weight);
+		});
+
+		return mstree;
+	}
+
+    private static SpellGraph<TN> ChuliuEdmondsRecursive<TG, TN>(TG graph, Comparison<int> comparer, TN root)
+		where TG : IGraph<TN>, new()
+		where TN : ISpellGraphNode, new()
+	{
+		SpellGraph<TN> mstree = new();
+		
+		if(graph is SpellGraph<TN>)
+		{
+			foreach(var node in graph) mstree.Add(node);
+		}
+		else
+		{
+			foreach(var node in graph) mstree.Add(node.Castable);
+		}
+
+		foreach(var node in graph) {
+			if(node.Index == root.Index)
+				continue;
+			
+			int minWeight = int.MaxValue;
+			int minWeightOwner = -1;
+			graph.ForeachSourceOf(node, (TN src, int weight) => {
+				
+				if(weight < minWeight)
+				{
+					minWeightOwner = src.Index;
+					minWeight = weight;
+				}
+			});
+			if(minWeightOwner != -1) mstree.Connect(mstree[minWeightOwner], node, minWeight);
+		}
+
+
+		bool foundCycle = false;
+
+		GraphUtil<SpellGraph<TN>, TN>.ForEachNodeByDFSIn(mstree, mstree[root.Index], null, null,
+		(TN source, TN target) => 
+		{
+			foundCycle = true;
+
+			List<TN> cycle = new() { target, source };
+			//retrieves the cycle and the points where it exits
+			TN cycleNode = source;
+			
+			while(cycleNode.Index != target.Index)
+			{
+				graph.ForeachSourceOf(cycleNode,(TN src, int weight) => {
+					cycle.Add(src);
+					cycleNode = src;
+				});
+			}
+				
+
+			var clusteredGraph = ClusterGraph(graph, root, cycle);
+			var resultGraph = ChuliuEdmondsRecursive(clusteredGraph, comparer, clusteredGraph[0]);
+			var unclusteredGraph = UnclusterGraph(resultGraph, graph);
+			unclusteredGraph.ForeachEdge((TN src, TN trg, int weight) => {
+				mstree.Connect(mstree[src.Index], mstree[trg.Index], weight);
+			});
+			mstree.Disconnect(source, target);
+
+		},
+		() => foundCycle
+		);
+
+		return mstree;
+	}
+	private static SpellGraph<TN> UnclusterGraph<TN>(SpellGraph<Cluster<TN>> graph, IGraph<TN> originalGraph)
+	where TN : ISpellGraphNode, new()
+	{
+		SpellGraph<TN> unclusteredGraph = new SpellGraph<TN>();
+		foreach(var node in originalGraph) unclusteredGraph.Add(node);
+
+		List<TN> cycle = null;
+
+		graph.ForeachEdge((Cluster<TN> src, Cluster<TN> trg, int weight) => {
+			if(src.containCycle && !trg.containCycle)
+			{
+				var srcNode = src.Cycle.Find((node) => originalGraph.AdjacenceBetween(node, trg.Node));
+				unclusteredGraph.Connect(srcNode, trg.Node, weight);
+				cycle = src.Cycle;
+			}
+			else if(!src.containCycle && trg.containCycle)
+			{
+				var trgNode = src.Cycle.Find((node) => originalGraph.AdjacenceBetween(src.Node, node));
+				unclusteredGraph.Connect(src.Node, trgNode, weight);
+				cycle = trg.Cycle;
+			}
+			else
+				unclusteredGraph.Connect(src.Node, trg.Node, weight);
+		});
+
+		for(int i = 2; i < cycle.Count; i++)
+		{
+			unclusteredGraph.Connect(cycle[i-1], cycle[i], originalGraph.GetEdgeWeight(cycle[i-1], cycle[i]));
+		}
+
+		return unclusteredGraph;
+	}
+	private static SpellGraph<Cluster<TN>> ClusterGraph<TN>(IGraph<TN> graph, TN root, List<TN> cycle)
+	where TN : ISpellGraphNode, new()
+	{
+		Dictionary<TN, Cluster<TN>> clusteredPairing = new();
+		foreach( var node in graph ) clusteredPairing.Add(node, new Cluster<TN>{containCycle = false, Node = node});
+		clusteredPairing.Remove(root);
+		foreach(var node in cycle) clusteredPairing.Remove(node);
+
+		SpellGraph<Cluster<TN>> clusteredGraph = new(){ new Cluster<TN>{containCycle = false, Node = root} };
+		foreach(var pair in clusteredPairing) clusteredGraph.Add(pair.Value);
+		var clusteredCycle = new Cluster<TN>{containCycle = true, Cycle = cycle};
+		clusteredGraph.Add(clusteredCycle);
+		
+		graph.ForeachEdge((TN src, TN trg, int weight) => {
+			var containSrc = cycle.Contains(src);
+			var containTrg = cycle.Contains(trg);
+			if(containSrc && containTrg){ return ;}
+			else if(containSrc && !containTrg)
+				clusteredGraph.Connect(clusteredCycle, clusteredPairing[trg], weight);
+			else if(!containSrc && containTrg)
+			{
+				int cycleBreakWeight = graph.GetEdgeWeight(cycle[(cycle.IndexOf(trg)+1)%cycle.Count], trg);
+				clusteredGraph.Connect(clusteredPairing[src], clusteredCycle, weight - cycleBreakWeight);
+			}
+				
+			else
+				clusteredGraph.Connect(clusteredPairing[src], clusteredPairing[trg], weight);
+		});
+
+		return clusteredGraph;
+	} 
+
+
+
 #endregion TREES
 
 #region SORTING
@@ -692,12 +863,12 @@ public class GraphUtil<TGraph, TNode>
 	}
 
 	/// <summary>
-	///	Runs Floyd-Warshall algorithm to find
+	///	Runs Floyd-Warshall algorithm to find the shortest paths between any two nodes on the graph
 	/// </summary>
 	/// <typeparam name="TGraph"></typeparam>
 	/// <typeparam name="TNode"></typeparam>
 	/// <param name="spellGraph"></param>
-	/// <returns></returns>
+	/// <returns>A bidimentional array with were arr[x][y] is the index of the predecessor of the node y, on the path from x to y.</returns>
 	public static int[,] FloydWarshall(TGraph spellGraph)
 	{
 		int size = spellGraph.Count();
@@ -729,16 +900,18 @@ public class GraphUtil<TGraph, TNode>
 			});
 		}
 		
-		for(int i = 0; i < size; i++){ 
-		for(int j = 0; j < size; j++){
-			for(int h = 0; h < size; h++){
-				if(distances[i, j] > distances[i, h] + distances[h,  j])
+		for(int k = 0; k < size; k++){ 
+			for(int i = 0; i < size; i++){ for(int j = 0; j < size; j++)
+			{
+				if(distances[i, k] == int.MaxValue) continue;
+				if(distances[k, j] == int.MaxValue) continue;
+				if(distances[i, j] == int.MaxValue || distances[i, j] > distances[i, k] + distances[k,  j])
 				{
-					distances[i, j] = distances[i, h] + distances[h,  j];
-					predecessors[i, j] = predecessors[h, j];
+					distances[i, j] = distances[i, k] + distances[k,  j];
+					predecessors[i, j] = predecessors[k, j];
 				}
-			}
-		}}
+			}}
+		}
 
 		return predecessors;
 	}
@@ -909,3 +1082,22 @@ public class GraphUtil<TGraph, TNode>
 public class Path<T> : List<T> 
 	where T : ISpellGraphNode
 {}
+
+public class Cluster<T> : ISpellGraphNode
+		where T : ISpellGraphNode
+    {
+		public bool containCycle;
+		public T Node; 
+		public List<T> Cycle;
+        public int Index { get ; set; }
+        public ICastable Castable { get; set; }
+        public Vector2 Position { get; set; }
+
+        public void AddSigil(Sigil sigil) =>  throw new NotImplementedException();
+        public Sigil GetSigil(int index) => throw new NotImplementedException();
+
+        public int GetSigilCount() => throw new NotImplementedException();
+
+        public IEnumerable<Sigil> GetSigils() => throw new NotImplementedException();
+        
+    }

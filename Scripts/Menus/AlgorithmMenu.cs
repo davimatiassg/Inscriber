@@ -66,6 +66,22 @@ public partial class AlgorithmMenu : Control
         };
         primButton.Disabled = false;
 
+        chuLiuEdmondsButton.Pressed += async () => 
+        {
+            var result = GraphUtil<SpellGraphView, VisualNode>.ChuliuEdmonds<SpellGraph<VisualNode>>(graphView, null);
+
+            var resource = SpellRepository.SaveSpell<SpellGraph<VisualNode>, VisualNode>(
+                result, 
+                graphView.metaMenu.titleField.Text + "-> chu-liu_Edmonds result", 
+                "result of Chu-Liu/Edmonds minimun spanning tree",
+                await graphView.metaMenu.GetPhoto()
+            );
+
+            SceneManager.SaveData("SELECTED_SPELL", resource);
+		    SceneManager.LoadScene("SpellEditor");
+        };
+        chuLiuEdmondsButton.Disabled = false;
+
 #endregion
 
 #region SHORTEST_PATH
@@ -102,7 +118,25 @@ public partial class AlgorithmMenu : Control
 
             await HighLightPath(result, Colors.White, 250);
         };
+        
         bellmanFordButton.Disabled = false;
+
+        floydWarshallButton.Pressed += async () => 
+        {
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result =RunFloydWarshall(graphView, graphView[0], graphView[graphView.Count-1]);
+            
+            if(result.Count < 2) 
+                return;
+            
+            await HighLightPath(result, Colors.Green, 250);
+
+            await Task.Delay(10000);
+
+            await HighLightPath(result, Colors.White, 250);
+        };
+        
+        floydWarshallButton.Disabled = false;
 
 #endregion
 	
@@ -129,6 +163,8 @@ public partial class AlgorithmMenu : Control
         hierholzerCyclesButton.Disabled = false;
 
 #endregion
+    
+    
     }
 
 
@@ -147,5 +183,30 @@ public partial class AlgorithmMenu : Control
             }
             await Task.Delay(betweenDelay);
         }
+    }
+
+    public Path<VisualNode> RunFloydWarshall(SpellGraphEditor graph, VisualNode startingNode, VisualNode endingNode)
+    {
+        var result = GraphUtil<SpellGraphView, VisualNode>.FloydWarshall(graph);
+
+        Path<VisualNode> resultPath = new();
+        if(startingNode.Index == endingNode.Index) return resultPath;
+
+        int x = startingNode.Index;
+        int y = endingNode.Index;
+
+        resultPath.Add(endingNode);
+        
+        do
+        {
+            y = result[x, y];
+            if(y == -1) 
+                return new Path<VisualNode>();
+            resultPath.Add(graph[y]);
+        }
+        while(x != y);
+
+        return resultPath;
+
     }
 }

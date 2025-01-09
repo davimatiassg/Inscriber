@@ -92,10 +92,8 @@ public partial class SpellGraph<T> : IGraph<T>
         return true;
     }
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return Nodes.GetEnumerator();
-    }
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Nodes).GetEnumerator();
+
 
 #endregion NODE_COLLECTION_FIELDS
 
