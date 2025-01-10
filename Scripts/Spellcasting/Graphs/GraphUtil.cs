@@ -107,6 +107,7 @@ public class GraphUtil<TGraph, TNode>
 			TNode currNode = stack.Pop();
 			if(markedNodes[currNode]) continue;
 
+			markedNodes[currNode] = true;
 			spellGraph.ForeachTargetOf(currNode, (TNode nextNode, int weight) =>
 			{
 				if(markedNodes[nextNode]) { 
@@ -119,7 +120,7 @@ public class GraphUtil<TGraph, TNode>
 				}
 			});
 			VisitationProcess?.Invoke(currNode);
-			markedNodes[currNode] = true;
+
 			if(BreakCondition !=null && BreakCondition()) return;
 		}
 	}
@@ -541,146 +542,81 @@ public class GraphUtil<TGraph, TNode>
 		if(rootIndex == graph.Count) 
 			throw new InvalidOperationException("The chosen directed graph does not have a spanning arborescence.");
 
+		ClusteredGraph<TNode> clusteredGraph = new();
+		foreach(var node in graph) clusteredGraph.Add(node);
+		graph.ForeachEdge((TNode src, TNode trg, int weight) => {
+			clusteredGraph.Connect(src, trg, weight);
+		});
 
-		var spellgraph = ChuliuEdmondsRecursive(graph, comparer, mstree[rootIndex]);
-	
-		spellgraph.ForeachEdge((TNode src, TNode trg, int weight) => {
+		clusteredGraph.root = graph[rootIndex];
+		clusteredGraph.cycleEdges = new();
+
+		clusteredGraph = ChuliuEdmondsRecursive(clusteredGraph, comparer, graph[rootIndex]);
+
+		int edgecount = 0;
+		clusteredGraph.ForeachEdge((TNode src, TNode trg, int weight) => {
+			edgecount++;
 			mstree.Connect(mstree[src.Index], mstree[trg.Index], weight);
 		});
 
 		return mstree;
 	}
 
-    private static SpellGraph<TN> ChuliuEdmondsRecursive<TG, TN>(TG graph, Comparison<int> comparer, TN root)
-		where TG : IGraph<TN>, new()
-		where TN : ISpellGraphNode, new()
+    private static ClusteredGraph<T> ChuliuEdmondsRecursive<T>(ClusteredGraph<T> original, Comparison<int> comparer, T root)
+		where T : ISpellGraphNode, new()
 	{
-		SpellGraph<TN> mstree = new();
-		
-		if(graph is SpellGraph<TN>)
-		{
-			foreach(var node in graph) mstree.Add(node);
-		}
-		else
-		{
-			foreach(var node in graph) mstree.Add(node.Castable);
-		}
 
-		foreach(var node in graph) {
-			if(node.Index == root.Index)
-				continue;
+		ClusteredGraph<T> graph = new();
+		foreach(var node in original) graph.Add(node);
+		original.ForeachEdge((T src, T trg, int weight) => {
+			graph.Connect(src, trg, weight);
+		}); 
+		graph.root = root;
+
+		graph.MakeMinimumArborescence();
+
+		List<T> unreachedNodes = new ();
+		foreach(var node in graph) unreachedNodes.Add(node);
+
+		GraphUtil<ClusteredGraph<T>, T>.ForEachNodeByDFSIn(graph, root, (T current) => unreachedNodes.Remove(current) );
+
+		if(unreachedNodes.Count == 0) return graph;
+		List<T> cycle = new();
+		do{		
+			var r = unreachedNodes.Last();
+			unreachedNodes.Remove(r);
 			
-			int minWeight = int.MaxValue;
-			int minWeightOwner = -1;
-			graph.ForeachSourceOf(node, (TN src, int weight) => {
+			GraphUtil<ClusteredGraph<T>, T>.ForEachNodeByDFSIn(graph, r, null, null,
+			(T source, T target) => 
+			{
+				cycle.Add(target);
+				//retrieves the cycle and the points where it exits
+				T cycleNode = source;
 				
-				if(weight < minWeight)
+				while(cycleNode.Index != target.Index)
 				{
-					minWeightOwner = src.Index;
-					minWeight = weight;
+					cycle.Add(cycleNode);
+					graph.ForeachSourceOf(cycleNode,(T src, int weight) => {
+						cycleNode = src;
+					});
 				}
-			});
-			if(minWeightOwner != -1) mstree.Connect(mstree[minWeightOwner], node, minWeight);
+
+			},
+			() => cycle.Count > 0
+			);
 		}
+		while(cycle.Count == 0 && unreachedNodes.Count > 0);
+
+		var clusteredGraph = new ClusteredGraph<T>(graph, original, root, cycle);
+		clusteredGraph.edges = ChuliuEdmondsRecursive(clusteredGraph, comparer, root).edges;
+		clusteredGraph.Cycle = cycle;
+		clusteredGraph.Uncluster();
+		graph = clusteredGraph;
+		graph.Disconnect(cycle[1], cycle[0]);
 
 
-		bool foundCycle = false;
-
-		GraphUtil<SpellGraph<TN>, TN>.ForEachNodeByDFSIn(mstree, mstree[root.Index], null, null,
-		(TN source, TN target) => 
-		{
-			foundCycle = true;
-
-			List<TN> cycle = new() { target, source };
-			//retrieves the cycle and the points where it exits
-			TN cycleNode = source;
-			
-			while(cycleNode.Index != target.Index)
-			{
-				graph.ForeachSourceOf(cycleNode,(TN src, int weight) => {
-					cycle.Add(src);
-					cycleNode = src;
-				});
-			}
-				
-
-			var clusteredGraph = ClusterGraph(graph, root, cycle);
-			var resultGraph = ChuliuEdmondsRecursive(clusteredGraph, comparer, clusteredGraph[0]);
-			var unclusteredGraph = UnclusterGraph(resultGraph, graph);
-			unclusteredGraph.ForeachEdge((TN src, TN trg, int weight) => {
-				mstree.Connect(mstree[src.Index], mstree[trg.Index], weight);
-			});
-			mstree.Disconnect(source, target);
-
-		},
-		() => foundCycle
-		);
-
-		return mstree;
+		return graph;
 	}
-	private static SpellGraph<TN> UnclusterGraph<TN>(SpellGraph<Cluster<TN>> graph, IGraph<TN> originalGraph)
-	where TN : ISpellGraphNode, new()
-	{
-		SpellGraph<TN> unclusteredGraph = new SpellGraph<TN>();
-		foreach(var node in originalGraph) unclusteredGraph.Add(node);
-
-		List<TN> cycle = null;
-
-		graph.ForeachEdge((Cluster<TN> src, Cluster<TN> trg, int weight) => {
-			if(src.containCycle && !trg.containCycle)
-			{
-				var srcNode = src.Cycle.Find((node) => originalGraph.AdjacenceBetween(node, trg.Node));
-				unclusteredGraph.Connect(srcNode, trg.Node, weight);
-				cycle = src.Cycle;
-			}
-			else if(!src.containCycle && trg.containCycle)
-			{
-				var trgNode = src.Cycle.Find((node) => originalGraph.AdjacenceBetween(src.Node, node));
-				unclusteredGraph.Connect(src.Node, trgNode, weight);
-				cycle = trg.Cycle;
-			}
-			else
-				unclusteredGraph.Connect(src.Node, trg.Node, weight);
-		});
-
-		for(int i = 2; i < cycle.Count; i++)
-		{
-			unclusteredGraph.Connect(cycle[i-1], cycle[i], originalGraph.GetEdgeWeight(cycle[i-1], cycle[i]));
-		}
-
-		return unclusteredGraph;
-	}
-	private static SpellGraph<Cluster<TN>> ClusterGraph<TN>(IGraph<TN> graph, TN root, List<TN> cycle)
-	where TN : ISpellGraphNode, new()
-	{
-		Dictionary<TN, Cluster<TN>> clusteredPairing = new();
-		foreach( var node in graph ) clusteredPairing.Add(node, new Cluster<TN>{containCycle = false, Node = node});
-		clusteredPairing.Remove(root);
-		foreach(var node in cycle) clusteredPairing.Remove(node);
-
-		SpellGraph<Cluster<TN>> clusteredGraph = new(){ new Cluster<TN>{containCycle = false, Node = root} };
-		foreach(var pair in clusteredPairing) clusteredGraph.Add(pair.Value);
-		var clusteredCycle = new Cluster<TN>{containCycle = true, Cycle = cycle};
-		clusteredGraph.Add(clusteredCycle);
-		
-		graph.ForeachEdge((TN src, TN trg, int weight) => {
-			var containSrc = cycle.Contains(src);
-			var containTrg = cycle.Contains(trg);
-			if(containSrc && containTrg){ return ;}
-			else if(containSrc && !containTrg)
-				clusteredGraph.Connect(clusteredCycle, clusteredPairing[trg], weight);
-			else if(!containSrc && containTrg)
-			{
-				int cycleBreakWeight = graph.GetEdgeWeight(cycle[(cycle.IndexOf(trg)+1)%cycle.Count], trg);
-				clusteredGraph.Connect(clusteredPairing[src], clusteredCycle, weight - cycleBreakWeight);
-			}
-				
-			else
-				clusteredGraph.Connect(clusteredPairing[src], clusteredPairing[trg], weight);
-		});
-
-		return clusteredGraph;
-	} 
 
 
 
@@ -1083,21 +1019,254 @@ public class Path<T> : List<T>
 	where T : ISpellGraphNode
 {}
 
-public class Cluster<T> : ISpellGraphNode
-		where T : ISpellGraphNode
+public class ClusteredGraph<T> : IGraph<T> where T : ISpellGraphNode, new()
+{
+	public List<T> Cycle = new();
+	public List<int> cycleWeights = new();
+	public List<T> nodes = new();
+	public T root;
+	public T clusteredCycle;
+	public Dictionary<(T src, T trg), int> edges = new();
+	public Dictionary<(T src, T trg), int> cycleEdges = new();
+	public Dictionary<T, (T trg, int weight)> cycleEdgesIn = new();
+	public Dictionary<T, (T src, int weight)> cycleEdgesOut = new();
+
+	public ClusteredGraph() {}
+
+	public ClusteredGraph(List<T> nodes, T root) 
+	{
+		foreach(var node in nodes)
+		{
+			this.nodes.Add(node);
+		}
+		this.root = root;
+	}
+	public ClusteredGraph(IGraph<T> graph, IGraph<T> original, T root, List<T> cycle)
+	{
+		
+		foreach( var node in graph ) nodes.Add(node);
+		this.root = root;
+		this.Cycle = cycle;
+
+		if(Cycle.Count > 0)
+		{
+			foreach(var node in cycle) { nodes.Remove(node); }
+			clusteredCycle = new();
+			Add(clusteredCycle);
+		}
+		
+		graph.ForeachEdge((T src, T trg, int weight) => {
+			var containSrc = Cycle.Contains(src);
+			var containTrg = Cycle.Contains(trg);
+			
+			
+			if(containSrc && containTrg)
+				cycleEdges.TryAdd((src, trg), weight);
+			else if(!containSrc && !containTrg)
+				Connect(src, trg, weight);
+
+			return;
+		});
+
+		foreach(var node in cycle)
+		{
+			original.ForeachSourceOf(node, (T src, int weight) => {
+				cycleEdgesIn.TryAdd(src, (node, weight));
+				int cycleBreakWeight = graph.GetEdgeWeight(cycle[(cycle.IndexOf(node)+1)%cycle.Count], node);
+				Connect(src, clusteredCycle, weight - cycleBreakWeight);
+			});
+			original.ForeachTargetOf(node, (T trg, int weight) => {
+				cycleEdgesOut.TryAdd(trg, (node, weight));
+				Connect(clusteredCycle, trg, weight);
+			});
+		}
+
+	}
+
+	public void Uncluster()
+	{
+		foreach(var node in Cycle)
+		{
+			nodes.Add(node);
+		}
+		foreach(var edge in cycleEdges)
+		{
+			Connect(edge.Key.src, edge.Key.trg, edge.Value);
+		}
+
+		List<(T src, T trg, int weight)> connections = new();
+		ForeachEdge((T src, T trg, int weight) => 
+		{
+			if(src.Index == clusteredCycle.Index)
+			{
+				var originalEdge = cycleEdgesOut[trg];
+				connections.Add((originalEdge.src, trg, originalEdge.weight));
+			}
+			else if(trg.Index == clusteredCycle.Index)
+			{
+				var originalEdge = cycleEdgesIn[src];
+				connections.Add((src, originalEdge.trg, originalEdge.weight));
+			}
+			else
+				connections.Add((src, trg, weight));
+		});
+		Remove(clusteredCycle);
+
+		foreach(var edge in connections)
+		{
+			Connect(edge.src, edge.trg, edge.weight);
+		}
+	}
+
+
+	public void MakeMinimumArborescence()
+	{
+		Dictionary<(T src, T trg), int> newEdges = new();
+		foreach(var node in nodes) {	
+			if(node.Index == root.Index) continue;
+			
+			int minWeight = int.MaxValue;
+			T minWeightSource = default;
+			ForeachSourceOf(node, (T src, int weight) => {
+				if(weight < minWeight)
+				{
+					minWeightSource = src;
+					minWeight = weight;
+				}
+			});
+			newEdges.Add((minWeightSource, node), minWeight);
+		}
+		this.edges = newEdges;
+	}
+
+
+    public T this[int index] { get => nodes[index]; set => nodes[index] = value; }
+
+    public GraphFlag[] Flags => throw new NotImplementedException();
+
+    public int Count => nodes.Count;
+
+    public bool IsReadOnly => false;
+
+    public void Add(ICastable c)
     {
-		public bool containCycle;
-		public T Node; 
-		public List<T> Cycle;
-        public int Index { get ; set; }
-        public ICastable Castable { get; set; }
-        public Vector2 Position { get; set; }
-
-        public void AddSigil(Sigil sigil) =>  throw new NotImplementedException();
-        public Sigil GetSigil(int index) => throw new NotImplementedException();
-
-        public int GetSigilCount() => throw new NotImplementedException();
-
-        public IEnumerable<Sigil> GetSigils() => throw new NotImplementedException();
-        
+        throw new NotImplementedException();
     }
+
+    public void Add(T item)
+    {
+		item.Index = nodes.Count;
+        nodes.Add(item);
+    }
+
+    public bool AdjacenceBetween(T n1, T n2) => edges.ContainsKey((n1, n2));
+    
+
+    public void Clear()
+    {
+        edges.Clear();
+		nodes.Clear();
+    }
+
+    public bool Connect(T sourceNode, T targetNode) => Connect(sourceNode, targetNode, 1);
+
+    public bool Connect(T sourceNode, T targetNode, int weight)
+    {
+        if(!nodes.Contains(sourceNode) || !nodes.Contains(targetNode)) return false;
+
+		edges.TryAdd((sourceNode, targetNode), weight);
+		return true;
+    }
+
+    public bool Contains(T item) => nodes.Contains(item);
+
+    public void CopyTo(T[] array, int arrayIndex) => nodes.CopyTo(array, arrayIndex);
+    public bool Disconnect(T sourceNode, T targetNode)
+    {
+        if(!nodes.Contains(sourceNode) || !nodes.Contains(targetNode)) return false;
+		return edges.Remove((sourceNode, targetNode));
+    }
+
+    public void ForeachEdge(Action<T, T, int> process)
+    {
+        foreach(var edge in edges)
+		{
+			process(edge.Key.Item1, edge.Key.Item2, edge.Value);
+		}
+    }
+
+    public void ForeachSourceOf(T node, Action<T, int> process)
+    {
+        foreach(var edge in edges)
+		{
+			if(edge.Key.Item2.Index != node.Index) continue;
+			process(edge.Key.Item1, edge.Value);
+		}
+    }
+
+    public void ForeachTargetOf(T node, Action<T, int> process)
+    {
+        foreach(var edge in edges)
+		{
+			if(edge.Key.Item1.Index != node.Index) continue;
+			process(edge.Key.Item2, edge.Value);
+		}
+    }
+
+    public int GetEdgeWeight(T src, T trg)
+    {
+        return edges[(src, trg)];
+    }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+       return nodes.GetEnumerator();
+    }
+
+    public int InwardsDegree(T n)
+    {
+        int degree = 0;
+        ForeachSourceOf(n, (_, _) => degree++);
+		return degree;
+    }
+
+    public int OutwardsDegree(T n)
+    {
+		int degree = 0;
+        ForeachTargetOf(n, (_, _) => degree++);
+		return degree;
+    }
+
+    public bool Remove(T item)
+    {
+		if(!nodes.Contains(item)) return false;
+		List<(T src, T trg)> valid_edges = new();
+        foreach(var edge in edges)
+		{
+			if(edge.Key.Item1.Index == item.Index || edge.Key.Item2.Index == item.Index)
+			{
+				valid_edges.Add(edge.Key);
+			}
+		}
+
+		foreach(var edge in valid_edges) { edges.Remove(edge); }
+		return nodes.Remove(item);
+    }
+
+    public bool ReplaceNode(T node, ICastable castable)
+    {
+		if(!nodes.Contains(node)) return false;
+		node.Castable = castable;
+		return true;
+    }
+
+    public void SetEdgeWeight(T src, T trg, int weight)
+    {
+		edges[(src, trg)] = weight;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+}
