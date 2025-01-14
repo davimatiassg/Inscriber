@@ -1,20 +1,22 @@
 
 using System;
+using System.Diagnostics.Debug;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Godot;
+using System.Diagnostics;
 
 
 public class GraphUtil<TGraph, TNode>
 	where TGraph : IGraph<TNode>, new()
-	where TNode : ISpellGraphNode, new()
+	where TNode : IGraphNode, new()
 {
 
 #region PREPARATIVE_FUNCTIONS
-	public static string TestNodeString(TNode n) => "[color=" + ((Rune)n.Castable).Color.ToHtml() + "]" + n.Index + "[/color]";
-	public static string NodeStringName(TNode n) => "[color=" + ((Rune)n.Castable).Color.ToHtml() + "]" + ((Rune)n.Castable).Name + "[/color]";	
+	public static string TestNodeString<T>(T n) where T : ISpellGraphNode => "[color=" + ((Rune)n.Castable).Color.ToHtml() + "]" + n.Index + "[/color]";
+	public static string NodeStringName<T>(T n) where T : ISpellGraphNode => "[color=" + ((Rune)n.Castable).Color.ToHtml() + "]" + ((Rune)n.Castable).Name + "[/color]";	
 	public static Dictionary<T1, T2> InitializePairType<T1, T2>(IEnumerable<T1> nodes, T2 defValue)
 	{
 		Dictionary<T1, T2> dict = new Dictionary<T1,T2>();
@@ -317,7 +319,7 @@ public class GraphUtil<TGraph, TNode>
 	/// <param name="graph">The graph to get connected components from</param>
 	/// <returns>A List with the connected components of the graph</returns>
 	public static List<List<T>> ListConnectedComponents<T>(IGraph<T> graph)
-	where T : TNode, new()
+		where T : TNode, new()
 	{
 		List<List<T>> connectedComponents = new List<List<T>>();
 		List<T> currentComponent = new List<T>();
@@ -403,9 +405,13 @@ public class GraphUtil<TGraph, TNode>
 		/// represents how many nodes are connected to this tree. Unused value if this tree is not the head. 
 		/// </summary>
 		public int rank = 1;
-		public TreeRank(int idx)
+
+        public int Index {get; set; }
+
+        public TreeRank(int idx)
 		{
 			treeHead = this;
+			Index = idx;
 		}
 		
 		//this WILL break if there is a cycle on the tree (i.e. if its not a tree at all)
@@ -515,9 +521,138 @@ public class GraphUtil<TGraph, TNode>
 	}
 
 
-    
-	public static TResult ChuliuEdmonds<TResult>(TGraph graph, Comparison<int> comparer)
+    public static TResult ChuliuEdmonds<TResult>(TGraph graph, Comparison<int> comparer)
 		where TResult : IGraph<TNode>, new()
+
+	{
+		
+		if(graph.Count < 2) 
+			return new TResult();
+
+		var rootIndex = 0;
+		foreach(var node in graph)
+		{
+			int visitedCount = 0;
+
+			ForEachNodeByDFSIn(graph, graph[rootIndex], (TNode _) => visitedCount++);
+
+			if(visitedCount == graph.Count) {break;}
+			else {rootIndex ++;}
+		}
+		if(rootIndex == graph.Count) 
+			throw new InvalidOperationException("The chosen directed graph does not have a spanning arborescence.");
+
+		var clusterGraph = InitClusterGraph(graph);
+		clusterGraph = ChuliuEdmondsRecursive(clusterGraph, clusterGraph[rootIndex], comparer);
+
+
+		List<(TNode src, TNode trg)> edges = new();
+		graph.ForeachEdge((TNode src, TNode trg, int weight) => {
+			edges.Add((src, trg));
+		});
+		foreach(var edge in edges) graph.Disconnect(edge.src, edge.trg);
+
+		return Convert<TResult, TNode, ClusterNode>(clusterGraph, (ClusterNode node) => (TNode)node.clusteredNodes[0]);
+		
+	}
+
+	public static MatrixGraph<ClusterNode> ChuliuEdmondsRecursive(MatrixGraph<ClusterNode> graph, ClusterNode root, Comparison<int> comparer)
+	{
+		var clusteredGraph = InitClusterGraph(graph);
+
+		var minimumEdges = FindMinimumEdges(clusteredGraph, root);
+
+		var unreachedNodes = new List<ClusterNode>(graph);
+		GraphUtil<MatrixGraph<ClusterNode>, ClusterNode>.ForEachNodeByDFSIn(graph, root, (ClusterNode current) => unreachedNodes.Remove(current) );
+
+		if(unreachedNodes.Count == 0)
+		{
+			Uncluster(clusteredGraph);
+			return clusteredGraph;
+		}
+
+		var lastUnreached = unreachedNodes.Last();
+		unreachedNodes.RemoveAt(lastUnreached.Index);
+		
+		GraphUtil<ClusteredGraph<T>, T>.ForEachNodeByDFSIn(graph, r, null, null,
+		(T source, T target) => 
+		{
+			cycle.Add(target);
+			//retrieves the cycle and the points where it exits
+			T cycleNode = source;
+			
+			while(cycleNode.Index != target.Index)
+			{
+				cycle.Add(cycleNode);
+				graph.ForeachSourceOf(cycleNode,(T src, int weight) => {
+					cycleNode = src;
+				});
+			}
+
+		},
+		() => cycle.Count > 0
+			);
+
+
+		return clusteredGraph;
+	}
+
+	private static MatrixGraph<ClusterNode> InitClusterGraph<T>(IGraph<T> graph) where T : IGraphNode 
+	{
+		MatrixGraph<ClusterNode> clusteredGraph = new();
+
+		for(int i = 0; i < graph.Count; i++)
+		{
+			var node = graph[i];
+
+			Debug.Assert(i == node.Index);
+
+			var clusterNode = new ClusterNode();
+			clusterNode.clusteredNodes.Add(node);
+			clusteredGraph.Add(clusterNode);
+		}
+
+		graph.ForeachEdge((T src, T trg, int weight) => {
+			clusteredGraph.Connect(clusteredGraph[src.Index], clusteredGraph[trg.Index], weight);
+		});
+
+		return clusteredGraph;
+	}
+
+	public static List<(ClusterNode src, ClusterNode trg)> FindMinimumEdges(MatrixGraph<ClusterNode> graph, ClusterNode root)
+	{
+		List<(ClusterNode src, ClusterNode trg)> minimumEdges = new();
+
+		foreach(var node in graph) {	
+			if(node.Index == root.Index)
+				continue;
+			
+			
+			int minWeight = int.MaxValue;
+			ClusterNode minWeightSource = default;
+			graph.ForeachSourceOf(node, (ClusterNode src, int weight) => {
+				if(weight < minWeight)
+				{
+					minWeightSource = src;
+					minWeight = weight;
+				}
+			});
+			Debug.Assert(minWeight != int.MaxValue);
+			minimumEdges.Add((minWeightSource, node));
+		}
+
+		return minimumEdges;
+	}
+
+	
+	public static void Uncluster(MatrixGraph<ClusterNode> graph)
+	{	
+		//TODO:
+	}
+
+
+
+		/*
 	{
 		TResult mstree = new TResult();
 
@@ -617,7 +752,7 @@ public class GraphUtil<TGraph, TNode>
 
 		return graph;
 	}
-
+*/
 
 
 #endregion TREES
@@ -665,17 +800,24 @@ public class GraphUtil<TGraph, TNode>
 #endregion SORTING
 
 #region GRAPH_CONVERSION
-	/*
+	
 	FIXME:
-	public static TResult ConvertGraphTo<TResult, TNode>(IGraph<TNode> originalGraph)
-		where TNode : TNode, new()
-		where TResult : IGraph<TNode>, new()
+	public static T Convert<T, TN, TNO>(this IGraph<TNO> graph, Func<TNO, TN> convertNodeProcess = null)
+		where T : IGraph<TN>, new()
+		where TN : IGraphNode, new()
+		where TNO : IGraphNode, new()
 	{
-		TResult result = new TResult();
-		result = originalGraph;
-		originalGraph.ForeachEdge((src, trg, w) => result.Connect(result[src.Index], result[trg.Index], w));
+		if(convertNodeProcess == null)
+			convertNodeProcess = (TNO node) => new TN{Index = node.Index, Position = node.Position};
+		T result = new T();
+		foreach(var node in graph) 
+		{
+			result.Add(convertNodeProcess(node));
+		}
+		graph.ForeachEdge((src, trg, w) => result.Connect(result[src.Index], result[trg.Index], w));
 		return result;  
-	}*/
+	}
+
 
 #endregion GRAPH_CONVERSION
 
@@ -918,7 +1060,6 @@ public class GraphUtil<TGraph, TNode>
 */
 #endregion
 
-
 #region  EULER_PATHS
 
 
@@ -1016,9 +1157,20 @@ public class GraphUtil<TGraph, TNode>
 }
 
 public class Path<T> : List<T> 
-	where T : ISpellGraphNode
+	where T : IGraphNode
 {}
 
+public class ClusterNode : IGraphNode
+{
+    public int Index { get; set; }
+    public Vector2 Position { get; set; }
+
+	public List<IGraphNode> clusteredNodes = new();
+
+	public ClusterNode()
+	{	}
+}
+/*
 public class ClusteredGraph<T> : IGraph<T> where T : ISpellGraphNode, new()
 {
 	public List<T> Cycle = new();
@@ -1269,4 +1421,6 @@ public class ClusteredGraph<T> : IGraph<T> where T : ISpellGraphNode, new()
     {
         return GetEnumerator();
     }
+	
 }
+*/
