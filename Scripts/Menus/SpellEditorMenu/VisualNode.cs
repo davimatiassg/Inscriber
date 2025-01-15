@@ -73,6 +73,12 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
         set => index = value; 
     }
 
+    public List<Sigil> Sigils 
+    {
+        get => GetChildren().Cast<Sigil>().ToList();
+        set {}
+    }
+
     private ICastable castable;
     public ICastable Castable
     {

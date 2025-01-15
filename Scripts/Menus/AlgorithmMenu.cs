@@ -36,7 +36,7 @@ public partial class AlgorithmMenu : Control
 #region SPANNING_TREE
 		kruskalButton.Pressed += async () => 
         {
-            var result = GraphUtil<SpellGraphView, VisualNode>.Kruskal<SpellGraph<VisualNode>>(graphView, null);
+            var result = GraphTree<SpellGraphView, VisualNode>.Kruskal<SpellGraph<VisualNode>>(graphView, null);
 
             var resource = SpellRepository.SaveSpell<SpellGraph<VisualNode>, VisualNode>(
                 result, 
@@ -52,7 +52,7 @@ public partial class AlgorithmMenu : Control
 
         primButton.Pressed += async () => 
         {
-            var result = GraphUtil<SpellGraphView, VisualNode>.Prim<SpellGraph<VisualNode>>(graphView, null);
+            var result = GraphTree<SpellGraphView, VisualNode>.Prim<SpellGraph<VisualNode>>(graphView, null);
 
             var resource = SpellRepository.SaveSpell<SpellGraph<VisualNode>, VisualNode>(
                 result, 
@@ -68,7 +68,7 @@ public partial class AlgorithmMenu : Control
 
         chuLiuEdmondsButton.Pressed += async () => 
         {
-            var result = GraphUtil<SpellGraphView, VisualNode>.ChuliuEdmonds<SpellGraph<VisualNode>>(graphView, null);
+            var result = GraphTree<SpellGraphView, VisualNode>.ChuliuEdmonds<SpellGraph<VisualNode>>(graphView, null);
 
             var resource = SpellRepository.SaveSpell<SpellGraph<VisualNode>, VisualNode>(
                 result, 
