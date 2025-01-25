@@ -26,7 +26,10 @@ public static class GraphConversion
             newNode.Position = node.Position;
 			result.Add(newNode);
 		}
-		graph.ForeachEdge((src, trg, w) => result.Connect(result[src.Index], result[trg.Index], w));
+		foreach((TNodeOriginal src, TNodeOriginal trg, int w) in graph.GetEdges())
+		{ 
+			result.Connect(result[src.Index], result[trg.Index], w); 
+		}
 		return result;  
 	}
 

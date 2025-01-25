@@ -10,25 +10,36 @@ using System.Threading.Tasks;
 
 public partial class AlgorithmMenu : Control
 {
+
+    /// Árvores Geradoras mínimas
     [Export] public Button kruskalButton;
     [Export] public Button primButton;
     [Export] public Button boruvkaButton;
     [Export] public Button chuLiuEdmondsButton;
+
+    /// Pathfinding
     [Export] public Button dijkstraButton;
     [Export] public Button bellmanFordButton;
     [Export] public Button floydWarshallButton;
+
+    /// Ciclos/Caminhos Eulerianos viajante
     [Export] public Button hierholzerCyclesButton;
     [Export] public Button hierholzerPathsButton;
+
+    /// Fluxo em redes
     [Export] public Button fordFulkersonButton;
     [Export] public Button edmondsKarpButton;
 
+    /// Caixeiro viajante
+    [Export] public Button greedyResButton;
+    [Export] public Button cheapInsertButton;
+    [Export] public Button graspSwapButton;
+    [Export] public Button graspPathRevertButton;
     public SpellGraphView graphButton;
 
     public override void _Ready()
     {
         base._Ready();
-        
-        
     }
     public void SetupButtons(SpellGraphEditor graphView)
 	{
@@ -80,7 +91,8 @@ public partial class AlgorithmMenu : Control
             SceneManager.SaveData("SELECTED_SPELL", resource);
 		    SceneManager.LoadScene("SpellEditor");
         };
-        chuLiuEdmondsButton.Disabled = false;
+        //FIXME:
+        chuLiuEdmondsButton.Disabled = true;
 
 #endregion
 

@@ -123,36 +123,36 @@ public partial class MatrixGraph<T> : IGraph<T>
         return k;
     }
 
-    public void ForeachSourceOf(T node, Action<T, int> process)
+    public IEnumerable<(T src, int weight)> GetSourcesOf(T node)
     {
         var count = Nodes.Count;
         var column = node.Index;
         for (int row = 0; row < count; row++) {
             var weight = EdgeMatrix[row][column];
             if(weight == int.MaxValue) continue;
-            process.Invoke(Nodes[row], weight);
+            yield return (Nodes[row], weight);
         }
     }
 
-    public void ForeachTargetOf(T node, Action<T, int> process)
+    public IEnumerable<(T trg, int weight)> GetTargetsOf(T node)
     {
         var count = Nodes.Count;
         var row = node.Index;
         for (int column = 0; column < count; column++) {
             var weight = EdgeMatrix[row][column];
             if(weight == int.MaxValue) continue;
-            process.Invoke(Nodes[column], weight);
+            yield return (Nodes[column], weight);
         }
     }
 
-    public void ForeachEdge(Action<T, T, int> process)
+    public IEnumerable<(T src, T trg, int weight)> GetEdges()
     {
         int range = Nodes.Count;
         for(int row = 0; row < range; row++) {
         for(int column = 0; column < range; column++) {
             int weight = EdgeMatrix[row][column];
             if(weight == int.MaxValue) continue;
-            process.Invoke(Nodes[row], Nodes[column], weight);
+            yield return (Nodes[row], Nodes[column], weight);
         }}
     }
 

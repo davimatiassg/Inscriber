@@ -123,7 +123,11 @@ public static class GraphTree<TGraph, TNode>
 		
 		List<(int, int, int)> edges = new List<(int, int, int)>();
 
-		graph.ForeachEdge( (TNode src, TNode trg, int weight) => edges.Add((src.Index, trg.Index, weight)) );
+
+		foreach(var edge in graph.GetEdges())
+		{
+			edges.Add((edge.src.Index, edge.trg.Index, edge.weight));
+		}
 		
 		edges = edges.AsEnumerable().OrderBy(edge => edge.Item3).ToList();		
 		
@@ -153,11 +157,12 @@ public static class GraphTree<TGraph, TNode>
 		
 		
 		List<(int src, int trg, int weight)> viableEdges = new();
-		graph.ForeachEdge( (TNode src, TNode trg, int weight) => 
-			{
-				viableEdges.Add((src.Index, trg.Index, weight));
-			}
-		);
+
+		foreach((TNode src, TNode trg, int weight) in graph.GetEdges())
+		{
+			viableEdges.Add((src.Index, trg.Index, weight));
+		}
+
 		viableEdges = viableEdges.OrderBy(edge => edge.weight).ToList();
 
 		//Avoid inconsistences in reference-type TNode's Connection
@@ -204,8 +209,16 @@ public static class GraphTree<TGraph, TNode>
         public List<IGraphNode> clusteredNodes = new();
         public ClusterNode()
         {	}
-    }
+        public override string ToString()
+        {
+			string k = "[ ";
+			foreach(var node in clusteredNodes) k+= node;
+			k += "]";
+            return "idx: " + Index + "|clustered:" + k; 
+        }
 
+    }
+ 
 
     public static TResult ChuliuEdmonds<TResult>(TGraph graph, Comparison<int> comparer = null)
 		where TResult : IGraph<TNode>, new()
@@ -233,9 +246,12 @@ public static class GraphTree<TGraph, TNode>
 		clusterGraph = ChuliuEdmondsRecursive(clusterGraph, clusterGraph[rootIndex], comparer);
 
 		List<(TNode src, TNode trg)> edges = new();
-		graph.ForeachEdge((TNode src, TNode trg, int weight) => {
+
+		foreach((TNode src, TNode trg, int weight) in graph.GetEdges())
+		{
 			edges.Add((src, trg));
-		});
+		}
+
 		foreach(var edge in edges) graph.Disconnect(edge.src, edge.trg);
 
 		return clusterGraph.Convert<TResult, TNode, ClusterNode>( (ClusterNode node) => (TNode)node.clusteredNodes[0]);
@@ -245,15 +261,18 @@ public static class GraphTree<TGraph, TNode>
 	public static MatrixGraph<ClusterNode> ChuliuEdmondsRecursive(MatrixGraph<ClusterNode> graph, ClusterNode root, Comparison<int> comparer)
 	{
 		var clusteredGraph = graph.Clone((ClusterNode node) => new ClusterNode{clusteredNodes = new List<IGraphNode>{node.clusteredNodes[0]}});
-        
-        ClusterNode clusteredRoot = null;
-        foreach(var node in graph) if(node.Index == root.Index) clusteredRoot = node;
+
+		ClusterNode clusteredRoot  = clusteredGraph[root.Index];
 
         Debug.Assert(clusteredRoot.Index == root.Index);
+		
+		List<(ClusterNode src, ClusterNode trg, int weight)> allEdges;
 
-		var minimumEdges = FindMinimumEdges(clusteredGraph, clusteredRoot);
+		var minimumEdges = FindMinimumEdges(clusteredGraph, clusteredRoot, out allEdges);
 
-		var cycle = FindCycle(minimumEdges, clusteredRoot);
+		var cycleIndexes = FindCycle(minimumEdges, root.Index);
+
+		var cycle = cycleIndexes.Select((int idx) => clusteredGraph[idx]);
 
 		if(cycle == null)
 		{
@@ -275,8 +294,9 @@ public static class GraphTree<TGraph, TNode>
         int minTrgWeight = int.MaxValue;
         ClusterNode minTrg = default;
         ClusterNode cycleSrc = default;
-        graph.ForeachEdge((ClusterNode src, ClusterNode trg, int weight) => {
-            
+
+		foreach((ClusterNode src, ClusterNode trg, int weight) in allEdges)
+        {
             bool containsSrc = cycle.Contains(src);
             bool containsTrg = cycle.Contains(trg);
             if(containsSrc && !containsTrg)
@@ -290,15 +310,16 @@ public static class GraphTree<TGraph, TNode>
             }
             else if(!containsSrc && containsTrg)
             {
-                if(minSrcWeight > weight)
+				var pi_trg = minimumEdges.Find(edge => edge.trg == trg);
+                if(minSrcWeight > weight - pi_trg.weight)
                 {
-                    minSrcWeight = weight;
+                    minSrcWeight = weight - pi_trg.weight;
                     minSrc = src;
                     cycleTrg = trg;
                 }
             }
 
-        });
+        }
         
         Debug.Assert(minSrcWeight != int.MaxValue);
 
@@ -322,63 +343,79 @@ public static class GraphTree<TGraph, TNode>
 	}
 
 
-    private static List<(ClusterNode src, ClusterNode trg, int weight)> FindMinimumEdges(MatrixGraph<ClusterNode> graph, ClusterNode root)
+    private static List<(ClusterNode src, ClusterNode trg, int weight)> FindMinimumEdges(
+		MatrixGraph<ClusterNode> graph, ClusterNode root, 
+		out List<(ClusterNode src, ClusterNode trg, int weight)> allEdges
+	)
     {
         List<(ClusterNode src, ClusterNode trg, int weight)> edges = new();
+		List<(ClusterNode src, ClusterNode trg, int weight)> outEdges = new();
         foreach(var node in graph)
         {
-            if(node == root)
-                continue;
+            if(node.Index == root.Index) continue;
 
             int minW = int.MaxValue;
             ClusterNode minSrc = default;
-            graph.ForeachSourceOf(node, (ClusterNode src, int weight) => 
+            foreach ((ClusterNode src, int weight) in graph.GetSourcesOf(node))
             {
                 if(minW > weight)
                 {
                     minSrc = src;
                     minW = weight;
                 }
-            });
-            if(minW != int.MaxValue) edges.Add((minSrc, node, minW));
+				outEdges.Add((src, node, weight));
+            }
+            edges.Add((minSrc, node, minW));
         }
+
+		allEdges = outEdges;
+		Debug.Assert(edges.Count == graph.Count-1);
 
         return edges;
     }
     
-    /// FIXME:
+
     /// <summary>
     /// Finds cycles in a dictionary of edges.
     /// </summary>
     /// <param name="edges">A dictionary storing edge sources as keys and targets as values. </param>
     /// <param name="root">The root of the arborescence. Optimization catalyst.</param>
     /// <returns> The first cycle found in a Dictionary of edges, or null if there is not one.</returns>
-    private static List<ClusterNode> FindCycle(List<(ClusterNode src, ClusterNode trg, int weight)> edges, ClusterNode root)
+    private static List<int> FindCycle(List<(ClusterNode src, ClusterNode trg, int weight)> edges, int root)
     {
-        if(edges.Count < 3)
+        if(edges.Count < 2)
             return null;
         
-        Dictionary<ClusterNode, bool> visited = new();
-        Dictionary<ClusterNode, ClusterNode> arcs = new();
+        Dictionary<int, bool> visited = new();
+        Dictionary<int, int> arcs = new();
         foreach(var edge in edges){ 
-            visited.Add(edge.trg, false); 
-            arcs.Add(edge.src, edge.trg);
+            visited.Add(edge.trg.Index, false);
+            arcs.Add(edge.trg.Index, edge.src.Index);
         }
 
-        Queue<ClusterNode> queue = new();
-        queue.Enqueue(root);
-    
-        while(queue.Count > 0)
-        {
-            var currentNode = queue.Dequeue();
-            if(!visited[currentNode])
-            {
-                queue.Enqueue(arcs[currentNode]);
-                visited[currentNode] = true;
-            }   
-        }
+		visited.Add(root, true);
 
-        List<ClusterNode> cycledNodes = new();
+		foreach(var keypair in visited)
+		{
+			if(keypair.Value) 
+				continue;
+			
+
+			List<int> path = new(){keypair.Key};
+			while(true)
+			{
+				var prev = arcs[path.Last()];
+				if(visited[prev])
+				{
+					foreach(var node in path) visited[node] = true;
+					break;
+				}
+				else if(path.Contains(arcs[prev])) { return path; }
+				path.Add(arcs[path.Last()]);
+			}
+		}
+
+        List<int> cycledNodes = new();
         foreach(var visitPairing in visited) if(!visitPairing.Value) cycledNodes.Add(visitPairing.Key); 
 
 
@@ -395,7 +432,7 @@ public static class GraphTree<TGraph, TNode>
 
         foreach(var cycleStart in cycledNodes)
         {
-            Stack<ClusterNode> stack = new();
+            Stack<int> stack = new();
             stack.Push(cycleStart);
             visited = new();
             foreach(var node in cycledNodes){ visited.Add(node, false); }
@@ -406,7 +443,7 @@ public static class GraphTree<TGraph, TNode>
                 if(visited[currNode])
                 {
                     var start = currNode;
-                    List<ClusterNode> cycle = new();
+                    List<int> cycle = new();
                     do
                     {
                         cycle.Add(currNode);

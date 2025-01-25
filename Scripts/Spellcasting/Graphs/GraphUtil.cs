@@ -61,7 +61,7 @@ public class GraphUtil<TGraph, TNode>
 			TNode currNode = queue.Dequeue();
 			if(markedNodes[currNode]) continue;
 				
-			spellGraph.ForeachTargetOf(currNode, (TNode nextNode, int weight) =>
+			foreach ((TNode nextNode, int weight) in spellGraph.GetTargetsOf(currNode))
 			{
 				if(markedNodes[nextNode]) { 
 					MarkedVisitProcess?.Invoke(currNode, nextNode);
@@ -72,7 +72,7 @@ public class GraphUtil<TGraph, TNode>
 					queue.Enqueue(nextNode);
 				}
 				
-			});
+			}
 
 			VisitationProcess?.Invoke(currNode);
 			markedNodes[currNode] = true;
@@ -109,7 +109,7 @@ public class GraphUtil<TGraph, TNode>
 			if(markedNodes[currNode]) continue;
 
 			markedNodes[currNode] = true;
-			spellGraph.ForeachTargetOf(currNode, (TNode nextNode, int weight) =>
+			foreach ((TNode nextNode, int weight) in spellGraph.GetTargetsOf(currNode))
 			{
 				if(markedNodes[nextNode]) { 
 					MarkedVisitProcess?.Invoke(currNode, nextNode);
@@ -119,7 +119,7 @@ public class GraphUtil<TGraph, TNode>
 					UnmarkedVisitProcess?.Invoke(currNode, nextNode);
 					stack.Push(nextNode);
 				}
-			});
+			}
 			VisitationProcess?.Invoke(currNode);
 
 			if(BreakCondition !=null && BreakCondition()) return;
@@ -167,7 +167,7 @@ public class GraphUtil<TGraph, TNode>
 
 			bool lastIteration = false;
 			
-			graph.ForeachTargetOf(currNode, (T nextNode, int weight) => 
+			foreach ((T nextNode, int weight) in graph.GetTargetsOf(currNode))
 			{
 				if(!markedNodes[nextNode.Index].Item1)
 				{
@@ -175,7 +175,7 @@ public class GraphUtil<TGraph, TNode>
 					stack.Push(nextNode);
 				}
 				else if(markedNodes[nextNode.Index].Item2 == brand) lastIteration = true;
-			});
+			}
 			if(lastIteration) return false;
 			brand = -brand;
 			
@@ -302,11 +302,11 @@ public class GraphUtil<TGraph, TNode>
 		foreach(TNode node in graph)
 		{
 			if(node.Equals(root)) continue;
-			graph.ForeachTargetOf(node, (TNode next, int weight) =>
+			foreach ((TNode nextNode, int weight) in graph.GetTargetsOf(node))
 			{
-				if(lowpts[next].Equals(next) || lowpts[next].Equals(node)) 
+				if(lowpts[nextNode].Equals(nextNode) || lowpts[nextNode].Equals(node)) 
 				if(!articulations.Contains(node)) articulations.Add(node);
-			});
+			}
 		}
 		if(treeEdges.Where(((TNode, TNode) n) => n.Item1.Equals(root) || n.Item2.Equals(root)).Count() > 1) articulations.Add(root);
 		return articulations;
@@ -425,7 +425,7 @@ public class GraphUtil<TGraph, TNode>
 		bool negativeCycleFound = false;
 		for(int i = 0; i < spellGraph.Count; i++)
 		{
-			spellGraph.ForeachEdge((TNode src, TNode trg, int weight) => 
+			foreach ((TNode src, TNode trg, int weight) in spellGraph.GetEdges()) 
 			{
 				if(distances[src.Index] != int.MaxValue && distances[src.Index] + weight < distances[trg.Index])
 				{
@@ -433,7 +433,7 @@ public class GraphUtil<TGraph, TNode>
 					distances[trg.Index] = distances[src.Index]  + weight;
 					predecessors[trg.Index] = src;
 				}
-			});
+			}
 		}
 
 		Path<TNode> path = new Path<TNode>();
@@ -482,14 +482,14 @@ public class GraphUtil<TGraph, TNode>
 			unvisited.Remove(current);
 			 
 			
-			spellGraph.ForeachTargetOf(current, (TNode next, int weight) => 
+			foreach ((TNode next, int weight) in spellGraph.GetTargetsOf(current))
 			{
 				if(distances[current.Index] + weight < distances[next.Index])
 				{
 					distances[next.Index] = distances[current.Index] + weight;
 					predecessors[next.Index] = current;
 				}
-			});
+			}
 		}
 		while (unvisited.Count > 0);
 
@@ -526,22 +526,24 @@ public class GraphUtil<TGraph, TNode>
 		}}
 		if(spellGraph.Flags.Contains(GraphFlag.WEIGHTED))
 		{
-			spellGraph.ForeachEdge((src, trg, weight) => {
+			foreach ((TNode src, TNode trg, int weight) in spellGraph.GetEdges())
+			{
 				int i = src.Index;
 				int j = trg.Index;
 				distances[i,j] = weight;
 				predecessors[i,j] =  i;
 
-			});
+			}
 		}
 		else
 		{
-			spellGraph.ForeachEdge((src, trg, weight) => {
+			foreach ((TNode src, TNode trg, int weight) in spellGraph.GetEdges())
+			{
 				int i = src.Index;
 				int j = trg.Index;
 				distances[i,j] = weight;
 				predecessors[i,j] =  i;
-			});
+			}
 		}
 		
 		for(int k = 0; k < size; k++){ 
@@ -635,18 +637,13 @@ public class GraphUtil<TGraph, TNode>
 		List<int> outwards = Enumerable.Repeat(0, graph.Count).ToList();
 		List<int> total = Enumerable.Repeat(0, graph.Count).ToList();
 		
-		graph.ForeachEdge(
-			
-			(TNode src, TNode trg, int weight) => 
-			
-			{
-				outwards[src.Index] ++;
-				inwards[trg.Index] ++;
-				total[trg.Index] ++;
-				total[src.Index] --;
-			}
-		);
-
+		foreach ((TNode src, TNode trg, int weight) in graph.GetEdges())
+		{
+			outwards[src.Index] ++;
+			inwards[trg.Index] ++;
+			total[trg.Index] ++;
+			total[src.Index] --;
+		}
 		return (inwards, outwards, total);
 	}
 
@@ -678,12 +675,12 @@ public class GraphUtil<TGraph, TNode>
 		//Ao invés de tirar as arestas do grafo, marcar quais já foram visitadas para facilitar o processo
 		int unmarkedEdges = 0;
 		Dictionary<(int, int), bool> edgeMarking = new();
-		graph.ForeachEdge( (TNode src, TNode trg, int weight) => 
-			{
-				unmarkedEdges ++;
-				edgeMarking.Add((src.Index, trg.Index), false);
-			}
-		);
+		foreach ((TNode src, TNode trg, int weight) in graph.GetEdges())
+		{
+			unmarkedEdges ++;
+			edgeMarking.Add((src.Index, trg.Index), false);
+		}
+		
 
 		//cycle.Add();
 		Stack<TNode> nodes = new();
@@ -692,21 +689,19 @@ public class GraphUtil<TGraph, TNode>
 		{
 
 			bool gotEdge = false;
-			graph.ForeachTargetOf(currNode, 
-				(TNode nextNode, int weight) =>
+			foreach ((TNode nextNode, int weight) in graph.GetTargetsOf(currNode))
+			{
+				var edge = (currNode.Index, nextNode.Index);
+				if(!edgeMarking[edge])
 				{
-					if(gotEdge) return;
-					var edge = (currNode.Index, nextNode.Index);
-					if(!edgeMarking[edge])
-					{
-						gotEdge = true;
-						edgeMarking[edge] = true;
-						unmarkedEdges --;
-						nodes.Push(nextNode);
-					}
+					gotEdge = true;
+					edgeMarking[edge] = true;
+					unmarkedEdges --;
+					nodes.Push(nextNode);
+					break;
 				}
-			);
-
+			}
+			
 			if(!gotEdge)
 			{
 				circuit.Add(nodes.Pop()); 

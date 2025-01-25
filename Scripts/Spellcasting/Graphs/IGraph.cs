@@ -102,9 +102,10 @@ public interface IGraph<T> : ICollection<T> where T : IGraphNode
     /// <returns> true when the disconnection was successful, false otherwise.</returns>
     /// 
     public bool Disconnect(T sourceNode, T targetNode);
-    public void ForeachTargetOf(T node, Action<T, int> process);
-    public void ForeachSourceOf(T Node, Action<T, int> process);
-    public void ForeachEdge(Action<T, T, int> process);
+
+    public IEnumerable<(T src, int weight)> GetSourcesOf(T node);
+    public IEnumerable<(T trg, int weight)> GetTargetsOf(T node);
+    public IEnumerable<(T src, T trg, int weight)> GetEdges();
     public bool AdjacenceBetween(T n1, T n2);
     public int InwardsDegree(T n);
     public int OutwardsDegree(T n);

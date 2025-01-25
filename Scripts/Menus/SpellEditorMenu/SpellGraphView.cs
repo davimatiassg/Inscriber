@@ -35,11 +35,29 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
                 process(arc.Target, arc.Weight);
         
     }
-    public void ForeachEdge(Action<VisualNode, VisualNode, int> process)
+
+    public IEnumerable<(VisualNode trg, int weight)> GetTargetsOf(VisualNode node)
+    {
+        foreach(VisualArc arc in node.arcs)
+            if(arc.Source == node) 
+                yield return (arc.Target, arc.Weight);
+    }
+
+    public IEnumerable<(VisualNode src, int weight)> GetSourcesOf(VisualNode node)
+    {
+        foreach(VisualArc arc in node.arcs)
+            if(arc.Target == node) 
+                yield return (arc.Source, arc.Weight);
+    }
+    
+
+    public IEnumerable<(VisualNode src, VisualNode trg, int weight)> GetEdges()
     {
         foreach(VisualArc arc in graphArcsMaster.GetChildren())
-            process(arc.Source, arc.Target, arc.Weight);
+            yield return (arc.Source, arc.Target, arc.Weight);
     }
+
+    
 
     public int Count =>  graphNodeMaster.GetChildCount();
 
@@ -189,14 +207,14 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
         {
             Add(node.Castable, node.Position);
         }
-
-        graph.ForeachEdge((src, trg, weight) => {
+        foreach(var edge in graph.GetEdges())
+        {
             Connect(
-                (VisualNode)graphNodeMaster.GetChild(src.Index), 
-                (VisualNode)graphNodeMaster.GetChild(trg.Index),
-                weight
+                (VisualNode)graphNodeMaster.GetChild(edge.src.Index), 
+                (VisualNode)graphNodeMaster.GetChild(edge.trg.Index),
+                edge.weight
             );
-        });
+        }
     }
 
 }

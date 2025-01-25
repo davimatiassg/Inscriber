@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" path="res://Scripts/Menus/AlgorithmMenu.cs" id="1_624cq"]
 
-[node name="AlgorithmMenu" type="Control" node_paths=PackedStringArray("kruskalButton", "primButton", "boruvkaButton", "chuLiuEdmondsButton", "dijkstraButton", "bellmanFordButton", "floydWarshallButton", "hierholzerCyclesButton", "hierholzerPathsButton", "fordFulkersonButton", "edmondsKarpButton")]
+[node name="AlgorithmMenu" type="Control" node_paths=PackedStringArray("kruskalButton", "primButton", "boruvkaButton", "chuLiuEdmondsButton", "dijkstraButton", "bellmanFordButton", "floydWarshallButton", "hierholzerCyclesButton", "hierholzerPathsButton", "fordFulkersonButton", "edmondsKarpButton", "greedyResButton", "cheapInsertButton", "graspSwapButton", "graspPathRevertButton")]
 layout_mode = 3
-anchors_preset = 15
 anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_bottom = 0.756
+offset_bottom = -2.16
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_624cq")
@@ -21,12 +21,15 @@ hierholzerCyclesButton = NodePath("Grafos Eulerianos/botoes/ScrollContainer/HBox
 hierholzerPathsButton = NodePath("Grafos Eulerianos/botoes/ScrollContainer/HBoxContainer/Button2")
 fordFulkersonButton = NodePath("Fluxo em Redes/botoes/ScrollContainer/HBoxContainer/Button")
 edmondsKarpButton = NodePath("Fluxo em Redes/botoes/ScrollContainer/HBoxContainer/Button2")
+greedyResButton = NodePath("Caixeiro Viajante/botoes/ScrollContainer/HBoxContainer/Button")
+cheapInsertButton = NodePath("Caixeiro Viajante/botoes/ScrollContainer/HBoxContainer/Button2")
+graspSwapButton = NodePath("Caixeiro Viajante/botoes/ScrollContainer/HBoxContainer/Button3")
+graspPathRevertButton = NodePath("Caixeiro Viajante/botoes/ScrollContainer/HBoxContainer/Button4")
 
 [node name="Arvores geradoras" type="Panel" parent="."]
 layout_mode = 2
 anchor_right = 1.0
-anchor_bottom = 0.227
-offset_bottom = 0.279999
+anchor_bottom = 0.2
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -80,11 +83,9 @@ text = "Chu-Liu/Edmonds "
 
 [node name="Caminho mais curto" type="Panel" parent="."]
 layout_mode = 2
-anchor_top = 0.227
+anchor_top = 0.2
 anchor_right = 1.0
-anchor_bottom = 0.472
-offset_top = 0.279999
-offset_bottom = 0.0799866
+anchor_bottom = 0.4
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -133,11 +134,9 @@ text = "Floyd-Warshall"
 
 [node name="Grafos Eulerianos" type="Panel" parent="."]
 layout_mode = 2
-anchor_top = 0.472
+anchor_top = 0.4
 anchor_right = 1.0
-anchor_bottom = 0.717
-offset_top = 0.0799866
-offset_bottom = -0.119995
+anchor_bottom = 0.6
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -182,10 +181,9 @@ text = "Hierholzer (CAMINHOS)"
 
 [node name="Fluxo em Redes" type="Panel" parent="."]
 layout_mode = 2
-anchor_top = 0.716
+anchor_top = 0.6
 anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 0.23999
+anchor_bottom = 0.8
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -226,3 +224,59 @@ text = "Ford-Fulkerson"
 layout_mode = 2
 disabled = true
 text = "Edmonds-Karp"
+
+[node name="Caixeiro Viajante" type="Panel" parent="."]
+layout_mode = 2
+anchor_top = 0.8
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Titulo" type="Label" parent="Caixeiro Viajante"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.426
+offset_bottom = -0.00400162
+text = "Traveling Salesman"
+
+[node name="botoes" type="Panel" parent="Caixeiro Viajante"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 23.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Caixeiro Viajante/botoes"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Caixeiro Viajante/botoes/ScrollContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="Caixeiro Viajante/botoes/ScrollContainer/HBoxContainer"]
+layout_mode = 2
+disabled = true
+text = "Greedy Algorithm"
+
+[node name="Button2" type="Button" parent="Caixeiro Viajante/botoes/ScrollContainer/HBoxContainer"]
+layout_mode = 2
+disabled = true
+text = "Cheapest Insertion"
+
+[node name="Button3" type="Button" parent="Caixeiro Viajante/botoes/ScrollContainer/HBoxContainer"]
+layout_mode = 2
+disabled = true
+text = "Grasp + Swap"
+
+[node name="Button4" type="Button" parent="Caixeiro Viajante/botoes/ScrollContainer/HBoxContainer"]
+layout_mode = 2
+disabled = true
+text = "Grasp + Path-Reversal"
