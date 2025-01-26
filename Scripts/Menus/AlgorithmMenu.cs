@@ -1,10 +1,5 @@
 using Godot;
 using SpellEditing;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 
@@ -100,7 +95,7 @@ public partial class AlgorithmMenu : Control
         dijkstraButton.Pressed += async () => 
         {
             graphView.CloseAlgMenu();
-            Path<VisualNode> result = GraphUtil<SpellGraphView, VisualNode>.Dijkstra(graphView, graphView[0], graphView[graphView.Count-1]);
+            Path<VisualNode> result = GraphPathfinding<SpellGraphView, VisualNode>.Dijkstra(graphView, graphView[0], graphView[graphView.Count-1]);
             
             if(result.Count < 2) 
                 return;
@@ -118,7 +113,7 @@ public partial class AlgorithmMenu : Control
         bellmanFordButton.Pressed += async () => 
         {
             graphView.CloseAlgMenu();
-            Path<VisualNode> result = GraphUtil<SpellGraphView, VisualNode>.BellmanFord(graphView, graphView[0], graphView[graphView.Count-1]);
+            Path<VisualNode> result = GraphPathfinding<SpellGraphView, VisualNode>.BellmanFord(graphView, graphView[0], graphView[graphView.Count-1]);
             
             if(result.Count < 2) 
                 return;
@@ -136,7 +131,7 @@ public partial class AlgorithmMenu : Control
         floydWarshallButton.Pressed += async () => 
         {
             graphView.CloseAlgMenu();
-            Path<VisualNode> result =RunFloydWarshall(graphView, graphView[0], graphView[graphView.Count-1]);
+            Path<VisualNode> result = RunFloydWarshall(graphView, graphView[0], graphView[graphView.Count-1]);
             
             if(result.Count < 2) 
                 return;
@@ -157,7 +152,7 @@ public partial class AlgorithmMenu : Control
         hierholzerCyclesButton.Pressed += async () => 
         {
             graphView.CloseAlgMenu();
-            Path<VisualNode> result = GraphUtil<SpellGraphView, VisualNode>.HierholzerDigraphCycles(graphView);
+            Path<VisualNode> result = GraphEuler<SpellGraphView, VisualNode>.HierholzerDigraphCycles(graphView);
             GD.Print(result);
             
             if(result.Count < 2) 
@@ -177,7 +172,35 @@ public partial class AlgorithmMenu : Control
 #endregion
     
     
+
+#region TRAVELING_SALESMAN
+
+        greedyResButton.Pressed += async () =>
+        {
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.GreedyTSP(graphView);
+            
+            if(result.Count < 2) 
+                return;
+            
+
+            await HighLightPath(result, Colors.Green, 250);
+
+            await Task.Delay(10000);
+
+            await HighLightPath(result, Colors.White, 250);
+        };
+        greedyResButton.Disabled = false;
+
+
+
+        
+
+#endregion
+
     }
+
+
 
 
 
@@ -195,11 +218,13 @@ public partial class AlgorithmMenu : Control
             }
             await Task.Delay(betweenDelay);
         }
+
+        GD.Print(path.size);
     }
 
     public Path<VisualNode> RunFloydWarshall(SpellGraphEditor graph, VisualNode startingNode, VisualNode endingNode)
     {
-        var result = GraphUtil<SpellGraphView, VisualNode>.FloydWarshall(graph);
+        var result = GraphPathfinding<SpellGraphView, VisualNode>.FloydWarshall(graph);
 
         Path<VisualNode> resultPath = new();
         if(startingNode.Index == endingNode.Index) return resultPath;
