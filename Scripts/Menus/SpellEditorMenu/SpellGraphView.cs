@@ -72,8 +72,9 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
     }
     public int GetEdgeWeight(VisualNode src, VisualNode trg)
     {
+        if(src.Index == trg.Index) throw new InvalidOperationException("Tried to get the weight of a loop, which are not allowed.");
         try { return src.arcs.Where(arc => arc.Target == trg).Single().Weight; }
-        catch(InvalidOperationException) { throw new InvalidOperationException("No Edge found between provided nodes"); }
+        catch(InvalidOperationException) { throw new InvalidOperationException("No Edge found between provided nodes."); }
     } 
     public void SetEdgeWeight(VisualNode src, VisualNode trg, int weight){
         try { src.arcs.Where(arc => arc.Target == trg).Single().Weight = weight; }

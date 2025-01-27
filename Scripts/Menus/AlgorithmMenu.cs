@@ -183,15 +183,79 @@ public partial class AlgorithmMenu : Control
             if(result.Count < 2) 
                 return;
             
+            PrintPathSize(result);
 
-            await HighLightPath(result, Colors.Green, 250);
+            SelectPath(result, Colors.Green, Colors.Transparent);
 
             await Task.Delay(10000);
 
-            await HighLightPath(result, Colors.White, 250);
+            SelectPath(result, Colors.White, Colors.White);
         };
         greedyResButton.Disabled = false;
 
+
+        cheapInsertButton.Pressed += async () =>
+        {
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.CheapestInsertTSP(graphView);
+            
+            if(result.Count < 2) 
+                return;
+            
+
+            PrintPathSize(result);
+
+            SelectPath(result, Colors.Green, Colors.Transparent);
+
+            await Task.Delay(10000);
+
+            SelectPath(result, Colors.White, Colors.White);
+            
+        };
+        cheapInsertButton.Disabled = false;
+
+        graspSwapButton.Pressed += async () =>
+        {
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.GRASP(
+                graphView, GraphTSP<SpellGraphView, VisualNode>.SwapLocalSearch);
+            
+            if(result.Count < 2) 
+                return;
+            
+
+            PrintPathSize(result);
+
+            SelectPath(result, Colors.Green, Colors.Transparent);
+
+            await Task.Delay(10000);
+
+            SelectPath(result, Colors.White, Colors.White);
+            
+        };
+        graspSwapButton.Disabled = false;
+
+
+        graspPathRevertButton.Pressed += async () =>
+        {
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.GRASP(
+                graphView, GraphTSP<SpellGraphView, VisualNode>.OPT2LocalSearch);
+            
+            if(result.Count < 2) 
+                return;
+            
+
+            PrintPathSize(result);
+
+            SelectPath(result, Colors.Green, Colors.Transparent);
+
+            await Task.Delay(10000);
+
+            SelectPath(result, Colors.White, Colors.White);
+            
+        };
+        graspPathRevertButton.Disabled = false;
 
 
         
@@ -201,9 +265,24 @@ public partial class AlgorithmMenu : Control
     }
 
 
+    public void PrintPathSize(Path<VisualNode> path)
+    {
+        GD.Print(((float)path.size)/10);
+    }
 
-
-
+    public void SelectPath(Path<VisualNode> path, Color color, Color backColor)
+    {
+        for(int i = 1; i < path.Count; i++)
+        {
+            var n1 = path[i-1];
+            var n2 = path[i];     
+            foreach(VisualArc arc in n2.arcs)
+            {
+                arc.Modulate = arc.Target == n1? color : backColor;
+            }
+        }
+        
+    }
     public async Task HighLightPath(Path<VisualNode> path, Color color, int betweenDelay = 250)
     {
         for(int i = 1; i < path.Count; i++)
@@ -218,8 +297,6 @@ public partial class AlgorithmMenu : Control
             }
             await Task.Delay(betweenDelay);
         }
-
-        GD.Print(path.size);
     }
 
     public Path<VisualNode> RunFloydWarshall(SpellGraphEditor graph, VisualNode startingNode, VisualNode endingNode)
