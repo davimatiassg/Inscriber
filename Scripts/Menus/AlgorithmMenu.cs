@@ -1,34 +1,41 @@
 using Godot;
 using SpellEditing;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 
 public partial class AlgorithmMenu : Control
 {
+
+    /// Árvores Geradoras mínimas
     [Export] public Button kruskalButton;
     [Export] public Button primButton;
     [Export] public Button boruvkaButton;
     [Export] public Button chuLiuEdmondsButton;
+
+    /// Pathfinding
     [Export] public Button dijkstraButton;
     [Export] public Button bellmanFordButton;
     [Export] public Button floydWarshallButton;
+
+    /// Ciclos/Caminhos Eulerianos viajante
     [Export] public Button hierholzerCyclesButton;
     [Export] public Button hierholzerPathsButton;
+
+    /// Fluxo em redes
     [Export] public Button fordFulkersonButton;
     [Export] public Button edmondsKarpButton;
 
+    /// Caixeiro viajante
+    [Export] public Button greedyResButton;
+    [Export] public Button cheapInsertButton;
+    [Export] public Button graspSwapButton;
+    [Export] public Button graspPathRevertButton;
     public SpellGraphView graphButton;
 
     public override void _Ready()
     {
         base._Ready();
-        
-        
     }
     public void SetupButtons(SpellGraphEditor graphView)
 	{
@@ -36,7 +43,7 @@ public partial class AlgorithmMenu : Control
 #region SPANNING_TREE
 		kruskalButton.Pressed += async () => 
         {
-            var result = GraphUtil<SpellGraphView, VisualNode>.Kruskal<SpellGraph<VisualNode>>(graphView, null);
+            var result = GraphTree<SpellGraphView, VisualNode>.Kruskal<SpellGraph<VisualNode>>(graphView, null);
 
             var resource = SpellRepository.SaveSpell<SpellGraph<VisualNode>, VisualNode>(
                 result, 
@@ -52,7 +59,7 @@ public partial class AlgorithmMenu : Control
 
         primButton.Pressed += async () => 
         {
-            var result = GraphUtil<SpellGraphView, VisualNode>.Prim<SpellGraph<VisualNode>>(graphView, null);
+            var result = GraphTree<SpellGraphView, VisualNode>.Prim<SpellGraph<VisualNode>>(graphView, null);
 
             var resource = SpellRepository.SaveSpell<SpellGraph<VisualNode>, VisualNode>(
                 result, 
@@ -68,7 +75,7 @@ public partial class AlgorithmMenu : Control
 
         chuLiuEdmondsButton.Pressed += async () => 
         {
-            var result = GraphUtil<SpellGraphView, VisualNode>.ChuliuEdmonds<SpellGraph<VisualNode>>(graphView, null);
+            var result = GraphTree<SpellGraphView, VisualNode>.ChuliuEdmonds<SpellGraph<VisualNode>>(graphView, null);
 
             var resource = SpellRepository.SaveSpell<SpellGraph<VisualNode>, VisualNode>(
                 result, 
@@ -80,7 +87,8 @@ public partial class AlgorithmMenu : Control
             SceneManager.SaveData("SELECTED_SPELL", resource);
 		    SceneManager.LoadScene("SpellEditor");
         };
-        chuLiuEdmondsButton.Disabled = false;
+        //FIXME:
+        chuLiuEdmondsButton.Disabled = true;
 
 #endregion
 
@@ -88,7 +96,7 @@ public partial class AlgorithmMenu : Control
         dijkstraButton.Pressed += async () => 
         {
             graphView.CloseAlgMenu();
-            Path<VisualNode> result = GraphUtil<SpellGraphView, VisualNode>.Dijkstra(graphView, graphView[0], graphView[graphView.Count-1]);
+            Path<VisualNode> result = GraphPathfinding<SpellGraphView, VisualNode>.Dijkstra(graphView, graphView[0], graphView[graphView.Count-1]);
             
             if(result.Count < 2) 
                 return;
@@ -106,7 +114,7 @@ public partial class AlgorithmMenu : Control
         bellmanFordButton.Pressed += async () => 
         {
             graphView.CloseAlgMenu();
-            Path<VisualNode> result = GraphUtil<SpellGraphView, VisualNode>.BellmanFord(graphView, graphView[0], graphView[graphView.Count-1]);
+            Path<VisualNode> result = GraphPathfinding<SpellGraphView, VisualNode>.BellmanFord(graphView, graphView[0], graphView[graphView.Count-1]);
             
             if(result.Count < 2) 
                 return;
@@ -124,7 +132,7 @@ public partial class AlgorithmMenu : Control
         floydWarshallButton.Pressed += async () => 
         {
             graphView.CloseAlgMenu();
-            Path<VisualNode> result =RunFloydWarshall(graphView, graphView[0], graphView[graphView.Count-1]);
+            Path<VisualNode> result = RunFloydWarshall(graphView, graphView[0], graphView[graphView.Count-1]);
             
             if(result.Count < 2) 
                 return;
@@ -145,7 +153,7 @@ public partial class AlgorithmMenu : Control
         hierholzerCyclesButton.Pressed += async () => 
         {
             graphView.CloseAlgMenu();
-            Path<VisualNode> result = GraphUtil<SpellGraphView, VisualNode>.HierholzerDigraphCycles(graphView);
+            Path<VisualNode> result = GraphEuler<SpellGraphView, VisualNode>.HierholzerDigraphCycles(graphView);
             GD.Print(result);
             
             if(result.Count < 2) 
@@ -165,10 +173,154 @@ public partial class AlgorithmMenu : Control
 #endregion
     
     
+
+#region TRAVELING_SALESMAN
+
+        greedyResButton.Pressed += async () =>
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.GreedyTSP(graphView);
+            
+            stopwatch.Stop();
+            PrintPathSize(result, graphView);
+            PrintExectutionTime(stopwatch);
+
+            if(result.Count < 2) 
+                return;
+            
+            SelectPath(result, Colors.Green, Colors.Transparent);
+
+            await Task.Delay(10000);
+
+            SelectPath(result, Colors.White, Colors.White);
+        };
+        greedyResButton.Disabled = false;
+
+
+        cheapInsertButton.Pressed += async () =>
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.CheapestInsertTSP(graphView);
+            
+            stopwatch.Stop();
+            PrintPathSize(result, graphView);
+            PrintExectutionTime(stopwatch);
+
+            if(result.Count < 2) 
+                return;
+
+            SelectPath(result, Colors.Green, Colors.Transparent);
+
+            await Task.Delay(10000);
+
+            SelectPath(result, Colors.White, Colors.White);
+            
+        };
+        cheapInsertButton.Disabled = false;
+
+        graspSwapButton.Pressed += async () =>
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.GRASP(
+                graphView, GraphTSP<SpellGraphView, VisualNode>.SwapLocalSearch);
+
+            stopwatch.Stop();
+            PrintPathSize(result, graphView);
+            PrintExectutionTime(stopwatch);
+
+            
+            if(result.Count < 2) 
+                return;
+
+            SelectPath(result, Colors.Green, Colors.Transparent);
+
+            await Task.Delay(10000);
+
+            SelectPath(result, Colors.White, Colors.White);
+            
+        };
+        graspSwapButton.Disabled = false;
+
+
+        graspPathRevertButton.Pressed += async () =>
+        {
+            
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            graphView.CloseAlgMenu();
+            Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.GRASP(
+                graphView, GraphTSP<SpellGraphView, VisualNode>.OPT2LocalSearch);
+            
+            stopwatch.Stop();
+            PrintPathSize(result, graphView);
+            PrintExectutionTime(stopwatch);
+
+
+            if(result.Count < 2) 
+                return;
+            
+            SelectPath(result, Colors.Green, Colors.Transparent);
+
+            await Task.Delay(10000);
+
+            SelectPath(result, Colors.White, Colors.White);
+            
+        };
+        graspPathRevertButton.Disabled = false;
+
+
+        
+
+#endregion
+
     }
 
+    public void PrintExectutionTime(Stopwatch stopwatch)
+    {
+        System.TimeSpan ts = stopwatch.Elapsed;
 
+        // Format and display the TimeSpan value.
+        string elapsedTime = System.String.Format("{0:00}:{1:00}.{2:000}",
+            ts.Minutes, ts.Seconds, ts.Milliseconds);
+        GD.Print("RunTime (Minutes) " + elapsedTime);
+    }
 
+    public void PrintPathSize(Path<VisualNode> path, SpellGraphView graph)
+    {
+        float pathsize = 0f;
+        for(int i = 1; i < path.Count; i++)
+        {
+           pathsize += graph.GetEdgeWeight(graph[path[i-1].Index], graph[path[i].Index]);
+        }
+
+        pathsize += graph.GetEdgeWeight(graph[path[path.Count-1].Index], graph[path[0].Index]);
+
+        GD.Print(pathsize/10);
+    }
+
+    public void SelectPath(Path<VisualNode> path, Color color, Color backColor)
+    {
+        for(int i = 1; i < path.Count; i++)
+        {
+            var n1 = path[i-1];
+            var n2 = path[i];     
+            foreach(VisualArc arc in n2.arcs)
+            {
+                arc.Modulate = arc.Target == n1? color : backColor;
+            }
+        }
+        
+    }
     public async Task HighLightPath(Path<VisualNode> path, Color color, int betweenDelay = 250)
     {
         for(int i = 1; i < path.Count; i++)
@@ -187,7 +339,7 @@ public partial class AlgorithmMenu : Control
 
     public Path<VisualNode> RunFloydWarshall(SpellGraphEditor graph, VisualNode startingNode, VisualNode endingNode)
     {
-        var result = GraphUtil<SpellGraphView, VisualNode>.FloydWarshall(graph);
+        var result = GraphPathfinding<SpellGraphView, VisualNode>.FloydWarshall(graph);
 
         Path<VisualNode> resultPath = new();
         if(startingNode.Index == endingNode.Index) return resultPath;

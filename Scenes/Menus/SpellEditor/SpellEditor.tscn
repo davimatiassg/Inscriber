@@ -145,12 +145,10 @@ indent_wrapped_lines = true
 
 [node name="AlgorithmMenu" parent="Hud" instance=ExtResource("2_xd22k")]
 visible = false
-anchors_preset = -1
 anchor_bottom = 0.988
 offset_left = 195.0
 offset_top = 1.0
-offset_right = 5.0
-offset_bottom = 1.31998
+offset_bottom = 0.320007
 grow_horizontal = 1
 grow_vertical = 1
 

@@ -9,8 +9,8 @@ using System.Linq;
 /// Implements a Spell's Simple Graph by storing it on a Adjacence Matrix 
 /// </summary>
 
-public partial class SpellGraph<T> : ISpellGraph<T>
-    where T : ISpellGraphNode, new()
+public partial class MatrixGraph<T> : IGraph<T>
+    where T : IGraphNode, new()
 {
 
     public const int DEFAULT_WEIGHT = 1;
@@ -36,12 +36,6 @@ public partial class SpellGraph<T> : ISpellGraph<T>
 
         EdgeMatrix.Add(Enumerable.Repeat(int.MaxValue, Count-1).ToList());
         foreach( var row in EdgeMatrix ) row.Add(int.MaxValue);
-    }
-
-    public void Add(ICastable item)
-    {
-        T newItem = new T{Castable = item};
-        Add(newItem);
     }
 
     public void Clear()
@@ -205,14 +199,12 @@ public partial class SpellGraph<T> : ISpellGraph<T>
         return degree;
     }
 
-    public bool ReplaceNode(T node, ICastable castable)
+    public void Add(ICastable c)
     {
-        if(!Nodes.Contains(node)) return false;
-        node.Castable = castable;
-        return true;
+        throw new NotImplementedException();
     }
 
-#endregion GRAPH_FIELDS
+    #endregion GRAPH_FIELDS
 
 }
 

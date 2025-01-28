@@ -196,7 +196,7 @@ public static class SpellRepository
         foreach(var node in graph)
         {
             CastingResources res = ((Rune)node.Castable).SigilResources;
-            graph.ForeachSourceOf(node, (src, weight) => res.Merge(src.Castable.CastReturns) );
+            foreach((TNode src, int weight) in graph.GetSourcesOf(node)) res.Merge(src.Castable.CastReturns);
             if(!(node.Castable.CastRequirements <= res)) 
             {
                 return false;
@@ -246,30 +246,29 @@ public static class SpellRepository
         XElement arcsElement = new XElement("Arcs");
         if( graph.Flags.Contains(GraphFlag.WEIGHTED))
         {
-            graph.ForeachEdge(
-                (src, trg, weight) => {
-                    arcsElement.Add(
-                        new XElement("Arc",
-                            new XAttribute("source", src.Index),
-                            new XAttribute("target", trg.Index),
-                            new XAttribute("weight", weight)
-                        )
-                    ); 
-                }
-            );
+            foreach((TNode src, TNode trg, int weight) in graph.GetEdges())
+            {
+                arcsElement.Add(
+                    new XElement("Arc",
+                        new XAttribute("source", src.Index),
+                        new XAttribute("target", trg.Index),
+                        new XAttribute("weight", weight)
+                    )
+                ); 
+            }
         }
         else
         {
-            graph.ForeachEdge(
-                (src, trg, weight) => {
-                    arcsElement.Add(
-                        new XElement("Arc",
-                            new XAttribute("source", src.Index),
-                            new XAttribute("target", trg.Index)
-                        )
-                    ); 
-                }
-            );
+            foreach((TNode src, TNode trg, int weight) in graph.GetEdges())
+            {
+                arcsElement.Add(
+                    new XElement("Arc",
+                        new XAttribute("source", src.Index),
+                        new XAttribute("target", trg.Index)
+                    )
+                ); 
+            }
+
         }
         return arcsElement;
     }
