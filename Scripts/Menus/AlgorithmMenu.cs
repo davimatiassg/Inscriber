@@ -1,5 +1,6 @@
 using Godot;
 using SpellEditing;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 
@@ -177,14 +178,19 @@ public partial class AlgorithmMenu : Control
 
         greedyResButton.Pressed += async () =>
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
             graphView.CloseAlgMenu();
             Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.GreedyTSP(graphView);
             
+            stopwatch.Stop();
+            PrintPathSize(result, graphView);
+            PrintExectutionTime(stopwatch);
+
             if(result.Count < 2) 
                 return;
             
-            PrintPathSize(result);
-
             SelectPath(result, Colors.Green, Colors.Transparent);
 
             await Task.Delay(10000);
@@ -196,14 +202,18 @@ public partial class AlgorithmMenu : Control
 
         cheapInsertButton.Pressed += async () =>
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             graphView.CloseAlgMenu();
             Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.CheapestInsertTSP(graphView);
             
+            stopwatch.Stop();
+            PrintPathSize(result, graphView);
+            PrintExectutionTime(stopwatch);
+
             if(result.Count < 2) 
                 return;
-            
-
-            PrintPathSize(result);
 
             SelectPath(result, Colors.Green, Colors.Transparent);
 
@@ -216,15 +226,20 @@ public partial class AlgorithmMenu : Control
 
         graspSwapButton.Pressed += async () =>
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             graphView.CloseAlgMenu();
             Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.GRASP(
                 graphView, GraphTSP<SpellGraphView, VisualNode>.SwapLocalSearch);
+
+            stopwatch.Stop();
+            PrintPathSize(result, graphView);
+            PrintExectutionTime(stopwatch);
+
             
             if(result.Count < 2) 
                 return;
-            
-
-            PrintPathSize(result);
 
             SelectPath(result, Colors.Green, Colors.Transparent);
 
@@ -238,16 +253,22 @@ public partial class AlgorithmMenu : Control
 
         graspPathRevertButton.Pressed += async () =>
         {
+            
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             graphView.CloseAlgMenu();
             Path<VisualNode> result = GraphTSP<SpellGraphView, VisualNode>.GRASP(
                 graphView, GraphTSP<SpellGraphView, VisualNode>.OPT2LocalSearch);
             
+            stopwatch.Stop();
+            PrintPathSize(result, graphView);
+            PrintExectutionTime(stopwatch);
+
+
             if(result.Count < 2) 
                 return;
             
-
-            PrintPathSize(result);
-
             SelectPath(result, Colors.Green, Colors.Transparent);
 
             await Task.Delay(10000);
@@ -264,10 +285,27 @@ public partial class AlgorithmMenu : Control
 
     }
 
-
-    public void PrintPathSize(Path<VisualNode> path)
+    public void PrintExectutionTime(Stopwatch stopwatch)
     {
-        GD.Print(((float)path.size)/10);
+        System.TimeSpan ts = stopwatch.Elapsed;
+
+        // Format and display the TimeSpan value.
+        string elapsedTime = System.String.Format("{0:00}:{1:00}.{2:000}",
+            ts.Minutes, ts.Seconds, ts.Milliseconds);
+        GD.Print("RunTime (Minutes) " + elapsedTime);
+    }
+
+    public void PrintPathSize(Path<VisualNode> path, SpellGraphView graph)
+    {
+        float pathsize = 0f;
+        for(int i = 1; i < path.Count; i++)
+        {
+           pathsize += graph.GetEdgeWeight(graph[path[i-1].Index], graph[path[i].Index]);
+        }
+
+        pathsize += graph.GetEdgeWeight(graph[path[path.Count-1].Index], graph[path[0].Index]);
+
+        GD.Print(pathsize/10);
     }
 
     public void SelectPath(Path<VisualNode> path, Color color, Color backColor)

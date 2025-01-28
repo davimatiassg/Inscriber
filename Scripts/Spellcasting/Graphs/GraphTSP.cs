@@ -18,6 +18,9 @@ public class GraphTSP<TGraph, TNode>
 	where TNode : IGraphNode, new()
 {
 
+    public const int MAX_ITERATIONS = 5000;
+    public const int MAX_GRASP_ITERATIONS = 5000;
+
 #region GREEDY
 
 
@@ -58,7 +61,18 @@ public class GraphTSP<TGraph, TNode>
     /// <returns>The Traveling Salesman's path</returns>
 	public static Path<TNode> GreedyTSP(TGraph graph)
     {
-        return GreedyLimitedTSP(graph, graph.Count);
+        Path<TNode> bestPath = new();
+        bestPath.size = int.MaxValue;
+
+        for(int i = 0; i < MAX_ITERATIONS; i++)
+        {
+            var path = GreedyLimitedTSP(graph, graph.Count);
+
+            if(path.size < bestPath.size)
+                bestPath = path;
+        }
+            
+        return bestPath;
     }
 
 #endregion 
@@ -70,9 +84,9 @@ public class GraphTSP<TGraph, TNode>
     /// </summary>
     /// <param name="graph">The graph where the greedy algorithm will run</param>
     /// <returns>The Traveling Salesman's path</returns>
-	public static Path<TNode> CheapestInsertTSP(TGraph graph)
+	public static Path<TNode> CheapestInsertWrappedTSP(TGraph graph, int initialPathSize)
     {
-        Path<TNode> path = GreedyLimitedTSP(graph, 2);
+        Path<TNode> path = GreedyLimitedTSP(graph, initialPathSize);
         bool[] visited = new bool[graph.Count];
         foreach(var node in path) {visited[node.Index] = true; }
         
@@ -119,6 +133,26 @@ public class GraphTSP<TGraph, TNode>
             visited[graphPosition] = true;
         }
         return path;
+    }
+
+
+    public static Path<TNode> CheapestInsertTSP(TGraph graph)
+    {
+        
+        
+
+        Path<TNode> bestPath = new();
+        bestPath.size = int.MaxValue;
+
+        for(int i = 0; i < MAX_ITERATIONS; i++)
+        {
+            var path = CheapestInsertWrappedTSP(graph, 2);
+
+            if(path.size < bestPath.size)
+                bestPath = path;
+        }
+            
+        return bestPath;
     }
 
 #endregion
@@ -222,14 +256,11 @@ public class GraphTSP<TGraph, TNode>
         Func<Path<TNode>, TGraph, Path<TNode>> LocalSearch)
     {
         
-        //STUB: //TODO: Condição de parada do grasp adequada.
-        int maxIterations = 3000;
-        
 
         Path<TNode> bestPath = new();
         bestPath.size = int.MaxValue;
 
-        for(int i = 0; i < maxIterations; i++)
+        for(int i = 0; i < MAX_GRASP_ITERATIONS; i++)
         {
             var path =  GreedyRandomTSP(graph, 0.1f);
             path = LocalSearch(path, graph);
