@@ -67,7 +67,7 @@ public partial class VisualNode : TextureRect, ISpellGraphNode
     int index = -1;
     public int Index { 
         get { 
-            if(index == -1) index = GetIndex(); 
+            if(index < 0) return GetIndex(); 
             return index;
         }
         set => index = value; 
