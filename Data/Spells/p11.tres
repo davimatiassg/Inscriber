@@ -16,8 +16,8 @@ image = SubResource("Image_cqed0")
 
 [resource]
 script = ExtResource("1_pxiqc")
-Name = "p11-12"
-Description = "Grafo do Problema 11 e 12"
+Name = "p11"
+Description = "Grafo do Problema 11"
 Portrait = SubResource("ImageTexture_j4f0x")
 XMLGraphData = "<Graph>
   <Nodes>

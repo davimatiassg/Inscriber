@@ -16,8 +16,8 @@ image = SubResource("Image_2tfb7")
 
 [resource]
 script = ExtResource("1_p7xcg")
-Name = "p7-8"
-Description = "Grafo do Problema 7 e 8"
+Name = "p8"
+Description = "Grafo do Problema 8"
 Portrait = SubResource("ImageTexture_7k72g")
 XMLGraphData = "<Graph>
   <Nodes>
@@ -59,137 +59,137 @@ XMLGraphData = "<Graph>
     </Node>
   </Nodes>
   <Arcs>
-    <Arc source=\"0\" target=\"1\" weight=\"388\" />
-    <Arc source=\"0\" target=\"2\" weight=\"297\" />
-    <Arc source=\"0\" target=\"3\" weight=\"374\" />
-    <Arc source=\"0\" target=\"4\" weight=\"768\" />
-    <Arc source=\"0\" target=\"5\" weight=\"1060\" />
-    <Arc source=\"0\" target=\"6\" weight=\"1700\" />
-    <Arc source=\"0\" target=\"7\" weight=\"264\" />
-    <Arc source=\"0\" target=\"8\" weight=\"424\" />
-    <Arc source=\"0\" target=\"9\" weight=\"268\" />
-    <Arc source=\"0\" target=\"10\" weight=\"499\" />
-    <Arc source=\"0\" target=\"11\" weight=\"459\" />
-    <Arc source=\"1\" target=\"0\" weight=\"388\" />
-    <Arc source=\"1\" target=\"2\" weight=\"315\" />
-    <Arc source=\"1\" target=\"3\" weight=\"393\" />
-    <Arc source=\"1\" target=\"4\" weight=\"507\" />
-    <Arc source=\"1\" target=\"5\" weight=\"1080\" />
-    <Arc source=\"1\" target=\"6\" weight=\"2050\" />
-    <Arc source=\"1\" target=\"7\" weight=\"609\" />
-    <Arc source=\"1\" target=\"8\" weight=\"770\" />
-    <Arc source=\"1\" target=\"9\" weight=\"624\" />
-    <Arc source=\"1\" target=\"10\" weight=\"432\" />
-    <Arc source=\"1\" target=\"11\" weight=\"805\" />
-    <Arc source=\"2\" target=\"0\" weight=\"297\" />
-    <Arc source=\"2\" target=\"1\" weight=\"315\" />
-    <Arc source=\"2\" target=\"3\" weight=\"99\" />
-    <Arc source=\"2\" target=\"4\" weight=\"822\" />
-    <Arc source=\"2\" target=\"5\" weight=\"790\" />
-    <Arc source=\"2\" target=\"6\" weight=\"1960\" />
-    <Arc source=\"2\" target=\"7\" weight=\"518\" />
-    <Arc source=\"2\" target=\"8\" weight=\"678\" />
-    <Arc source=\"2\" target=\"9\" weight=\"532\" />
-    <Arc source=\"2\" target=\"10\" weight=\"677\" />
-    <Arc source=\"2\" target=\"11\" weight=\"713\" />
-    <Arc source=\"3\" target=\"0\" weight=\"374\" />
-    <Arc source=\"3\" target=\"1\" weight=\"393\" />
-    <Arc source=\"3\" target=\"2\" weight=\"99\" />
-    <Arc source=\"3\" target=\"4\" weight=\"733\" />
-    <Arc source=\"3\" target=\"5\" weight=\"734\" />
-    <Arc source=\"3\" target=\"6\" weight=\"2040\" />
-    <Arc source=\"3\" target=\"7\" weight=\"595\" />
-    <Arc source=\"3\" target=\"8\" weight=\"756\" />
-    <Arc source=\"3\" target=\"9\" weight=\"609\" />
-    <Arc source=\"3\" target=\"10\" weight=\"823\" />
-    <Arc source=\"3\" target=\"11\" weight=\"791\" />
-    <Arc source=\"4\" target=\"0\" weight=\"768\" />
-    <Arc source=\"4\" target=\"1\" weight=\"507\" />
-    <Arc source=\"4\" target=\"2\" weight=\"822\" />
-    <Arc source=\"4\" target=\"3\" weight=\"733\" />
-    <Arc source=\"4\" target=\"5\" weight=\"2280\" />
-    <Arc source=\"4\" target=\"6\" weight=\"1280\" />
-    <Arc source=\"4\" target=\"7\" weight=\"993\" />
-    <Arc source=\"4\" target=\"8\" weight=\"1150\" />
-    <Arc source=\"4\" target=\"9\" weight=\"836\" />
-    <Arc source=\"4\" target=\"10\" weight=\"511\" />
-    <Arc source=\"4\" target=\"11\" weight=\"1130\" />
-    <Arc source=\"5\" target=\"0\" weight=\"1060\" />
-    <Arc source=\"5\" target=\"1\" weight=\"1080\" />
-    <Arc source=\"5\" target=\"2\" weight=\"790\" />
-    <Arc source=\"5\" target=\"3\" weight=\"734\" />
-    <Arc source=\"5\" target=\"4\" weight=\"2280\" />
-    <Arc source=\"5\" target=\"6\" weight=\"2720\" />
-    <Arc source=\"5\" target=\"7\" weight=\"1280\" />
-    <Arc source=\"5\" target=\"8\" weight=\"1440\" />
-    <Arc source=\"5\" target=\"9\" weight=\"1300\" />
-    <Arc source=\"5\" target=\"10\" weight=\"1510\" />
-    <Arc source=\"5\" target=\"11\" weight=\"1480\" />
-    <Arc source=\"6\" target=\"0\" weight=\"1700\" />
-    <Arc source=\"6\" target=\"1\" weight=\"2050\" />
-    <Arc source=\"6\" target=\"2\" weight=\"1960\" />
-    <Arc source=\"6\" target=\"3\" weight=\"2040\" />
-    <Arc source=\"6\" target=\"4\" weight=\"1280\" />
-    <Arc source=\"6\" target=\"5\" weight=\"2720\" />
-    <Arc source=\"6\" target=\"7\" weight=\"1660\" />
-    <Arc source=\"6\" target=\"8\" weight=\"1510\" />
-    <Arc source=\"6\" target=\"9\" weight=\"1590\" />
-    <Arc source=\"6\" target=\"10\" weight=\"1840\" />
-    <Arc source=\"6\" target=\"11\" weight=\"1300\" />
-    <Arc source=\"7\" target=\"0\" weight=\"264\" />
-    <Arc source=\"7\" target=\"1\" weight=\"609\" />
-    <Arc source=\"7\" target=\"2\" weight=\"518\" />
-    <Arc source=\"7\" target=\"3\" weight=\"595\" />
-    <Arc source=\"7\" target=\"4\" weight=\"993\" />
-    <Arc source=\"7\" target=\"5\" weight=\"1280\" />
-    <Arc source=\"7\" target=\"6\" weight=\"1660\" />
-    <Arc source=\"7\" target=\"8\" weight=\"161\" />
-    <Arc source=\"7\" target=\"9\" weight=\"281\" />
-    <Arc source=\"7\" target=\"10\" weight=\"712\" />
-    <Arc source=\"7\" target=\"11\" weight=\"431\" />
-    <Arc source=\"8\" target=\"0\" weight=\"424\" />
-    <Arc source=\"8\" target=\"1\" weight=\"770\" />
-    <Arc source=\"8\" target=\"2\" weight=\"678\" />
-    <Arc source=\"8\" target=\"3\" weight=\"756\" />
-    <Arc source=\"8\" target=\"4\" weight=\"1150\" />
-    <Arc source=\"8\" target=\"5\" weight=\"1440\" />
-    <Arc source=\"8\" target=\"6\" weight=\"1510\" />
-    <Arc source=\"8\" target=\"7\" weight=\"161\" />
-    <Arc source=\"8\" target=\"9\" weight=\"273\" />
-    <Arc source=\"8\" target=\"10\" weight=\"623\" />
-    <Arc source=\"8\" target=\"11\" weight=\"298\" />
-    <Arc source=\"9\" target=\"0\" weight=\"268\" />
-    <Arc source=\"9\" target=\"1\" weight=\"624\" />
-    <Arc source=\"9\" target=\"2\" weight=\"532\" />
-    <Arc source=\"9\" target=\"3\" weight=\"609\" />
-    <Arc source=\"9\" target=\"4\" weight=\"836\" />
-    <Arc source=\"9\" target=\"5\" weight=\"1300\" />
-    <Arc source=\"9\" target=\"6\" weight=\"1590\" />
-    <Arc source=\"9\" target=\"7\" weight=\"281\" />
-    <Arc source=\"9\" target=\"8\" weight=\"273\" />
-    <Arc source=\"9\" target=\"10\" weight=\"351\" />
-    <Arc source=\"9\" target=\"11\" weight=\"298\" />
-    <Arc source=\"10\" target=\"0\" weight=\"499\" />
-    <Arc source=\"10\" target=\"1\" weight=\"432\" />
-    <Arc source=\"10\" target=\"2\" weight=\"677\" />
-    <Arc source=\"10\" target=\"3\" weight=\"823\" />
-    <Arc source=\"10\" target=\"4\" weight=\"511\" />
-    <Arc source=\"10\" target=\"5\" weight=\"1510\" />
-    <Arc source=\"10\" target=\"6\" weight=\"1840\" />
-    <Arc source=\"10\" target=\"7\" weight=\"712\" />
-    <Arc source=\"10\" target=\"8\" weight=\"623\" />
-    <Arc source=\"10\" target=\"9\" weight=\"351\" />
-    <Arc source=\"10\" target=\"11\" weight=\"649\" />
-    <Arc source=\"11\" target=\"0\" weight=\"459\" />
-    <Arc source=\"11\" target=\"1\" weight=\"805\" />
-    <Arc source=\"11\" target=\"2\" weight=\"713\" />
-    <Arc source=\"11\" target=\"3\" weight=\"791\" />
-    <Arc source=\"11\" target=\"4\" weight=\"1130\" />
-    <Arc source=\"11\" target=\"5\" weight=\"1480\" />
-    <Arc source=\"11\" target=\"6\" weight=\"1300\" />
-    <Arc source=\"11\" target=\"7\" weight=\"431\" />
-    <Arc source=\"11\" target=\"8\" weight=\"298\" />
-    <Arc source=\"11\" target=\"9\" weight=\"298\" />
-    <Arc source=\"11\" target=\"10\" weight=\"649\" />
+	<Arc source=\"0\" target=\"1\" weight=\"330\"/>
+	<Arc source=\"0\" target=\"2\" weight=\"270\"/>
+	<Arc source=\"0\" target=\"3\" weight=\"340\"/>
+	<Arc source=\"0\" target=\"4\" weight=\"650\"/>
+	<Arc source=\"0\" target=\"5\" weight=\"930\"/>
+	<Arc source=\"0\" target=\"6\" weight=\"1450\"/>
+	<Arc source=\"0\" target=\"7\" weight=\"230\"/>
+	<Arc source=\"0\" target=\"8\" weight=\"370\"/>
+	<Arc source=\"0\" target=\"9\" weight=\"230\"/>
+	<Arc source=\"0\" target=\"10\" weight=\"380\"/>
+	<Arc source=\"0\" target=\"11\" weight=\"380\"/>
+	<Arc source=\"1\" target=\"0\" weight=\"330\"/>
+	<Arc source=\"1\" target=\"2\" weight=\"280\"/>
+	<Arc source=\"1\" target=\"3\" weight=\"350\"/>
+	<Arc source=\"1\" target=\"4\" weight=\"420\"/>
+	<Arc source=\"1\" target=\"5\" weight=\"940\"/>
+	<Arc source=\"1\" target=\"6\" weight=\"1720\"/>
+	<Arc source=\"1\" target=\"7\" weight=\"500\"/>
+	<Arc source=\"1\" target=\"8\" weight=\"640\"/>
+	<Arc source=\"1\" target=\"9\" weight=\"510\"/>
+	<Arc source=\"1\" target=\"10\" weight=\"470\"/>
+	<Arc source=\"1\" target=\"11\" weight=\"650\"/>
+	<Arc source=\"2\" target=\"0\" weight=\"270\"/>
+	<Arc source=\"2\" target=\"1\" weight=\"280\"/>
+	<Arc source=\"2\" target=\"3\" weight=\"110\"/>
+	<Arc source=\"2\" target=\"4\" weight=\"690\"/>
+	<Arc source=\"2\" target=\"5\" weight=\"710\"/>
+	<Arc source=\"2\" target=\"6\" weight=\"1660\"/>
+	<Arc source=\"2\" target=\"7\" weight=\"440\"/>
+	<Arc source=\"2\" target=\"8\" weight=\"570\"/>
+	<Arc source=\"2\" target=\"9\" weight=\"440\"/>
+	<Arc source=\"2\" target=\"10\" weight=\"720\"/>
+	<Arc source=\"2\" target=\"11\" weight=\"590\"/>
+	<Arc source=\"3\" target=\"0\" weight=\"340\"/>
+	<Arc source=\"3\" target=\"1\" weight=\"350\"/>
+	<Arc source=\"3\" target=\"2\" weight=\"110\"/>
+	<Arc source=\"3\" target=\"4\" weight=\"710\"/>
+	<Arc source=\"3\" target=\"5\" weight=\"660\"/>
+	<Arc source=\"3\" target=\"6\" weight=\"1740\"/>
+	<Arc source=\"3\" target=\"7\" weight=\"520\"/>
+	<Arc source=\"3\" target=\"8\" weight=\"660\"/>
+	<Arc source=\"3\" target=\"9\" weight=\"530\"/>
+	<Arc source=\"3\" target=\"10\" weight=\"730\"/>
+	<Arc source=\"3\" target=\"11\" weight=\"670\"/>
+	<Arc source=\"4\" target=\"0\" weight=\"650\"/>
+	<Arc source=\"4\" target=\"1\" weight=\"420\"/>
+	<Arc source=\"4\" target=\"2\" weight=\"690\"/>
+	<Arc source=\"4\" target=\"3\" weight=\"710\"/>
+	<Arc source=\"4\" target=\"5\" weight=\"1920\"/>
+	<Arc source=\"4\" target=\"6\" weight=\"1140\"/>
+	<Arc source=\"4\" target=\"7\" weight=\"830\"/>
+	<Arc source=\"4\" target=\"8\" weight=\"970\"/>
+	<Arc source=\"4\" target=\"9\" weight=\"700\"/>
+	<Arc source=\"4\" target=\"10\" weight=\"430\"/>
+	<Arc source=\"4\" target=\"11\" weight=\"940\"/>
+	<Arc source=\"5\" target=\"0\" weight=\"930\"/>
+	<Arc source=\"5\" target=\"1\" weight=\"940\"/>
+	<Arc source=\"5\" target=\"2\" weight=\"710\"/>
+	<Arc source=\"5\" target=\"3\" weight=\"660\"/>
+	<Arc source=\"5\" target=\"4\" weight=\"1920\"/>
+	<Arc source=\"5\" target=\"6\" weight=\"2350\"/>
+	<Arc source=\"5\" target=\"7\" weight=\"1120\"/>
+	<Arc source=\"5\" target=\"8\" weight=\"1260\"/>
+	<Arc source=\"5\" target=\"9\" weight=\"1130\"/>
+	<Arc source=\"5\" target=\"10\" weight=\"1330\"/>
+	<Arc source=\"5\" target=\"11\" weight=\"1270\"/>
+	<Arc source=\"6\" target=\"0\" weight=\"1450\"/>
+	<Arc source=\"6\" target=\"1\" weight=\"1720\"/>
+	<Arc source=\"6\" target=\"2\" weight=\"1660\"/>
+	<Arc source=\"6\" target=\"3\" weight=\"1740\"/>
+	<Arc source=\"6\" target=\"4\" weight=\"1140\"/>
+	<Arc source=\"6\" target=\"5\" weight=\"2350\"/>
+	<Arc source=\"6\" target=\"7\" weight=\"1370\"/>
+	<Arc source=\"6\" target=\"8\" weight=\"1240\"/>
+	<Arc source=\"6\" target=\"9\" weight=\"1330\"/>
+	<Arc source=\"6\" target=\"10\" weight=\"1510\"/>
+	<Arc source=\"6\" target=\"11\" weight=\"1090\"/>
+	<Arc source=\"7\" target=\"0\" weight=\"230\"/>
+	<Arc source=\"7\" target=\"1\" weight=\"500\"/>
+	<Arc source=\"7\" target=\"2\" weight=\"440\"/>
+	<Arc source=\"7\" target=\"3\" weight=\"520\"/>
+	<Arc source=\"7\" target=\"4\" weight=\"830\"/>
+	<Arc source=\"7\" target=\"5\" weight=\"1120\"/>
+	<Arc source=\"7\" target=\"6\" weight=\"1370\"/>
+	<Arc source=\"7\" target=\"8\" weight=\"140\"/>
+	<Arc source=\"7\" target=\"9\" weight=\"380\"/>
+	<Arc source=\"7\" target=\"10\" weight=\"610\"/>
+	<Arc source=\"7\" target=\"11\" weight=\"380\"/>
+	<Arc source=\"8\" target=\"0\" weight=\"370\"/>
+	<Arc source=\"8\" target=\"1\" weight=\"640\"/>
+	<Arc source=\"8\" target=\"2\" weight=\"570\"/>
+	<Arc source=\"8\" target=\"3\" weight=\"660\"/>
+	<Arc source=\"8\" target=\"4\" weight=\"970\"/>
+	<Arc source=\"8\" target=\"5\" weight=\"1260\"/>
+	<Arc source=\"8\" target=\"6\" weight=\"1240\"/>
+	<Arc source=\"8\" target=\"7\" weight=\"140\"/>
+	<Arc source=\"8\" target=\"9\" weight=\"360\"/>
+	<Arc source=\"8\" target=\"10\" weight=\"670\"/>
+	<Arc source=\"8\" target=\"11\" weight=\"240\"/>
+	<Arc source=\"9\" target=\"0\" weight=\"230\"/>
+	<Arc source=\"9\" target=\"1\" weight=\"510\"/>
+	<Arc source=\"9\" target=\"2\" weight=\"440\"/>
+	<Arc source=\"9\" target=\"3\" weight=\"530\"/>
+	<Arc source=\"9\" target=\"4\" weight=\"700\"/>
+	<Arc source=\"9\" target=\"5\" weight=\"1130\"/>
+	<Arc source=\"9\" target=\"6\" weight=\"1330\"/>
+	<Arc source=\"9\" target=\"7\" weight=\"380\"/>
+	<Arc source=\"9\" target=\"8\" weight=\"360\"/>
+	<Arc source=\"9\" target=\"10\" weight=\"310\"/>
+	<Arc source=\"9\" target=\"11\" weight=\"250\"/>
+	<Arc source=\"10\" target=\"0\" weight=\"380\"/>
+	<Arc source=\"10\" target=\"1\" weight=\"470\"/>
+	<Arc source=\"10\" target=\"2\" weight=\"720\"/>
+	<Arc source=\"10\" target=\"3\" weight=\"730\"/>
+	<Arc source=\"10\" target=\"4\" weight=\"430\"/>
+	<Arc source=\"10\" target=\"5\" weight=\"1330\"/>
+	<Arc source=\"10\" target=\"6\" weight=\"1510\"/>
+	<Arc source=\"10\" target=\"7\" weight=\"610\"/>
+	<Arc source=\"10\" target=\"8\" weight=\"670\"/>
+	<Arc source=\"10\" target=\"9\" weight=\"310\"/>
+	<Arc source=\"10\" target=\"11\" weight=\"560\"/>
+	<Arc source=\"11\" target=\"0\" weight=\"380\"/>
+	<Arc source=\"11\" target=\"1\" weight=\"650\"/>
+	<Arc source=\"11\" target=\"2\" weight=\"590\"/>
+	<Arc source=\"11\" target=\"3\" weight=\"670\"/>
+	<Arc source=\"11\" target=\"4\" weight=\"940\"/>
+	<Arc source=\"11\" target=\"5\" weight=\"1270\"/>
+	<Arc source=\"11\" target=\"6\" weight=\"1090\"/>
+	<Arc source=\"11\" target=\"7\" weight=\"380\"/>
+	<Arc source=\"11\" target=\"8\" weight=\"240\"/>
+	<Arc source=\"11\" target=\"9\" weight=\"250\"/>
+	<Arc source=\"11\" target=\"10\" weight=\"560\"/>
   </Arcs>
 </Graph>"

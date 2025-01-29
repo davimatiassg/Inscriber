@@ -18,8 +18,10 @@ public class GraphTSP<TGraph, TNode>
 	where TNode : IGraphNode, new()
 {
 
-    public const int MAX_ITERATIONS = 5000;
-    public const int MAX_GRASP_ITERATIONS = 5000;
+    public const int MAX_ITERATIONS = 5;
+    public const int MAX_GRASP_ITERATIONS = 1000;
+
+    public const float GRASP_ALPHA = 0.1f;
 
 #region GREEDY
 
@@ -260,9 +262,29 @@ public class GraphTSP<TGraph, TNode>
         Path<TNode> bestPath = new();
         bestPath.size = int.MaxValue;
 
+        for(int i = 0; i < MAX_ITERATIONS; i++)
+        {
+            var path =  GRASPWrapped(graph, LocalSearch);
+
+            if(path.size < bestPath.size)
+                bestPath = path;
+        }
+
+        return bestPath;
+    }
+
+
+    public static Path<TNode> GRASPWrapped(TGraph graph,
+        Func<Path<TNode>, TGraph, Path<TNode>> LocalSearch)
+    {
+        
+
+        Path<TNode> bestPath = new();
+        bestPath.size = int.MaxValue;
+
         for(int i = 0; i < MAX_GRASP_ITERATIONS; i++)
         {
-            var path =  GreedyRandomTSP(graph, 0.1f);
+            var path =  GreedyRandomTSP(graph, GRASP_ALPHA);
             path = LocalSearch(path, graph);
 
             if(path.size < bestPath.size)

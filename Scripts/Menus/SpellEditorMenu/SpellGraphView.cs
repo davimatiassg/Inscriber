@@ -83,13 +83,19 @@ public partial class SpellGraphView : Control, IGraph<VisualNode>
     }
     public int GetEdgeWeight(VisualNode src, VisualNode trg)
     {
+        
         if(src.Index == trg.Index) throw new InvalidOperationException("Tried to get the weight of a loop, which are not allowed.");
-        try { return src.arcs.Where(arc => arc.Target == trg).Single().Weight; }
-        catch(InvalidOperationException) { throw new InvalidOperationException("No Edge found between provided nodes."); }
+        var arc = EdgeMatrix [src.Index][trg.Index];
+        if(arc == null) { throw new InvalidOperationException("No Edge found between provided nodes."); }
+
+        return arc.Weight;
     } 
     public void SetEdgeWeight(VisualNode src, VisualNode trg, int weight){
-        try { src.arcs.Where(arc => arc.Target == trg).Single().Weight = weight; }
-        catch(InvalidOperationException) { throw new InvalidOperationException("No Edge found between provided nodes"); }
+        if(src.Index == trg.Index) throw new InvalidOperationException("Tried to get the weight of a loop, which are not allowed.");
+        var arc = EdgeMatrix [src.Index][trg.Index];
+        if(arc == null) { throw new InvalidOperationException("No Edge found between provided nodes."); }
+
+        arc.Weight = weight;
     }
     public int EdgeAmmount() => graphArcsMaster.GetChildCount();
     public bool AdjacenceBetween(VisualNode n1, VisualNode n2) => 
